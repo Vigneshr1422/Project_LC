@@ -1,5 +1,6 @@
 import { useState } from "react";
-
+import biryaniImg from "../Images/pulao.webp";
+import Payasam from "../Images/payasam.webp";
 function Menu() {
 
   const [language, setLanguage] = useState("en");
@@ -677,8 +678,7 @@ function Menu() {
     ta: "பிரியாணி வகைகள்",
   },
 
-  image:
-    "https://images.unsplash.com/photo-1563379091339-03246963d29c?q=80&w=1200&auto=format&fit=crop",
+   image: biryaniImg,
 
   items: [
 
@@ -879,8 +879,7 @@ function Menu() {
     ta: "பாயாசம் வகைகள்",
   },
 
-  image:
-    "https://images.unsplash.com/photo-1601050690117-94f5f6fa6a6f?q=80&w=1200&auto=format&fit=crop",
+  image: Payasam,
 
   items: [
 

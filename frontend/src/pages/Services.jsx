@@ -1,5 +1,15 @@
 import { useState } from "react";
+import Wedding from "../Images/Wedding.webp";
+import temple from "../Images/temple.webp";
+import Wedding1 from "../Images/Wedding1.webp";
 
+import Seemantham from "../Images/Seemantham.webp";
+import Reception from "../Images/Reception.webp";
+import Mehanthi from "../Images/Mehanthi.webp";
+
+import teamlunch from "../Images/teamlunch.webp";
+
+import House from "../Images/House.webp";
 function Services() {
 
   const serviceData = [
@@ -7,7 +17,7 @@ function Services() {
       title: "Traditional Events",
 
       mainImage:
-        "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?q=80&w=1200&auto=format&fit=crop",
+       Wedding,
 
       events: [
         {
@@ -25,13 +35,13 @@ function Services() {
         {
           name: "Temple Functions",
           image:
-            "https://images.unsplash.com/photo-1583391733981-849840c7e81a?q=80&w=1200&auto=format&fit=crop",
+           temple,
         },
 
         {
           name: "Seemantham",
           image:
-            "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=1200&auto=format&fit=crop",
+           Seemantham,
         },
       ],
     },
@@ -40,19 +50,18 @@ function Services() {
       title: "Wedding Events",
 
       mainImage:
-        "https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=1200&auto=format&fit=crop",
+        Wedding1,
 
       events: [
         {
           name: "Wedding",
-          image:
-            "https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=1200&auto=format&fit=crop",
+          image:Wedding1,
         },
 
         {
           name: "Reception",
           image:
-            "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?q=80&w=1200&auto=format&fit=crop",
+            Reception,
         },
 
         {
@@ -64,7 +73,7 @@ function Services() {
         {
           name: "Mehndi",
           image:
-            "https://images.unsplash.com/photo-1591604466107-ec97de577aff?q=80&w=1200&auto=format&fit=crop",
+            Mehanthi,
         },
       ],
     },
@@ -85,7 +94,7 @@ function Services() {
         {
           name: "House Warming",
           image:
-            "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1200&auto=format&fit=crop",
+            House,
         },
 
         {
@@ -112,7 +121,7 @@ function Services() {
         {
           name: "Office Lunch",
           image:
-            "https://images.unsplash.com/photo-1556740749-887f6717d7e4?q=80&w=1200&auto=format&fit=crop",
+            teamlunch,
         },
 
         {
