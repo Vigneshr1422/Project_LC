@@ -46,7 +46,7 @@ function Navbar() {
 
          
 
-          <a href="/#contact" className={navLinkStyle}>
+          <a href="#contact" className={navLinkStyle}>
             Contact
           </a>
 
@@ -130,7 +130,7 @@ function Navbar() {
          
 
           <a
-            href="/#contact"
+            href="#contact"
             className={navLinkStyle}
             onClick={() => setMenuOpen(false)}
           >

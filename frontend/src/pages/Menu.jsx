@@ -1,6 +1,21 @@
 import { useState } from "react";
 import biryaniImg from "../Images/pulao.webp";
 import Payasam from "../Images/payasam.webp";
+import Noodles from "../Images/Noodels.webp";
+import Paan from "../Images/paan.webp";
+import Icecream from "../Images/Icecream.webp";
+import Roti from "../Images/Roti.webp";
+import fish from "../Images/fish.webp";
+import Egg from "../Images/egg.webp";
+
+import grab from "../Images/grab.webp";
+import Soup from "../Images/soup.webp";
+import snacks from "../Images/snakcs.webp";
+import Sweets from "../Images/Sweets.webp";
+
+import chettinad from "../Images/chettinad.webp";
+
+
 function Menu() {
 
   const [language, setLanguage] = useState("en");
@@ -14,7 +29,7 @@ function Menu() {
   },
 
   image:
-    "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?q=80&w=1200&auto=format&fit=crop",
+    Noodles,
 
   items: [
 
@@ -69,7 +84,7 @@ function Menu() {
   },
 
   image:
-    "https://images.unsplash.com/photo-1601050690597-df0568f70950?q=80&w=1200&auto=format&fit=crop",
+    Paan,
 
   items: [
 
@@ -108,7 +123,7 @@ function Menu() {
   },
 
   image:
-    "https://images.unsplash.com/photo-1563805042-7684c019e1cb?q=80&w=1200&auto=format&fit=crop",
+    Icecream,
 
   items: [
 
@@ -296,7 +311,7 @@ function Menu() {
   },
 
   image:
-    "https://images.unsplash.com/photo-1512058564366-18510be2db19?q=80&w=1200&auto=format&fit=crop",
+    Roti,
 
   items: [
 
@@ -473,7 +488,7 @@ function Menu() {
   },
 
   image:
-    "https://images.unsplash.com/photo-1544943910-4c1dc44aab44?q=80&w=1200&auto=format&fit=crop",
+    fish,
 
   items: [
 
@@ -532,7 +547,7 @@ function Menu() {
   },
 
   image:
-    "https://images.unsplash.com/photo-1525351484163-7529414344d8?q=80&w=1200&auto=format&fit=crop",
+    Egg,
 
   items: [
 
@@ -585,8 +600,7 @@ function Menu() {
     ta: "நண்டு வகைகள்",
   },
 
-  image:
-    "https://images.unsplash.com/photo-1579631542720-3a87824fff86?q=80&w=1200&auto=format&fit=crop",
+  image:grab,
 
   items: [
 
@@ -821,7 +835,7 @@ function Menu() {
   },
 
   image:
-    "https://images.unsplash.com/photo-1547592166-23ac45744acd?q=80&w=1200&auto=format&fit=crop",
+    Soup,
 
   items: [
 
@@ -1200,7 +1214,7 @@ function Menu() {
   },
 
   image:
-    "https://images.unsplash.com/photo-1551024601-bec78aea704b?q=80&w=1200&auto=format&fit=crop",
+    Sweets,
 
   items: [
 
@@ -1314,7 +1328,7 @@ function Menu() {
   },
 
   image:
-    "https://images.unsplash.com/photo-1601050690597-df0568f70950?q=80&w=1200&auto=format&fit=crop",
+    snacks,
 
   items: [
 
@@ -1408,7 +1422,7 @@ function Menu() {
   },
 
   image:
-    "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=1200&auto=format&fit=crop",
+    chettinad,
 
   items: [
 
