@@ -8,6 +8,16 @@ import Reception from "../Images/Reception.webp";
 import Mehanthi from "../Images/Mehanthi.webp";
 
 import teamlunch from "../Images/teamlunch.webp";
+import Retirement from "../Images/Retirement.webp";
+import Birthday from "../Images/Birthday.webp";
+import Engagement from "../Images/Engagement.webp";
+
+import Image60th from "../Images/60th.webp";
+import Image70th from "../Images/70th.webp";
+import Corprate from "../Images/Corprate.webp";
+import Professional from "../Images/Professional.webp"
+import GrihaPravesh from "../Images/GrihaPravesh.webp";
+
 
 import House from "../Images/House.webp";
 function Services() {
@@ -23,13 +33,13 @@ function Services() {
         {
           name: "60th Wedding",
           image:
-            "https://images.unsplash.com/photo-1606800052052-a08af7148866?q=80&w=1200&auto=format&fit=crop",
+           Image60th,
         },
 
         {
           name: "70th Wedding",
           image:
-            "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=1200&auto=format&fit=crop",
+            Image70th,
         },
 
         {
@@ -67,7 +77,7 @@ function Services() {
         {
           name: "Engagement",
           image:
-            "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1200&auto=format&fit=crop",
+            Engagement,
         },
 
         {
@@ -88,13 +98,13 @@ function Services() {
         {
           name: "Birthday Party",
           image:
-            "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?q=80&w=1200&auto=format&fit=crop",
+          Birthday,
         },
 
         {
           name: "House Warming",
           image:
-            House,
+            GrihaPravesh,
         },
 
         {
@@ -109,13 +119,13 @@ function Services() {
       title: "Professional Events",
 
       mainImage:
-        "https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=1200&auto=format&fit=crop",
+        Professional,
 
       events: [
         {
           name: "Corporate Events",
           image:
-            "https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1200&auto=format&fit=crop",
+            Corprate,
         },
 
         {
@@ -127,7 +137,7 @@ function Services() {
         {
           name: "Retirement Function",
           image:
-            "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=1200&auto=format&fit=crop",
+            Retirement,
         },
       ],
     },

@@ -1551,23 +1551,25 @@ function Menu() {
 
   ];
 
- return (
+return (
 
-  <div className="bg-gradient-to-b from-[#fff8f5] to-[#fff1ea] min-h-screen pt-[85px] md:pt-[100px] pb-20 md:pb-24 px-3 sm:px-4 md:px-10 overflow-hidden">
+  <div className="bg-gradient-to-b from-[#fff8f5] to-[#fff1ea] min-h-screen pt-[78px] md:pt-[95px] pb-14 md:pb-24 px-3 sm:px-4 md:px-10 overflow-hidden">
 
     {/* TOP SECTION */}
-    <div className="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 md:gap-8 mb-10 md:mb-14">
+    <div className="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 md:gap-8 mb-8 md:mb-14">
 
       {/* LEFT */}
       <div className="w-full">
 
-        <span className="inline-block bg-[#ffe7dc] text-[#962a27] px-4 py-2 md:px-5 rounded-full text-xs sm:text-sm font-semibold tracking-wide">
+        {/* TAG */}
+        <span className="inline-block bg-[#ffe7dc] text-[#962a27] px-3 py-1.5 md:px-5 md:py-2 rounded-full text-[11px] sm:text-sm font-semibold tracking-wide">
 
           Premium Catering Menu
 
         </span>
 
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#7c2d12] mt-5 leading-tight">
+        {/* HEADING */}
+        <h1 className="text-[28px] sm:text-[38px] md:text-5xl lg:text-6xl font-bold text-[#7c2d12] mt-4 md:mt-5 leading-[1.2]">
 
           {language === "en"
             ? "Explore Our Delicious Menu"
@@ -1575,7 +1577,8 @@ function Menu() {
 
         </h1>
 
-        <p className="text-gray-500 mt-4 md:mt-5 max-w-3xl leading-7 md:leading-8 text-sm md:text-base">
+        {/* DESCRIPTION */}
+        <p className="text-gray-500 mt-3 md:mt-5 max-w-3xl leading-6 md:leading-8 text-[13px] sm:text-sm md:text-base">
 
           {language === "en"
             ? "Discover authentic Chettinad flavors, traditional dishes, sweets, biryanis and premium catering specials."
@@ -1585,14 +1588,14 @@ function Menu() {
 
       </div>
 
-      {/* RIGHT TOGGLE */}
+      {/* LANGUAGE TOGGLE */}
       <div className="flex justify-start lg:justify-end">
 
-        <div className="flex items-center gap-2 bg-white p-2 rounded-full shadow-md border border-[#f3d7c8] w-fit">
+        <div className="flex items-center gap-2 bg-white p-1.5 md:p-2 rounded-full shadow-md border border-[#f3d7c8] w-fit">
 
           <button
             onClick={() => setLanguage("en")}
-            className={`px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-semibold duration-300 whitespace-nowrap ${
+            className={`px-4 py-1.5 md:px-5 md:py-2 rounded-full text-[11px] sm:text-sm font-semibold duration-300 whitespace-nowrap ${
               language === "en"
                 ? "bg-[#962a27] text-white shadow"
                 : "text-[#962a27]"
@@ -1605,7 +1608,7 @@ function Menu() {
 
           <button
             onClick={() => setLanguage("ta")}
-            className={`px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-semibold duration-300 whitespace-nowrap ${
+            className={`px-4 py-1.5 md:px-5 md:py-2 rounded-full text-[11px] sm:text-sm font-semibold duration-300 whitespace-nowrap ${
               language === "ta"
                 ? "bg-[#962a27] text-white shadow"
                 : "text-[#962a27]"
@@ -1623,17 +1626,14 @@ function Menu() {
     </div>
 
     {/* MENU CARDS */}
-    <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 md:gap-8">
-
+<div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 md:gap-8 place-items-center">
       {specialMenus.map((menu, index) => (
 
         <div
           key={index}
-          className="relative bg-white rounded-[26px] md:rounded-[34px] overflow-hidden border border-[#f5d6c6] hover:-translate-y-2 hover:shadow-2xl duration-500 group"
-        >
-
+className="relative bg-white rounded-[24px] md:rounded-[34px] overflow-hidden border border-[#f5d6c6] hover:shadow-2xl duration-500 group w-[92%] sm:w-full md:max-w-full max-w-[300px]">
           {/* TOP BORDER */}
-          <div className="absolute top-0 left-0 w-full h-[5px] bg-gradient-to-r from-[#962a27] via-[#d97706] to-[#f59e0b] z-10"></div>
+          <div className="absolute top-0 left-0 w-full h-[4px] bg-gradient-to-r from-[#962a27] via-[#d97706] to-[#f59e0b] z-10"></div>
 
           {/* IMAGE */}
           <div className="relative overflow-hidden">
@@ -1642,37 +1642,35 @@ function Menu() {
               src={menu.image}
               alt="menu"
               loading="lazy"
-              className="w-full h-[190px] sm:h-[220px] md:h-[240px] object-cover group-hover:scale-110 duration-700"
-            />
+className="w-full h-[140px] sm:h-[180px] md:h-[230px] object-cover group-hover:scale-105 duration-700"            />
 
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
 
           </div>
 
           {/* CONTENT */}
-          <div className="p-4 sm:p-5 md:p-6">
+          <div className="p-4 md:p-5">
 
             {/* TITLE */}
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#7c2d12] mb-4 md:mb-6 leading-snug">
+            <h2 className="text-[20px] sm:text-2xl md:text-[30px] font-bold text-[#7c2d12] mb-4 md:mb-5 leading-snug">
 
               {menu.title[language]}
 
             </h2>
 
             {/* ITEMS */}
-            <div className="space-y-3 max-h-[260px] md:max-h-[320px] overflow-y-auto custom-scroll pr-1 md:pr-2">
-
+<div className="space-y-2.5 md:space-y-3 h-[190px] overflow-y-auto custom-scroll pr-1">
               {menu.items.map((item, i) => (
 
                 <div
                   key={i}
-                  className="flex items-start gap-3"
+                  className="flex items-start gap-2.5"
                 >
 
                   {/* ICON */}
-                  <div className="min-w-[22px] h-[22px] rounded-full bg-[#fff1ea] flex items-center justify-center mt-[2px]">
+                  <div className="min-w-[20px] h-[20px] rounded-full bg-[#fff1ea] flex items-center justify-center mt-[2px]">
 
-                    <span className="text-[#962a27] text-[10px]">
+                    <span className="text-[#962a27] text-[9px]">
 
                       ✦
 
@@ -1681,7 +1679,7 @@ function Menu() {
                   </div>
 
                   {/* TEXT */}
-                  <p className="text-[#5f3a37] text-sm md:text-[15px] leading-6 md:leading-7">
+                  <p className="text-[#5f3a37] text-[13px] sm:text-sm md:text-[15px] leading-6">
 
                     {item[language]}
 
