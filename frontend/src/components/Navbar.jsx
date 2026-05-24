@@ -16,14 +16,20 @@ function Navbar() {
       <div className="w-full px-6 md:px-14 py-4 flex items-center justify-between">
 
         {/* Logo */}
-        <div className="flex items-center">
-          <img
-            src={logo}
-            alt="logo"
-            className="w-28 md:w-32 h-20 object-contain"
-          />
-        </div>
+       <Link to="/" className="flex items-center">
 
+  <img
+    src={logo}
+    alt="logo"
+    className="
+    w-28 md:w-32
+    h-20
+    object-contain
+    cursor-pointer
+    "
+  />
+
+</Link>
         {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center gap-10 text-[17px] font-medium text-black">
 
@@ -46,7 +52,7 @@ function Navbar() {
 
          
 
-          <a href="#contact" className={navLinkStyle}>
+          <a href="/contact" className={navLinkStyle}>
             Contact
           </a>
 
@@ -130,7 +136,7 @@ function Navbar() {
          
 
           <a
-            href="#contact"
+            href="/contact"
             className={navLinkStyle}
             onClick={() => setMenuOpen(false)}
           >
