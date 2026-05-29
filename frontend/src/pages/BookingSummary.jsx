@@ -72,7 +72,7 @@ const BookingSummary = () => {
           const saveResponse =
             await axios.post(
 
-              "http://localhost:5000/api/bookings",
+              "https://project-lc.onrender.com/api/bookings",
 
               finalData
 

@@ -26,7 +26,7 @@ const Files = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:5000/api/bookings/completed");
+      const response = await axios.get("https://project-lc.onrender.com/api/bookings/completed");
       // Sort by date descending (latest first)
       const sortedData = response.data.orders.sort((a, b) => new Date(b.date) - new Date(a.date));
       setOrders(sortedData);

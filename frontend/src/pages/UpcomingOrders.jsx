@@ -150,7 +150,7 @@ const UpcomingOrders = () => {
 
         const response =
           await axios.delete(
-            `http://localhost:5000/api/bookings/${id}`
+            `https://project-lc.onrender.com/api/bookings/${id}`
           );
 
         if (
@@ -219,7 +219,7 @@ const UpcomingOrders = () => {
 
         const response =
           await axios.get(
-            "http://localhost:5000/api/bookings/upcoming"
+            "https://project-lc.onrender.com/api/bookings/upcoming"
           );
 
         const sortedOrders =

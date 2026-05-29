@@ -21,7 +21,7 @@ const UsersManagement = () => {
 
           const res =
             await axios.get(
-              "http://localhost:5000/api/bookings/storage"
+              "https://project-lc.onrender.com/api/bookings/storage"
             );
 
           setStorage(
