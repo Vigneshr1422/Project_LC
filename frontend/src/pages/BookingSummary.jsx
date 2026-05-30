@@ -143,6 +143,75 @@ const BookingSummary = () => {
 
   };
 
+
+  const handleWithoutAdvanceBooking = async () => {
+
+  try {
+
+    const finalData = {
+
+      ...customerDetails,
+
+      selectedItems,
+
+      sectionCounts,
+
+      grandTotal,
+
+      advanceAmount: 0,
+
+      remainingAmount: grandTotal,
+
+      paymentStatus: "Pending",
+
+      bookingStatus: "Booked",
+
+      paymentId: "",
+
+      orderId: "",
+
+    };
+
+    const saveResponse = await axios.post(
+      "https://project-lc.onrender.com/api/bookings",
+      finalData
+    );
+
+    if (saveResponse.data.success) {
+
+      localStorage.removeItem("bookingData");
+
+      toast.success(
+        "Booking Confirmed Successfully ✨"
+      );
+
+      setTimeout(() => {
+
+        navigate("/payment-success", {
+          state: {
+            customerName: customerDetails.name,
+            paymentId: "Not Paid",
+            advanceAmount: 0,
+            grandTotal,
+            event: customerDetails.event,
+            date: customerDetails.date,
+          },
+        });
+
+      }, 1500);
+
+    }
+
+  } catch (error) {
+
+    console.log(error);
+
+    toast.error("Booking Save Failed");
+
+  }
+
+};
+
   return (
 
     <div className="min-h-screen bg-[#f5f5f5] px-4 py-8 md:py-12">
@@ -662,61 +731,84 @@ const BookingSummary = () => {
 
         {/* BUTTONS */}
 
-        <div
-          className="
-            flex
-            flex-col
-            md:flex-row
-            gap-5
-          "
-        >
+       {/* BUTTONS */}
 
-          {/* BACK */}
+<div
+  className="
+    flex
+    flex-col
+    md:flex-row
+    gap-5
+  "
+>
 
-          <button
-            onClick={() => navigate(-1)}
-            className="
-              flex-1
-              px-8
-              py-4
-              rounded-full
-              border-2
-              border-[#962a27]
-              text-[#962a27]
-              font-bold
-              hover:bg-[#fff7f7]
-              transition-all
-            "
-          >
+  {/* BACK */}
 
-            Back To Booking
+  <button
+    onClick={() => navigate(-1)}
+    className="
+      flex-1
+      px-8
+      py-4
+      rounded-full
+      border-2
+      border-[#962a27]
+      text-[#962a27]
+      font-bold
+      hover:bg-[#fff7f7]
+      transition-all
+    "
+  >
 
-          </button>
+    Back To Booking
 
-          {/* PAYMENT */}
+  </button>
 
-          <button
-            onClick={handlePayment}
-            className="
-              flex-1
-              px-8
-              py-4
-              rounded-full
-              bg-[#962a27]
-              text-white
-              font-bold
-              hover:scale-[1.02]
-              transition-all
-            "
-          >
+  {/* PAY ADVANCE */}
 
-            Pay Advance ₹
-            {" "}
-            {advanceAmount.toLocaleString()}
+  <button
+    onClick={handlePayment}
+    className="
+      flex-1
+      px-8
+      py-4
+      rounded-full
+      bg-[#962a27]
+      text-white
+      font-bold
+      hover:scale-[1.02]
+      transition-all
+    "
+  >
 
-          </button>
+    Pay Advance ₹
+    {" "}
+    {advanceAmount.toLocaleString()}
 
-        </div>
+  </button>
+
+  {/* WITHOUT ADVANCE */}
+
+  <button
+    onClick={handleWithoutAdvanceBooking}
+    className="
+      flex-1
+      px-8
+      py-4
+      rounded-full
+      bg-green-600
+      text-white
+      font-bold
+      hover:scale-[1.02]
+      transition-all
+    "
+  >
+
+    Book Without Advance
+
+  </button>
+
+</div>
 
       </div>
 

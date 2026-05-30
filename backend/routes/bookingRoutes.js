@@ -204,15 +204,17 @@ router.get(
 
     } catch (error) {
 
-      res.status(500).json({
+  console.log("BOOKING ERROR =>", error);
 
-        success: false,
+  res.status(500).json({
 
-        message: error.message,
+    success: false,
 
-      });
+    message: error.message,
 
-    }
+  });
+
+}
 
   }
 );
