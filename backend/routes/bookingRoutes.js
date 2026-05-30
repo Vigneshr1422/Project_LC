@@ -42,6 +42,9 @@ router.post("/create-order", async (req, res) => {
 
 router.post("/", async (req, res) => {
 
+  console.log("========== BOOKING API HIT ==========");
+  console.log("REQ BODY =>", req.body);
+
   try {
 
     const {
@@ -60,10 +63,6 @@ router.post("/", async (req, res) => {
 
     } = req.body;
 
-    /* =========================
-        VALIDATION
-    ========================== */
-
     if (
       !name ||
       !phone ||
@@ -76,28 +75,17 @@ router.post("/", async (req, res) => {
 
         success: false,
 
-        message:
-          "All fields are required",
+        message: "All fields are required",
 
       });
 
     }
 
-    /* =========================
-        BOOKING ID
-    ========================== */
-
     const totalBookings =
       await Booking.countDocuments();
 
     const bookingId =
-      `LC${String(
-        totalBookings + 1
-      ).padStart(4, "0")}`;
-
-    /* =========================
-        CREATE BOOKING
-    ========================== */
+      `LC${Date.now()}`;
 
     const booking =
       new Booking({
@@ -123,11 +111,12 @@ router.post("/", async (req, res) => {
         advanceAmount,
 
         remainingAmount:
-          grandTotal -
-          advanceAmount,
+          grandTotal - advanceAmount,
 
         paymentStatus:
-          "Advance Paid",
+          advanceAmount > 0
+            ? "Advance Paid"
+            : "Pending",
 
         bookingStatus:
           "Booked",
@@ -138,11 +127,16 @@ router.post("/", async (req, res) => {
 
       });
 
+    console.log(
+      "BOOKING BEFORE SAVE =>",
+      booking
+    );
+
     await booking.save();
 
-    /* =========================
-        RESPONSE
-    ========================== */
+    console.log(
+      "BOOKING SAVED SUCCESSFULLY"
+    );
 
     res.status(201).json({
 
@@ -156,6 +150,11 @@ router.post("/", async (req, res) => {
     });
 
   } catch (error) {
+
+    console.log(
+      "BOOKING ERROR =>",
+      error
+    );
 
     res.status(500).json({
 
