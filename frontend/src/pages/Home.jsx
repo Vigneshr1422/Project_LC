@@ -1,7 +1,7 @@
 import cateringImage from "../Images/image4.webp";
 import food1 from "../Images/food1.webp";
 import food2 from "../Images/food2.webp";
-
+import { useNavigate } from "react-router-dom";
 import { MdOutlineRestaurant } from "react-icons/md";
 import { FaGlassCheers } from "react-icons/fa";
 import { HiOutlineUsers } from "react-icons/hi";
@@ -45,7 +45,7 @@ function Home() {
       },
     },
   };
-
+const navigate = useNavigate();
   const fadeRight = {
     hidden: {
       opacity: 0,
@@ -220,20 +220,17 @@ function Home() {
           >
 
             <motion.button
-
-              whileHover={{
-                scale: 1.08,
-              }}
-
-              whileTap={{
-                scale: 0.95,
-              }}
-
-              className="bg-[#962a27] text-white px-8 py-4 rounded-full text-lg font-medium shadow-lg"
-
-            >
-              Book Now
-            </motion.button>
+  whileHover={{
+    scale: 1.08,
+  }}
+  whileTap={{
+    scale: 0.95,
+  }}
+  onClick={() => navigate("/booking")}
+  className="bg-[#962a27] text-white px-8 py-4 rounded-full text-lg font-medium shadow-lg"
+>
+  Book Now
+</motion.button>
 
             <motion.button
 
@@ -244,7 +241,7 @@ function Home() {
               whileTap={{
                 scale: 0.95,
               }}
-
+onClick={() => navigate("/menu")}
               className="border-2 border-[#962a27] text-[#962a27] px-8 py-4 rounded-full text-lg font-medium hover:bg-[#962a27] hover:text-white duration-300"
 
             >
