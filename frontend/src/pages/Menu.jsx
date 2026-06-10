@@ -1,1721 +1,346 @@
-import { useState } from "react";
-import biryaniImg from "../Images/pulao.webp";
-import Payasam from "../Images/payasam.webp";
-import Noodles from "../Images/Noodels.webp";
-import Paan from "../Images/paan.webp";
-import Icecream from "../Images/Icecream.webp";
-import Roti from "../Images/Roti.webp";
-import fish from "../Images/fish.webp";
-import Egg from "../Images/egg.webp";
-
-import grab from "../Images/grab.webp";
-import Soup from "../Images/soup.webp";
-import snacks from "../Images/snakcs.webp";
-import Sweets from "../Images/Sweets.webp";
-
-import chettinad from "../Images/chettinad.webp";
-
+import { useState, useRef, useEffect } from "react";
+// 🔥 SpecialMenu file import as default blueprint schema fallback
+import specialMenus from "../data/specialMenus"; 
+import Loader from "../components/Loader";
 
 function Menu() {
-
   const [language, setLanguage] = useState("en");
+  const [menuData, setMenuData] = useState(specialMenus); // Master dynamic menu data state
 
-  const specialMenus = [
+  // ==========================================================================
+  // SYNC DYNAMIC INVENTORY DATA ON LOAD FROM STORAGE ENGINE
+  // ==========================================================================
+// ==========================================================================
+  // SYNC DYNAMIC INVENTORY DATA ON LOAD FROM STORAGE ENGINE - FIXED IMAGE LOGIC
+  // ==========================================================================
+  useEffect(() => {
+    const savedInventory = localStorage.getItem("lc_flat_special_inventory");
+    if (savedInventory) {
+      try {
+        const flatList = JSON.parse(savedInventory);
+        
+        // Convert flat array format back into structured categorized map for client views
+        const structuredData = {
+          Breakfast: [],
+          Lunch: [],
+          Dinner: [],
+          VegPackages: [],
+          NonVegPackages: []
+        };
 
-   {
-  title: {
-    en: "Noodles Varieties",
-    ta: "நூடுல்ஸ் வகைகள்",
+        // Grouping logic reconstruction pipeline
+        flatList.forEach((item) => {
+          const category = item.category;
+          if (!structuredData[category]) return;
+
+          // Find fallback image from original static specialMenus blueprint if available
+          const staticCategoryItems = specialMenus[category] || [];
+          const staticGroupFallback = staticCategoryItems.find(
+            g => g.title?.en === item.groupTitleEn
+          );
+
+          if (item.isPackage) {
+            // Re-constructing Packages Structure array format
+            structuredData[category].push({
+              title: { en: item.groupTitleEn, ta: item.groupTitleTa },
+              price: item.price,
+              // First priority: item image -> Second priority: blueprint file image -> Last: safe placeholder
+              image: item.image || staticGroupFallback?.image || "https://images.unsplash.com/photo-1512058564366-18510be2db19?q=80&w=1200&auto=format&fit=crop",
+              items: item.componentsList ? item.componentsList.split(", ").map(i => ({ en: i, ta: i })) : []
+            });
+          } else {
+            // Re-constructing Standard Categories sections
+            let group = structuredData[category].find(
+              g => g.title.en === item.groupTitleEn
+            );
+
+            if (!group) {
+              group = {
+                title: { en: item.groupTitleEn, ta: item.groupTitleTa },
+                // FIX: Hardcode panni irundha URL-ah mathi dynamic image logic potachu thala
+                image: item.image || staticGroupFallback?.image || "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?q=80&w=1200&auto=format&fit=crop",
+                items: []
+              };
+              structuredData[category].push(group);
+            }
+
+            group.items.push({
+              en: item.dishNameEn,
+              ta: item.dishNameTa,
+              price: item.price,
+              type: item.type
+            });
+          }
+        });
+
+        setMenuData(structuredData);
+      } catch (err) {
+        console.error("Failed to parse dynamic catalog tree matrix:", err);
+      }
+    }
+  }, []);
+
+  // ==========================================================================
+  // DATA SEPARATION: செக்ஷன் செக்ஷனா டேட்டாவை பிரிக்கிறோம்
+  // ==========================================================================
+  const sections = [
+    {
+   id: "veg-packages",
+    isVeg: true, // இதை வச்சு நாம UI-ல சிம்பல் காட்ட போறோம் தலா
+    title: { en: "Pure Veg Catering Packages", ta: "சைவ உணவு பேக்கேஜ்கள்" },
+    desc: { en: "Premium readymade multi-course veg meals", ta: "முழுமையான பிரீமியம் சைவ உணவு விருந்து வகைகள்" },
+    cards: menuData.VegPackages || []
   },
-
-  image:
-    Noodles,
-
-  items: [
-
-    {
-      en: "Chicken Noodles",
-      ta: "சிக்கன் நூடுல்ஸ்",
-    },
-
-    {
-      en: "Mutton Noodles",
-      ta: "மட்டன் நூடுல்ஸ்",
-    },
-
-    {
-      en: "Chinese Noodles",
-      ta: "சைனீஸ் நூடுல்ஸ்",
-    },
-
-    {
-      en: "Egg Chicken Noodles",
-      ta: "எக் சிக்கன் நூடுல்ஸ்",
-    },
-
-    {
-      en: "Egg Noodles",
-      ta: "எக் நூடுல்ஸ்",
-    },
-
-    {
-      en: "Dry Noodles",
-      ta: "ட்ரை நூடுல்ஸ்",
-    },
-
-    {
-      en: "Prawn Noodles",
-      ta: "இறால் நூடுல்ஸ்",
-    },
-
-    {
-      en: "Chinese Hot Noodles",
-      ta: "சைனீஸ் ஹாட் நூடுல்ஸ்",
-    },
-
-  ],
-},
-
-
-{
-  title: {
-    en: "Beeda Varieties",
-    ta: "பீடா வகைகள்",
+  {
+    id: "nonveg-packages",
+    isNonVeg: true, // அசைவ சிம்பலுக்கு
+    title: { en: "Non-Veg Luxury Packages", ta: "அசைவ உணவு பேக்கேஜ்கள்" },
+    desc: { en: "Authentic Chettinad non-veg traditional feasts", ta: "அசல் செட்டிநாடு பாரம்பரிய அசைவ உணவு விருந்துகள்" },
+    cards: menuData.NonVegPackages || []
   },
-
-  image:
-    Paan,
-
-  items: [
-
     {
-      en: "Beeda",
-      ta: "பீடா",
+      id: "breakfast-specials",
+      title: { en: "🥞 Traditional Breakfast Varieties", ta: "🥞 காலை உணவு பலகாரங்கள்" },
+      desc: { en: "Idly, Dosa, Pongal and traditional oil sweets", ta: "இட்லி, தோசை, பொங்கல் மற்றும் பாரம்பரிய பலகாரங்கள்" },
+      cards: menuData.Breakfast || []
     },
-
     {
-      en: "Sweet Beeda",
-      ta: "ஸ்வீட் பீடா",
+      id: "lunch-specials",
+      title: { en: "🍲 Rich Lunch Curries & Beverages", ta: "🍲 மதிய உணவு கறி வகைகள் & ஜூஸ்" },
+      desc: { en: "Special non-veg curries and cold refreshing beverages", ta: "சிறப்பு அசைவ கறிகள் மற்றும் குளிர்ச்சியான பானங்கள்" },
+      cards: menuData.Lunch || []
     },
-
     {
-      en: "Kolkata Beeda",
-      ta: "கல்கத்தா பீடா",
-    },
-
-    {
-      en: "Special Nuts Beeda",
-      ta: "ஸ்பெஷல் நட்ஸ் பீடா",
-    },
-
-    {
-      en: "Betel Leaf, Areca Nut & Lime",
-      ta: "வெற்றிலை, பாக்கு, சுண்ணாம்பு",
-    },
-
-  ],
-},
-
-{
-  title: {
-    en: "Ice Cream Varieties",
-    ta: "ஐஸ்கிரீம் வகைகள்",
-  },
-
-  image:
-    Icecream,
-
-  items: [
-
-    {
-      en: "Vanilla Ice Cream",
-      ta: "வெண்ணிலா ஐஸ்கிரீம்",
-    },
-
-    {
-      en: "Strawberry Ice Cream",
-      ta: "ஸ்ட்ராபெரி ஐஸ்கிரீம்",
-    },
-
-    {
-      en: "Kulfi Ice Cream",
-      ta: "குல்பி ஐஸ்கிரீம்",
-    },
-
-    {
-      en: "Cone Ice Cream",
-      ta: "கோன் ஐஸ்கிரீம்",
-    },
-
-    {
-      en: "Butter Scotch Ice Cream",
-      ta: "பட்டர் ஸ்காட்ச் ஐஸ்கிரீம்",
-    },
-
-    {
-      en: "Pista Ice Cream",
-      ta: "பிஸ்தா ஐஸ்கிரீம்",
-    },
-
-    {
-      en: "Cassata Ice Cream",
-      ta: "கசாட்டா ஐஸ்கிரீம்",
-    },
-
-    {
-      en: "Chocolate Ice Cream",
-      ta: "சாக்லேட் ஐஸ்கிரீம்",
-    },
-
-  ],
-},
-
-{
-  title: {
-    en: "Fry Varieties",
-    ta: "ஃப்ரை வகைகள்",
-  },
-
-  image:
-    "https://images.unsplash.com/photo-1527477396000-e27163b481c2?q=80&w=1200&auto=format&fit=crop",
-
-  items: [
-
-    {
-      en: "Chicken Fry",
-      ta: "சிக்கன் ஃப்ரை",
-    },
-
-    {
-      en: "Chicken 65",
-      ta: "சிக்கன் 65",
-    },
-
-    {
-      en: "Butter Chicken Masala",
-      ta: "பட்டர் சிக்கன் மசாலா",
-    },
-
-    {
-      en: "Grill Chicken",
-      ta: "கிரில் சிக்கன்",
-    },
-
-    {
-      en: "Green Chicken",
-      ta: "கிரீன் சிக்கன்",
-    },
-
-    {
-      en: "Ginger Chicken",
-      ta: "ஜிஞ்சர் சிக்கன்",
-    },
-
-    {
-      en: "Chicken Tandoori",
-      ta: "சிக்கன் தந்தூரி",
-    },
-
-    {
-      en: "Pepper Chicken",
-      ta: "பெப்பர் சிக்கன்",
-    },
-
-    {
-      en: "Chicken Sukka",
-      ta: "சிக்கன் சுக்கா",
-    },
-
-    {
-      en: "Chicken Sukka Fry",
-      ta: "சிக்கன் சுக்கா ஃப்ரை",
-    },
-
-    {
-      en: "Lemon Chicken",
-      ta: "லெமன் சிக்கன்",
-    },
-
-    {
-      en: "Soya Chicken",
-      ta: "சோயா சிக்கன்",
-    },
-
-    {
-      en: "Quail 65",
-      ta: "காடை 65",
-    },
-
-    {
-      en: "Quail Fry",
-      ta: "காடை ஃப்ரை",
-    },
-
-    {
-      en: "Ginger Fish",
-      ta: "ஜிஞ்சர் ஃபிஷ்",
-    },
-
-    {
-      en: "Chilli Fish",
-      ta: "சில்லி ஃபிஷ்",
-    },
-
-    {
-      en: "Prawn Manchurian",
-      ta: "பிரான் மஞ்சூரியன்",
-    },
-
-    {
-      en: "Ginger Garlic Prawn",
-      ta: "ஜிஞ்சர் கார்லிக் பிரான்",
-    },
-
-    {
-      en: "Egg Manchurian",
-      ta: "எக் மஞ்சூரியன்",
-    },
-
-    {
-      en: "Egg Spring Roll",
-      ta: "எக் ஸ்ப்ரிங் ரோல்",
-    },
-
-    {
-      en: "Chicken Manchurian",
-      ta: "சிக்கன் மஞ்சூரியன்",
-    },
-
-    {
-      en: "Chicken Spring Roll",
-      ta: "சிக்கன் ஸ்பிரிங் ரோல்",
-    },
-
-    {
-      en: "Chicken Lollipop",
-      ta: "சிக்கன் லாலிபாப்",
-    },
-
-    {
-      en: "Hong Kong Chicken",
-      ta: "ஹாங்காங் சிக்கன்",
-    },
-
-  ],
-},
-
-{
-  title: {
-    en: "Roti Varieties",
-    ta: "ரோட்டி வகைகள்",
-  },
-
-  image:
-    Roti,
-
-  items: [
-
-    {
-      en: "Naan",
-      ta: "நான்",
-    },
-
-    {
-      en: "Butter Naan",
-      ta: "பட்டர் நான்",
-    },
-
-    {
-      en: "Parotta",
-      ta: "பரோட்டா",
-    },
-
-    {
-      en: "Chicken Parotta",
-      ta: "சிக்கன் பரோட்டா",
-    },
-
-    {
-      en: "Egg Parotta",
-      ta: "முட்டை பரோட்டா",
-    },
-
-    {
-      en: "Veechu Parotta",
-      ta: "வீச் பரோட்டா",
-    },
-
-    {
-      en: "Egg Veechu Parotta",
-      ta: "முட்டை வீச் பரோட்டா",
-    },
-
-    {
-      en: "Lappa Parotta",
-      ta: "லாப்பா பரோட்டா",
-    },
-
-    {
-      en: "Egg Lappa Parotta",
-      ta: "முட்டை லாப்பா பரோட்டா",
-    },
-
-    {
-      en: "Chicken Lappa Parotta",
-      ta: "சிக்கன் லாப்பா பரோட்டா",
-    },
-
-    {
-      en: "Chilli Parotta",
-      ta: "சில்லி பரோட்டா",
-    },
-
-    {
-      en: "Bun Parotta",
-      ta: "பன் பரோட்டா",
-    },
-
-    {
-      en: "Nool Parotta",
-      ta: "நூல் பரோட்டா",
-    },
-
-    {
-      en: "Chicken Kothu Parotta",
-      ta: "சிக்கன் கொத்து பரோட்டா",
-    },
-
-  ],
-},
-
-{
-  title: {
-    en: "Quail Varieties",
-    ta: "காடை வகைகள்",
-  },
-
-  image:
-    "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1200&auto=format&fit=crop",
-
-  items: [
-
-    {
-      en: "Quail Curry",
-      ta: "காடை குழம்பு",
-    },
-
-    {
-      en: "Quail Gravy",
-      ta: "காடை கிரேவி",
-    },
-
-    {
-      en: "Quail Pepper Masala",
-      ta: "காடை பெப்பர் மசாலா",
-    },
-
-    {
-      en: "Quail Fry",
-      ta: "காடை வறுவல்",
-    },
-
-    {
-      en: "Quail Roast",
-      ta: "காடை ரோஸ்ட்",
-    },
-
-  ],
-},
-
-{
-  title: {
-    en: "Prawn Varieties",
-    ta: "இறால் வகைகள்",
-  },
-
-  image:
-    "https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?q=80&w=1200&auto=format&fit=crop",
-
-  items: [
-
-    {
-      en: "Prawn Curry",
-      ta: "இறால் குழம்பு",
-    },
-
-    {
-      en: "Prawn Tamarind Curry",
-      ta: "இறால் புளி குழம்பு",
-    },
-
-    {
-      en: "Prawn Gravy",
-      ta: "இறால் கிரேவி",
-    },
-
-    {
-      en: "Prawn Masala Curry",
-      ta: "இறால் மசாலா கறி",
-    },
-
-    {
-      en: "Prawn Thokku",
-      ta: "இறால் தொக்கு",
-    },
-
-    {
-      en: "Prawn Coconut Roast",
-      ta: "இறால் தேங்காய் பிரட்டல்",
-    },
-
-    {
-      en: "Prawn Podimas",
-      ta: "இறால் பொடிமாஸ்",
-    },
-
-    {
-      en: "Butter Prawn Egg Masala",
-      ta: "பட்டர் இறால் முட்டை மசாலா",
-    },
-
-  ],
-},
-
-{
-  title: {
-    en: "Fish Varieties",
-    ta: "மீன் வகைகள்",
-  },
-
-  image:
-    fish,
-
-  items: [
-
-    {
-      en: "Fish Curry",
-      ta: "மீன் குழம்பு",
-    },
-
-    {
-      en: "Anchovy Fish Curry",
-      ta: "நெத்திலி மீன் குழம்பு",
-    },
-
-    {
-      en: "Fish Thokku",
-      ta: "மீன் தொக்கு",
-    },
-
-    {
-      en: "Fish Fry",
-      ta: "மீன் வறுவல்",
-    },
-
-    {
-      en: "Spicy Tamarind Fish Fry",
-      ta: "மீன் புளி வறுவல்",
-    },
-
-    {
-      en: "Fish Cutlet",
-      ta: "மீன் கட்லெட்",
-    },
-
-    {
-      en: "Fish Roast",
-      ta: "மீன் ரோஸ்ட்",
-    },
-
-    {
-      en: "Fish Puttu Curry",
-      ta: "மீன் புட்டுக்கறி",
-    },
-
-    {
-      en: "Fish Poriyal",
-      ta: "மீன் பொறியல்",
-    },
-
-  ],
-},
-
-{
-  title: {
-    en: "Egg Varieties",
-    ta: "முட்டை வகைகள்",
-  },
-
-  image:
-    Egg,
-
-  items: [
-
-    {
-      en: "Egg Curry",
-      ta: "முட்டை குழம்பு",
-    },
-
-    {
-      en: "Egg Fry",
-      ta: "முட்டை வறுவல்",
-    },
-
-    {
-      en: "Egg Masala",
-      ta: "முட்டை மசாலா",
-    },
-
-    {
-      en: "Cheese Omelette",
-      ta: "சீஸ் ஆம்லெட்",
-    },
-
-    {
-      en: "Onion Omelette",
-      ta: "ஆனியன் ஆம்லெட்",
-    },
-
-    {
-      en: "Egg Kalakki",
-      ta: "முட்டை கலக்கி",
-    },
-
-    {
-      en: "Egg Aviyal",
-      ta: "முட்டை அவியல்",
-    },
-
-    {
-      en: "Egg Masala Podimas",
-      ta: "முட்டை மசாலா பொடிமாஸ்",
-    },
-
-  ],
-},
-
-{
-  title: {
-    en: "Crab Varieties",
-    ta: "நண்டு வகைகள்",
-  },
-
-  image:grab,
-
-  items: [
-
-    {
-      en: "Crab Masala Curry",
-      ta: "நண்டு மசாலா குழம்பு",
-    },
-
-    {
-      en: "Chettinad Crab Curry",
-      ta: "செட்டிநாட்டு நண்டு குழம்பு",
-    },
-
-    {
-      en: "Crab Gravy",
-      ta: "நண்டு கிரேவி",
-    },
-
-    {
-      en: "Coconut Pepper Crab",
-      ta: "தேங்காய் மிளகு நண்டு",
-    },
-
-    {
-      en: "Crab Fry",
-      ta: "நண்டு வறுவல்",
-    },
-
-    {
-      en: "Crab Fry Special",
-      ta: "நண்டு ஃப்ரை",
-    },
-
-    {
-      en: "Crab Rasam",
-      ta: "நண்டு ரசம்",
-    },
-
-    {
-      en: "Crab Pepper Soup",
-      ta: "நண்டு மிளகு சூப்",
-    },
-
-  ],
-},
-
-{
-  title: {
-    en: "Turkey Varieties",
-    ta: "வான்கோழி வகைகள்",
-  },
-
-  image:
-    "https://images.unsplash.com/photo-1600891964092-4316c288032e?q=80&w=1200&auto=format&fit=crop",
-
-  items: [
-
-    {
-      en: "Turkey Curry",
-      ta: "வான்கோழி குழம்பு",
-    },
-
-    {
-      en: "Turkey Gravy",
-      ta: "வான்கோழி கிரேவி",
-    },
-
-    {
-      en: "Pepper Turkey Fry",
-      ta: "மிளகு வான்கோழி வறுவல்",
-    },
-
-    {
-      en: "Turkey Chilli",
-      ta: "வான்கோழி சில்லி",
-    },
-
-    {
-      en: "Turkey Soup",
-      ta: "வான்கோழி சூப்",
-    },
-
-  ],
-},
-
-{
-  title: {
-    en: "Biryani Varieties",
-    ta: "பிரியாணி வகைகள்",
-  },
-
-   image: biryaniImg,
-
-  items: [
-
-    {
-      en: "Chettinad Seeraga Samba Chicken Biryani",
-      ta: "செட்டிநாட்டு சீரக சம்பா சிக்கன் பிரியாணி",
-    },
-
-    {
-      en: "Mutton Biryani",
-      ta: "மட்டன் பிரியாணி",
-    },
-
-    {
-      en: "Hyderabadi Chicken Biryani",
-      ta: "ஹைதராபாத் சிக்கன் பிரியாணி",
-    },
-
-    {
-      en: "Hyderabadi Mutton Biryani",
-      ta: "ஹைதராபாத் மட்டன் பிரியாணி",
-    },
-
-    {
-      en: "Country Chicken Biryani",
-      ta: "நாட்டுக்கோழி பிரியாணி",
-    },
-
-    {
-      en: "Fish Biryani",
-      ta: "மீன் பிரியாணி",
-    },
-
-    {
-      en: "Prawn Biryani",
-      ta: "இறால் பிரியாணி",
-    },
-
-    {
-      en: "Mutton Leg Biryani",
-      ta: "ஆட்டுக்கால் பிரியாணி",
-    },
-
-    {
-      en: "Turkey Biryani",
-      ta: "வான்கோழி பிரியாணி",
-    },
-
-    {
-      en: "Quail Biryani",
-      ta: "காடை பிரியாணி",
-    },
-
-    {
-      en: "Egg Biryani",
-      ta: "முட்டை பிரியாணி",
-    },
-
-  ],
-},
-
-{
-  title: {
-    en: "Rice Varieties",
-    ta: "ரைஸ் வகைகள்",
-  },
-
-  image:
-    "https://images.unsplash.com/photo-1512058564366-18510be2db19?q=80&w=1200&auto=format&fit=crop",
-
-  items: [
-
-    {
-      en: "Chicken Fried Rice",
-      ta: "சிக்கன் ஃப்ரைடு ரைஸ்",
-    },
-
-    {
-      en: "Mutton Fried Rice",
-      ta: "மட்டன் ஃப்ரைடு ரைஸ்",
-    },
-
-    {
-      en: "Prawn Fried Rice",
-      ta: "இறால் ஃப்ரைடு ரைஸ்",
-    },
-
-    {
-      en: "Mixed Fried Rice",
-      ta: "மிக்ஸ்டு ஃப்ரைடு ரைஸ்",
-    },
-
-    {
-      en: "Fish Fried Rice",
-      ta: "மீன் ஃப்ரைடு ரைஸ்",
-    },
-
-    {
-      en: "Schezwan Chicken Rice",
-      ta: "செஸ்வான் சிக்கன் ரைஸ்",
-    },
-
-    {
-      en: "Schezwan Mutton Rice",
-      ta: "செஸ்வான் மட்டன் ரைஸ்",
-    },
-
-    {
-      en: "Schezwan Fish Rice",
-      ta: "செஸ்வான் ஃபிஷ் ரைஸ்",
-    },
-
-    {
-      en: "Schezwan Prawn Rice",
-      ta: "செஸ்வான் பிரான் ரைஸ்",
-    },
-
-    {
-      en: "Schezwan Egg Rice",
-      ta: "செஸ்வான் எக் ரைஸ்",
-    },
-
-    {
-      en: "White Rice",
-      ta: "ஒயிட் ரைஸ்",
-    },
-
-    {
-      en: "Ghee Rice",
-      ta: "கீ ரைஸ்",
-    },
-
-  ],
-},
-
-{
-  title: {
-    en: "Soup Varieties",
-    ta: "சூப் வகைகள்",
-  },
-
-  image:
-    Soup,
-
-  items: [
-
-    {
-      en: "Sweet Corn Soup",
-      ta: "ஸ்வீட் கார்ன் சூப்",
-    },
-
-    {
-      en: "Baby Corn Soup",
-      ta: "பேபி கார்ன் சூப்",
-    },
-
-    {
-      en: "Tomato Soup",
-      ta: "தக்காளி சூப்",
-    },
-
-    {
-      en: "Herbal Soup",
-      ta: "ஹெர்பல்ஸ் சூப்",
-    },
-
-    {
-      en: "Noodles Soup",
-      ta: "நூடுல்ஸ் சூப்",
-    },
-
-    {
-      en: "Mushroom Soup",
-      ta: "மஷ்ரூம் சூப்",
-    },
-
-    {
-      en: "Vegetable Clear Soup",
-      ta: "வெஜிடபிள் கிளியர் சூப்",
-    },
-
-    {
-      en: "Hot Pepper Water Soup",
-      ta: "ஹாட் மிளகுதண்ணி சூப்",
-    },
-
-    {
-      en: "Lemon Coriander Soup",
-      ta: "லெமன் கொரியாண்டர் சூப்",
-    },
-
-  ],
-},
-
-{
-  title: {
-    en: "Payasam Varieties",
-    ta: "பாயாசம் வகைகள்",
-  },
-
-  image: Payasam,
-
-  items: [
-
-    {
-      en: "Milk Payasam",
-      ta: "பால் பாயாசம்",
-    },
-
-    {
-      en: "Sago Payasam",
-      ta: "ஜவ்வரிசி பாயாசம்",
-    },
-
-    {
-      en: "Semiya Payasam",
-      ta: "சேமியா பாயாசம்",
-    },
-
-    {
-      en: "Dal Payasam",
-      ta: "பருப்பு பாயாசம்",
-    },
-
-    {
-      en: "Tender Coconut Payasam",
-      ta: "இளநீர் பாயாசம்",
-    },
-
-    {
-      en: "Aval Payasam",
-      ta: "அவுல் பாயாசம்",
-    },
-
-    {
-      en: "Basmati Payasam",
-      ta: "பாசுமதி பாயாசம்",
-    },
-
-    {
-      en: "Rava Payasam",
-      ta: "ரவை பாயாசம்",
-    },
-
-    {
-      en: "Palada Pradhaman Payasam",
-      ta: "பாலடை பிரதமன் பாயாசம்",
-    },
-
-    {
-      en: "Rice Payasam",
-      ta: "அரிசி பாயாசம்",
-    },
-
-    {
-      en: "Chettinad Fruit Payasam",
-      ta: "செட்டிநாடு பழ பாயாசம்",
-    },
-
-    {
-      en: "Sago Semiya Payasam",
-      ta: "ஜவ்வரிசி சேமியா பாயாசம்",
-    },
-
-    {
-      en: "Green Gram Payasam",
-      ta: "பாசி பருப்பு பாயாசம்",
-    },
-
-    {
-      en: "Red Rice Payasam",
-      ta: "சிவப்பரிசி பாயாசம்",
-    },
-
-    {
-      en: "Black Kavuni Rice Payasam",
-      ta: "கவுனி அரிசி பாயாசம்",
-    },
-
-    {
-      en: "Bottle Gourd Payasam",
-      ta: "சுரைக்காய் பாயாசம்",
-    },
-
-  ],
-},
-
-{
-  title: {
-    en: "Pickle Varieties",
-    ta: "ஊறுகாய் வகைகள்",
-  },
-
-  image:
-    "https://images.unsplash.com/photo-1626200419199-391ae4be7a41?q=80&w=1200&auto=format&fit=crop",
-
-  items: [
-
-    {
-      en: "Mango Pickle",
-      ta: "மாங்காய் ஊறுகாய்",
-    },
-
-    {
-      en: "Lemon Pickle",
-      ta: "எலுமிச்சை ஊறுகாய்",
-    },
-
-    {
-      en: "Ginger Pickle",
-      ta: "இஞ்சி ஊறுகாய்",
-    },
-
-    {
-      en: "Garlic Pickle",
-      ta: "பூண்டு ஊறுகாய்",
-    },
-
-    {
-      en: "Green Chilli Pickle",
-      ta: "பச்சை மிளகாய் ஊறுகாய்",
-    },
-
-  ],
-},
-
-{
-  title: {
-    en: "Idly Varieties",
-    ta: "இட்லி வகைகள்",
-  },
-
-  image:
-    "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?q=80&w=1200&auto=format&fit=crop",
-
-  items: [
-
-    {
-      en: "Coriander Idly",
-      ta: "மல்லி இட்லி",
-    },
-
-    {
-      en: "Hardin Idly",
-      ta: "ஹார்டின் இட்லி",
-    },
-
-    {
-      en: "Plate Idly",
-      ta: "தட்டு இட்லி",
-    },
-
-    {
-      en: "Ghee Mini Idly",
-      ta: "நெய் மினி இட்லி",
-    },
-
-    {
-      en: "Plain Idly",
-      ta: "சாதா இட்லி",
-    },
-
-    {
-      en: "Cup Idly",
-      ta: "கப்பு இட்லி",
-    },
-
-    {
-      en: "Kulfi Idly",
-      ta: "குல்பி இட்லி",
-    },
-
-    {
-      en: "Masala Idly",
-      ta: "மசாலா இட்லி",
-    },
-
-    {
-      en: "Star Idly",
-      ta: "ஸ்டார் இட்லி",
-    },
-
-    {
-      en: "Rava Idly",
-      ta: "ரவா இட்லி",
-    },
-
-    {
-      en: "Kanchipuram Idly",
-      ta: "காஞ்சிபுரம் இட்லி",
-    },
-
-    {
-      en: "Tender Coconut Idly",
-      ta: "இளநீர் இட்லி",
-    },
-
-    {
-      en: "Kuzhi Paniyaram",
-      ta: "குழி பணியாரம்",
-    },
-
-    {
-      en: "Kuzhai Puttu",
-      ta: "குழாய் புட்டு",
-    },
-
-    {
-      en: "Appam",
-      ta: "ஆப்பம்",
-    },
-
-    {
-      en: "Idiyappam with Coconut Milk",
-      ta: "இடியாப்பம் + தேங்காய் பால்",
-    },
-
-  ],
-},
-
-{
-  title: {
-    en: "Mixed Rice Varieties",
-    ta: "கலவை சாதம் வகைகள்",
-  },
-
-  image:
-    "https://images.unsplash.com/photo-1512058564366-18510be2db19?q=80&w=1200&auto=format&fit=crop",
-
-  items: [
-
-    {
-      en: "White Rice",
-      ta: "வெள்ளை சாதம்",
-    },
-
-    {
-      en: "Bisi Bele Bath",
-      ta: "பிசிபேளா பாத்",
-    },
-
-    {
-      en: "Bhagala Bath",
-      ta: "பகாளா பாத்",
-    },
-
-    {
-      en: "Kalkandu Bath",
-      ta: "கல்கண்டு பாத்",
-    },
-
-    {
-      en: "Sweet Pongal",
-      ta: "சர்க்கரை பொங்கல்",
-    },
-
-    {
-      en: "Tamarind Rice",
-      ta: "புளி சாதம்",
-    },
-
-    {
-      en: "Sesame Rice",
-      ta: "எள்ளு சாதம்",
-    },
-
-    {
-      en: "Lemon Rice",
-      ta: "லெமன் சாதம்",
-    },
-
-    {
-      en: "Coconut Rice",
-      ta: "தேங்காய் சாதம்",
-    },
-
-    {
-      en: "Tomato Rice",
-      ta: "தக்காளி சாதம்",
-    },
-
-    {
-      en: "Mango Rice",
-      ta: "மாங்காய் சாதம்",
-    },
-
-    {
-      en: "Mint Rice",
-      ta: "புதினா சாதம்",
-    },
-
-    {
-      en: "Curry Leaves Rice",
-      ta: "கருவேப்பிலை சாதம்",
-    },
-
-    {
-      en: "Vatha Kuzhambu Rice",
-      ta: "வத்த குழம்பு சாதம்",
-    },
-
-    {
-      en: "Brinji Rice",
-      ta: "பிரிஞ்சி சாதம்",
-    },
-
-    {
-      en: "Curd Rice",
-      ta: "தயிர் சாதம்",
-    },
-
-  ],
-},
-
-{
-  title: {
-    en: "Sweets",
-    ta: "ஸ்வீட்ஸ்",
-  },
-
-  image:
-    Sweets,
-
-  items: [
-
-    {
-      en: "Rasmalai",
-      ta: "ரசமலாய்",
-    },
-
-    {
-      en: "Bengali Sweet",
-      ta: "பெங்காலி",
-    },
-
-    {
-      en: "Agra Paan",
-      ta: "ஆகரா பான்",
-    },
-
-    {
-      en: "Rasgulla",
-      ta: "ரசகுல்லா",
-    },
-
-    {
-      en: "Badam Halwa",
-      ta: "பாதாம் அல்வா",
-    },
-
-    {
-      en: "Pista Roll",
-      ta: "பிஸ்தா ரோல்",
-    },
-
-    {
-      en: "Malai Cream Roll",
-      ta: "மலாய் கிரீம் ரோல்",
-    },
-
-    {
-      en: "China Stores Sweet",
-      ta: "சீனா ஸ்டோர்ஸ்",
-    },
-
-    {
-      en: "Cashew Pista Roll",
-      ta: "முந்திரி பிஸ்தா ரோல்",
-    },
-
-    {
-      en: "Litchi Labdi",
-      ta: "லிச்சி லப்டி",
-    },
-
-    {
-      en: "Anarkali",
-      ta: "அனார்கலி",
-    },
-
-    {
-      en: "Dry Fruit Halwa",
-      ta: "ட்ரை ஃப்ரூட் அல்வா",
-    },
-
-    {
-      en: "Godhi Halwa",
-      ta: "கோதி அல்வா",
-    },
-
-    {
-      en: "Malai Sandwich",
-      ta: "மலாய் சாண்ட்விச்",
-    },
-
-    {
-      en: "Gulab Jamun (Round)",
-      ta: "குலோப் ஜாம் (ரவுண்ட்)",
-    },
-
-    {
-      en: "Dry Jamun",
-      ta: "ட்ரை ஜாமுன் (நீட்டு)",
-    },
-
-    {
-      en: "Makkan Peda",
-      ta: "மக்கன் பேடா",
-    },
-
-    {
-      en: "Large Jangiri",
-      ta: "பெரிய ஜாங்கிரி",
-    },
-
-    {
-      en: "Mini Boondi Laddu",
-      ta: "மினி பூந்தி லட்டு",
-    },
-
-    {
-      en: "Mothi Paagu",
-      ta: "மோதி பாகு",
-    },
-
-  ],
-},
-
-{
-  title: {
-    en: "Snacks Varieties",
-    ta: "கார வகைகள்",
-  },
-
-  image:
-    snacks,
-
-  items: [
-
-    {
-      en: "Veg Roll",
-      ta: "வெஜ் ரோல்",
-    },
-
-    {
-      en: "Paneer Roll",
-      ta: "பன்னீர் ரோல்",
-    },
-
-    {
-      en: "Cutlet",
-      ta: "கட்லெட்",
-    },
-
-    {
-      en: "Cashew Pakoda",
-      ta: "முந்திரி பக்கோடா",
-    },
-
-    {
-      en: "Onion Pakoda",
-      ta: "ஆனியன் பக்கோடா",
-    },
-
-    {
-      en: "Masala Groundnut",
-      ta: "மசாலா வேர்க்கடலை",
-    },
-
-    {
-      en: "Cauliflower Pakoda",
-      ta: "காலிஃப்ளவர் பக்கோடா",
-    },
-
-    {
-      en: "Soft Pakoda",
-      ta: "மெது பக்கோடா",
-    },
-
-    {
-      en: "Veg Spring Roll",
-      ta: "வெஜ் ஸ்ப்ரிங் ரோல்",
-    },
-
-    {
-      en: "Veg Fish Fry",
-      ta: "வெஜ் மீன் வருவல்",
-    },
-
-    {
-      en: "Potato Chips",
-      ta: "உருளை சிப்ஸ்",
-    },
-
-    {
-      en: "Stick Chips",
-      ta: "குச்சி சிப்ஸ்",
-    },
-
-    {
-      en: "Nendram Chips",
-      ta: "நேந்திரம் சிப்ஸ்",
-    },
-
-    {
-      en: "Kara Sev",
-      ta: "கார சேவ்",
-    },
-
-    {
-      en: "Kara Boondi",
-      ta: "கார பூந்தி",
-    },
-
-    {
-      en: "Mixture",
-      ta: "மிச்சர்",
-    },
-
-  ],
-},
-
-{
-  title: {
-    en: "Chettinad Special",
-    ta: "செட்டிநாடு ஸ்பெஷல்",
-  },
-
-  image:
-    chettinad,
-
-  items: [
-
-    {
-      en: "Kandharappam",
-      ta: "கந்தர்ப்பம்",
-    },
-
-    {
-      en: "Aadi Kummayam",
-      ta: "ஆடி கும்மாயம்",
-    },
-
-    {
-      en: "Ukkarai",
-      ta: "உக்கரா",
-    },
-
-    {
-      en: "Black Kavuni Rice",
-      ta: "கருப்பு கவுனி அரிசி",
-    },
-
-    {
-      en: "Milk Paniyaram",
-      ta: "பால் பணியாரம்",
-    },
-
-    {
-      en: "White Paniyaram",
-      ta: "வெள்ளை பணியாரம்",
-    },
-
-    {
-      en: "Sweet Kuzhi Paniyaram",
-      ta: "இனிப்பு குழி பணியாரம்",
-    },
-
-    {
-      en: "Suzhiyam",
-      ta: "சுழியம்",
-    },
-
-    {
-      en: "Milk Kozhukattai",
-      ta: "பால் கொழுக்கட்டை",
-    },
-
-    {
-      en: "Kalkandu Vadai",
-      ta: "கல்கண்டு வடை",
-    },
-
-    {
-      en: "Erukkala Kozhukattai",
-      ta: "எருக்கல கொழுக்கட்டை",
-    },
-
-    {
-      en: "Crushed Pidi Kozhukattai",
-      ta: "இடிச்ச புடி கொழுக்கட்டை",
-    },
-
-    {
-      en: "Pooranam Kozhukattai",
-      ta: "பூரணம் கொழுக்கட்டை",
-    },
-
-    {
-      en: "Manavalam",
-      ta: "மணவளம்",
-    },
-
-    {
-      en: "Poli",
-      ta: "போலி",
-    },
-
-    {
-      en: "Thanjavur Arachi Vitta Sambar",
-      ta: "தஞ்சாவூர் அரைச்சி விட்ட சாம்பார்",
-    },
-
-    {
-      en: "Vandikkaran Kara Kuzhambu",
-      ta: "வண்டிக்காரன் காரக்குழம்பு",
-    },
-
-    {
-      en: "Oil Brinjal Kuzhambu",
-      ta: "எண்ணெய் கத்திரிக்காய் குழம்பு",
-    },
-
-    {
-      en: "Sunda Vatha Kuzhambu",
-      ta: "சுண்ட வத்த குழம்பு",
-    },
-
-    {
-      en: "Pakoda Kuzhambu",
-      ta: "பக்கோடா குழம்பு",
-    },
-
-    {
-      en: "Puli Kuzhambu",
-      ta: "புளிக்குழம்பு",
-    },
-
-    {
-      en: "Urundai Kuzhambu",
-      ta: "உருண்டை குழம்பு",
-    },
-
-    {
-      en: "Veg Fish Kuzhambu",
-      ta: "பொய் மீன் குழம்பு",
-    },
-
-    {
-      en: "Garlic Kuzhambu",
-      ta: "பூண்டு குழம்பு",
-    },
-
-    {
-      en: "Chettinad Wedding Sambar",
-      ta: "செட்டிநாட்டு கல்யாண சாம்பார்",
-    },
-
-    {
-      en: "Chettinad Kara Kuzhambu",
-      ta: "செட்டிநாட்டு கார குழம்பு",
-    },
-
-  ],
-},
-// 
-
-    
-    
-
+      id: "dinner-specials",
+      title: { en: "🌙 Dinner Naan, Roti & Parotta Hub", ta: "🌙 இரவு உணவு பரோட்டா & ரோட்டி வகைகள்" },
+      desc: { en: "Idiyappam, Noodles, varieties of fluffly parottas", ta: "இடியாப்பம், நூடுல்ஸ் மற்றும் சுடச்சுட பரோட்டா வகைகள்" },
+      cards: menuData.Dinner || []
+    }
   ];
 
-return (
+  const rowRefs = useRef({});
 
-  <div className="bg-gradient-to-b from-[#fff8f5] to-[#fff1ea] min-h-screen pt-[78px] md:pt-[95px] pb-14 md:pb-24 px-3 sm:px-4 md:px-10 overflow-hidden">
+  const handleScroll = (sectionId, direction) => {
+    const container = rowRefs.current[sectionId];
+    if (container) {
+      const scrollAmount = direction === "left" ? -300 : 300; 
+      container.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
 
-    {/* TOP SECTION */}
-    <div className="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 md:gap-8 mb-8 md:mb-14">
+  return (
+    <div className="bg-gradient-to-b from-[#fff8f5] to-[#fff1ea] min-h-screen pt-[78px] md:pt-[95px] pb-14 md:pb-24 px-3 sm:px-4 md:px-8 overflow-hidden">
 
-      {/* LEFT */}
-      <div className="w-full">
-
-        {/* TAG */}
-        <span className="inline-block bg-[#ffe7dc] text-[#962a27] px-3 py-1.5 md:px-5 md:py-2 rounded-full text-[11px] sm:text-sm font-semibold tracking-wide">
-
-          Premium Catering Menu
-
-        </span>
-
-        {/* HEADING */}
-        <h1 className="text-[28px] sm:text-[38px] md:text-5xl lg:text-6xl font-bold text-[#7c2d12] mt-4 md:mt-5 leading-[1.2]">
-
-          {language === "en"
-            ? "Explore Our Delicious Menu"
-            : "எங்கள் சுவையான உணவுப் பட்டியல்"}
-
-        </h1>
-
-        {/* DESCRIPTION */}
-        <p className="text-gray-500 mt-3 md:mt-5 max-w-3xl leading-6 md:leading-8 text-[13px] sm:text-sm md:text-base">
-
-          {language === "en"
-            ? "Discover authentic Chettinad flavors, traditional dishes, sweets, biryanis and premium catering specials."
-            : "அசல் செட்டிநாடு சுவைகள், பாரம்பரிய உணவுகள், இனிப்புகள் மற்றும் சிறப்பு விருந்துகளை அனுபவிக்குங்கள்."}
-
-        </p>
-
-      </div>
-
-      {/* LANGUAGE TOGGLE */}
-      <div className="flex justify-start lg:justify-end">
-
-        <div className="flex items-center gap-2 bg-white p-1.5 md:p-2 rounded-full shadow-md border border-[#f3d7c8] w-fit">
-
-          <button
-            onClick={() => setLanguage("en")}
-            className={`px-4 py-1.5 md:px-5 md:py-2 rounded-full text-[11px] sm:text-sm font-semibold duration-300 whitespace-nowrap ${
-              language === "en"
-                ? "bg-[#962a27] text-white shadow"
-                : "text-[#962a27]"
-            }`}
-          >
-
-            English
-
-          </button>
-
-          <button
-            onClick={() => setLanguage("ta")}
-            className={`px-4 py-1.5 md:px-5 md:py-2 rounded-full text-[11px] sm:text-sm font-semibold duration-300 whitespace-nowrap ${
-              language === "ta"
-                ? "bg-[#962a27] text-white shadow"
-                : "text-[#962a27]"
-            }`}
-          >
-
-            தமிழ்
-
-          </button>
-
+      {/* 1. TOP MAIN BRAND HEADER */}
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 md:gap-8 mb-8 md:mb-12">
+        <div className="w-full text-left">
+          <span className="inline-block bg-[#ffe7dc] text-[#962a27] px-5 py-2 rounded-full text-xs sm:text-sm font-black tracking-wide shadow-sm">
+            👑 Lakshmi Catering Premium Menu
+          </span>
+          <h1 className="text-[32px] sm:text-[42px] md:text-5xl lg:text-6xl font-black text-[#7c2d12] mt-4 tracking-tight leading-none">
+            {language === "en" ? "Explore Traditional Tastes" : "எங்கள் சுவையான உணவுப் பட்டியல்"}
+          </h1>
+          <p className="text-gray-500 mt-3 md:mt-4 max-w-2xl leading-relaxed text-xs sm:text-sm md:text-base font-medium">
+            {language === "en"
+              ? "Discover authentic Chettinad flavors, readymade budget combos, sweets and premium live-counter catering specials."
+              : "அசல் செட்டிநாடு சுவைகள், பிரீமியம் பட்ஜெட் பேக்கேஜ்கள் மற்றும் சிறந்த அலா கார்டே விருந்துகளை அனுபவியுங்கள்."}
+          </p>
         </div>
 
+        {/* LANGUAGE CONTROL SWAPPER */}
+        <div className="flex justify-start lg:justify-end shrink-0">
+          <div className="flex items-center gap-1.5 bg-white p-1.5 rounded-full shadow-md border border-[#f3d7c8] w-fit">
+            <button
+              onClick={() => setLanguage("en")}
+              className={`px-5 py-2 rounded-full text-xs sm:text-sm font-black transition-all duration-300 ${
+                language === "en" ? "bg-[#962a27] text-white shadow-md" : "text-[#962a27] hover:bg-[#fff1ea]"
+              }`}
+            >
+              English
+            </button>
+            <button
+              onClick={() => setLanguage("ta")}
+              className={`px-5 py-2 rounded-full text-xs sm:text-sm font-black transition-all duration-300 ${
+                language === "ta" ? "bg-[#962a27] text-white shadow-md" : "text-[#962a27] hover:bg-[#fff1ea]"
+              }`}
+            >
+              தமிழ்
+            </button>
+          </div>
+        </div>
       </div>
 
+      {/* ==========================================================================
+          2. MOVEABLE BOOK CONTAINER ROW WITH RESPONSIVE SLIDE ARROWS
+          ========================================================================== */}
+      <div className="max-w-7xl mx-auto space-y-12 md:space-y-16">
+        {sections.map((section) => {
+          if (section.cards.length === 0) return null;
+
+        return (
+  <div key={section.id} className="w-full text-left relative group/section">
+    
+    {/* Section Title Container */}
+    <div className="mb-5 sm:mb-8 px-1 flex justify-between items-end gap-2">
+      <div>
+        {/* Container size-ah gap-3 aaki dynamic sizes boost panniyachu */}
+        <div className="flex items-center gap-3 mb-2">
+          
+          {/* 🟢 Official Veg Symbol Setup (BIG SIZE) */}
+          {section.isVeg && (
+            <div className="w-6 h-6 border-2 border-green-600 flex items-center justify-center bg-white p-[3px] shrink-0 rounded-md shadow-md">
+              <div className="w-3.5 h-3.5 rounded-full bg-green-600"></div>
+            </div>
+          )}
+
+          {/* 🔴 Official Non-Veg Symbol Setup (BIG SIZE) */}
+          {section.isNonVeg && (
+            <div className="w-6 h-6 border-2 border-red-600 flex items-center justify-center bg-white p-[3px] shrink-0 rounded-md shadow-md">
+              <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[11px] border-b-red-600"></div>
+            </div>
+          )}
+
+          {/* Text size increased: text-2xl from text-xl */}
+          <h2 className="text-2xl sm:text-4xl font-black text-[#7c2d12] tracking-tight leading-none">
+            {section.title[language]}
+          </h2>
+        </div>
+        
+        <p className="text-xs sm:text-base text-gray-400 font-medium mt-1.5 pl-1">
+          {section.desc[language]}
+        </p>
+      </div>
+
+      {/* Navigation Arrows */}
+      <div className="flex items-center gap-2 mb-1 shrink-0">
+        <button 
+          onClick={() => handleScroll(section.id, "left")}
+          className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl border border-[#f5d6c6] bg-white hover:bg-[#962a27] text-[#962a27] hover:text-white flex items-center justify-center font-black text-sm sm:text-base transition-all shadow-sm active:scale-90"
+        >
+          ←
+        </button>
+        <button 
+          onClick={() => handleScroll(section.id, "right")}
+          className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl border border-[#f5d6c6] bg-white hover:bg-[#962a27] text-[#962a27] hover:text-white flex items-center justify-center font-black text-sm sm:text-base transition-all shadow-sm active:scale-90"
+        >
+          →
+        </button>
+      </div>
     </div>
 
-    {/* MENU CARDS */}
-<div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5 md:gap-8 place-items-center">
-      {specialMenus.map((menu, index) => (
+    {/* Slider Content Wrapper */}
+    <div className="relative w-full">
+      
+      <div 
+        ref={(el) => (rowRefs.current[section.id] = el)}
+        className="w-full flex gap-4 sm:gap-6 md:gap-8 overflow-x-auto pb-6 pt-1 px-1 snap-x snap-mandatory scrollbar-thin scroll-smooth select-none custom-scroll-row"
+      >
+        {section.cards.map((menu, index) => (
+          <div
+            key={index}
+            className="w-[280px] sm:w-[320px] md:w-[360px] shrink-0 snap-start bg-white rounded-[24px] md:rounded-[32px] overflow-hidden border border-[#f5d6c6] hover:shadow-2xl duration-300 group relative"
+          >
+            {/* Gradient Accent Strip */}
+            <div className="absolute top-0 left-0 w-full h-[4px] bg-gradient-to-r from-[#962a27] via-[#d97706] to-[#f59e0b] z-10" />
 
-        <div
-          key={index}
-className="relative bg-white rounded-[24px] md:rounded-[34px] overflow-hidden border border-[#f5d6c6] hover:shadow-2xl duration-500 group w-[92%] sm:w-full md:max-w-full max-w-[300px]">
-          {/* TOP BORDER */}
-          <div className="absolute top-0 left-0 w-full h-[4px] bg-gradient-to-r from-[#962a27] via-[#d97706] to-[#f59e0b] z-10"></div>
-
-          {/* IMAGE */}
-          <div className="relative overflow-hidden">
-
-            <img
-              src={menu.image}
-              alt="menu"
-              loading="lazy"
-className="w-full h-[140px] sm:h-[180px] md:h-[230px] object-cover group-hover:scale-105 duration-700"            />
-
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-
-          </div>
-
-          {/* CONTENT */}
-          <div className="p-4 md:p-5">
-
-            {/* TITLE */}
-            <h2 className="text-[20px] sm:text-2xl md:text-[30px] font-bold text-[#7c2d12] mb-4 md:mb-5 leading-snug">
-
-              {menu.title[language]}
-
-            </h2>
-
-            {/* ITEMS */}
-<div className="space-y-2.5 md:space-y-3 h-[190px] overflow-y-auto custom-scroll pr-1">
-              {menu.items.map((item, i) => (
-
-                <div
-                  key={i}
-                  className="flex items-start gap-2.5"
-                >
-
-                  {/* ICON */}
-                  <div className="min-w-[20px] h-[20px] rounded-full bg-[#fff1ea] flex items-center justify-center mt-[2px]">
-
-                    <span className="text-[#962a27] text-[9px]">
-
-                      ✦
-
-                    </span>
-
-                  </div>
-
-                  {/* TEXT */}
-                  <p className="text-[#5f3a37] text-[13px] sm:text-sm md:text-[15px] leading-6">
-
-                    {item[language]}
-
-                  </p>
-
+            {/* Card Image Thumbnail Box */}
+            <div className="relative overflow-hidden h-[150px] sm:h-[180px] md:h-[210px]">
+              <img
+                src={menu.image}
+                alt="dish template look"
+                loading="lazy"
+                className="w-full h-full object-cover group-hover:scale-105 duration-700"
+              />
+              {/* Price Tag Overlay */}
+              {menu.price && (
+                <div className="absolute top-4 right-4 bg-gray-900/90 backdrop-blur-sm text-amber-400 font-black text-[11px] sm:text-xs px-3 py-1.5 rounded-full shadow-md z-20">
+                  ₹{menu.price} {menu.price <= 350 ? "/ Leaf" : "/ Head"}
                 </div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+            </div>
 
-              ))}
+            {/* Content Frame */}
+            <div className="p-4 sm:p-5 flex flex-col justify-between">
+              <div>
+                <h3 className="text-lg sm:text-xl md:text-2xl font-black text-[#7c2d12] mb-2 tracking-tight line-clamp-1">
+                  {menu.title ? (menu.title[language] || menu.title.en) : ""}
+                </h3>
 
+                {menu.note ? (
+                  <p className="text-[10px] text-amber-700 bg-amber-50/70 rounded-lg px-2.5 py-1.5 mb-3 font-bold border border-amber-100/60 truncate">
+                    * {menu.note}
+                  </p>
+                ) : (
+                  <div className="h-[29px] mb-3 hidden sm:block opacity-0" />
+                )}
+
+                {/* List container mapping options inside layout blocks */}
+                <div className="space-y-2 md:space-y-2.5 h-[160px] overflow-y-auto custom-scroll pr-1 mt-1 border-t border-gray-50 pt-3">
+                  {menu.items && menu.items.map((item, i) => (
+                    <div key={i} className="flex justify-between items-center gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        
+                        {/* Dynamic Box configuration for listed single items */}
+                        <div 
+                          className="w-4 h-4 rounded border flex items-center justify-center bg-white shrink-0 p-0.5" 
+                          style={{ borderColor: (item.type === "non-veg" || section.isNonVeg) ? "#EF4444" : "#10B981" }}
+                        >
+                          <span 
+                            className="text-[8px] leading-none" 
+                            style={{ color: (item.type === "non-veg" || section.isNonVeg) ? "#EF4444" : "#10B981" }}
+                          >
+                            ●
+                          </span>
+                        </div>
+                        
+                        <p className="text-[#5f3a37] text-xs sm:text-sm font-bold truncate capitalize">
+                          {item[language] || item.en || item}
+                        </p>
+                      </div>
+
+                      {item.price && (
+                        <span className="text-gray-400 font-mono text-xs font-black shrink-0">
+                          ₹{item.price}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
           </div>
-
-        </div>
-
-      ))}
+        ))}
+      </div>
 
     </div>
-
   </div>
-
 );
+        })}
+      </div>
+
+      {/* Stylesheet injector overrides */}
+      <style dangerouslySetInnerHTML={{__html: `
+        .custom-scroll-row::-webkit-scrollbar {
+          height: 6px;
+        }
+        .custom-scroll-row::-webkit-scrollbar-track {
+          background: rgba(150, 42, 39, 0.05);
+          border-radius: 20px;
+        }
+        .custom-scroll-row::-webkit-scrollbar-thumb {
+          background: rgba(150, 42, 39, 0.2);
+          border-radius: 20px;
+        }
+        .custom-scroll-row::-webkit-scrollbar-thumb:hover {
+          background: rgba(150, 42, 39, 0.4);
+        }
+      `}} />
+
+    </div>
+  );
 }
 
 export default Menu;
+

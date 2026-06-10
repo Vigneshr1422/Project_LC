@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { MdOutlineRestaurant } from "react-icons/md";
 import { FaGlassCheers } from "react-icons/fa";
 import { HiOutlineUsers } from "react-icons/hi";
+import Loader from "../components/Loader";
 
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";

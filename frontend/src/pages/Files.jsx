@@ -1,9 +1,11 @@
 import axios from "axios";
 import Loader from "../components/Loader";
+import Swal from "sweetalert2";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { saveAs } from "file-saver";
-import { FileText, Download, Eye, ArrowLeft } from "lucide-react"; // Added icons for better look
+import JSZip from "jszip"; // 🔥 Import for Zip compiler engine
+import { saveAs } from "file-saver"; // 🔥 Import for direct file downloader save triggers
+import { Trash2, Loader2, Eye, Calendar, User, Phone, FileText, FolderArchive } from "lucide-react";
 
 const Files = () => {
   const navigate = useNavigate();
@@ -11,259 +13,462 @@ const Files = () => {
   /* ========================= STATES ========================== */
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [previewLoading, setPreviewLoading] = useState(null);
-  const [downloadLoading, setDownloadLoading] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10; // Kept it 10 to match CompletedOrders feel
+  const [deletingId, setDeletingId] = useState(null);
+  const [isZipLoading, setIsZipLoading] = useState(false); // 🔥 ZIP compilation loader tracker
+  const [searchBy, setSearchBy] = useState("customerName");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const ordersPerPage = 10;
+  
+  const LOCAL_API_BASE = "http://localhost:5000/api/booking1";
 
-  /* ========================= PAGINATION logic ========================== */
-  const totalPages = Math.ceil(orders.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentOrders = orders.slice(startIndex, startIndex + itemsPerPage);
-
-  /* ========================= FETCH ========================== */
-  const fetchOrders = async () => {
+  /* ========================= FETCH ALL ORDERS ========================== */
+  const fetchAllOrders = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("https://project-lc.onrender.com/api/bookings/completed");
-      // Sort by date descending (latest first)
-      const sortedData = response.data.orders.sort((a, b) => new Date(b.date) - new Date(a.date));
-      setOrders(sortedData);
+      const [upcomingRes, completedRes] = await Promise.all([
+        axios.get(`${LOCAL_API_BASE}/upcoming`),
+        axios.get(`${LOCAL_API_BASE}/completed`)
+      ]);
+      
+      const upcomingData = upcomingRes.data.orders || upcomingRes.data || [];
+      const completedData = completedRes.data.orders || completedRes.data || [];
+      
+      const allOrdersCombined = [...upcomingData, ...completedData];
+      const sortedOrders = allOrdersCombined.sort(
+        (a, b) => new Date(b.eventDate) - new Date(a.eventDate)
+      );
+      
+      setOrders(sortedOrders);
     } catch (error) {
-      console.log("Error fetching files:", error);
+      console.log("Error fetching all system billing files:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Fetch Error",
+        text: "Failed to load database invoice logs.",
+        confirmButtonColor: "#962a27"
+      });
     } finally {
-      setTimeout(() => setLoading(false), 1000);
+      setTimeout(() => {
+        setLoading(false);
+      }, 800);
     }
   };
 
   useEffect(() => {
-    fetchOrders();
+    fetchAllOrders();
   }, []);
 
-  /* ========================= DOWNLOAD CSV ========================== */
-  const downloadCSV = async (order) => {
+  /* ========================= 🔥 BULK ZIP DOWNLOAD ENGINE ========================== */
+  const handleDownloadAllAsZip = async () => {
+    // PDF Generated aana links list variable filter panrom
+    const ordersWithInvoice = filteredOrders.filter(o => o.invoicePdfDriveLink);
+
+    if (ordersWithInvoice.length === 0) {
+      Swal.fire({
+        icon: "info",
+        title: "No Invoices Ready",
+        text: "There are no generated base64 invoices setup in the active search log list to compile.",
+        confirmButtonColor: "#962a27"
+      });
+      return;
+    }
+
     try {
-      setDownloadLoading(order._id);
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      setIsZipLoading(true);
+      const zip = new JSZip();
+      const folder = zip.folder("Lakshmi_Catering_Invoices");
 
-      const selectedItems = Object.keys(order.selectedItems || {})
-        .filter((item) => order.selectedItems[item])
-        .join(" | ");
+      ordersWithInvoice.forEach((order) => {
+        const base64Data = order.invoicePdfDriveLink;
+        
+        // Base64 Data URI header details meta tag data-va split panrom (e.g. data:application/pdf;base64,...)
+        if (base64Data.includes("base64,")) {
+          const pureBase64 = base64Data.split("base64,")[1];
+          const fileName = `Invoice_${order.customerName.trim().replace(/\s+/g, "_")}_${order.eventDate}.pdf`;
+          
+          // Injecting document data cleanly inside virtual zip directory folder block
+          folder.file(fileName, pureBase64, { base64: true });
+        }
+      });
 
-      const headers = ["Booking ID", "Customer Name", "Phone", "Event", "Date", "Items", "Total"];
-      const row = [
-        order.bookingId || "N/A",
-        order.name || "",
-        order.phone || "",
-        order.event || "",
-        order.date || "",
-        selectedItems,
-        `₹${order.grandTotal || 0}`
-      ];
+      // Generating client content package
+      const content = await zip.generateAsync({ type: "blob" });
+      saveAs(content, `Lakshmi_Invoices_Archive_${new Date().toISOString().slice(0, 10)}.zip`);
 
-      const csvContent = [headers, row].map(e => e.join(",")).join("\n");
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      saveAs(blob, `${order.bookingId}_${order.name}.csv`);
-    } catch (error) {
-      console.log(error);
+      Swal.fire({
+        icon: "success",
+        title: "ZIP Downloaded!",
+        text: `Successfully bundled ${ordersWithInvoice.length} bill invoices copy!`,
+        confirmButtonColor: "#962a27"
+      });
+
+    } catch (err) {
+      console.error("ZIP Generation Error: ", err);
+      Swal.fire({
+        icon: "error",
+        title: "Compilation Error",
+        text: "Failed to zip payload database records.",
+        confirmButtonColor: "#962a27"
+      });
     } finally {
-      setDownloadLoading(null);
+      setIsZipLoading(false);
     }
   };
 
-  const handlePreview = async (order) => {
-    setPreviewLoading(order._id);
-    await new Promise((resolve) => setTimeout(resolve, 600));
-    setSelectedOrder(order);
-    setPreviewLoading(null);
+  /* ========================= SEARCH + SORT LOGIC ========================== */
+  const filteredOrders = orders
+    .filter((order) => {
+      const value = String(order?.[searchBy] || "").toLowerCase();
+      return value.includes(searchTerm.toLowerCase());
+    })
+    .sort((a, b) => {
+      return sortOrder === "asc"
+        ? new Date(a.eventDate) - new Date(b.eventDate)
+        : new Date(b.eventDate) - new Date(a.eventDate);
+    });
+
+  const lastIndex = currentPage * ordersPerPage;
+  const firstIndex = lastIndex - ordersPerPage;
+  const currentOrders = filteredOrders.slice(firstIndex, lastIndex);
+  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+
+  /* ========================= SPECIFIC INVOICE COPY HANDLER ========================== */
+/* ========================= SPECIFIC INVOICE COPY HANDLER ========================== */
+  const handleViewPersonInvoice = (order) => {
+    // 🎯 பிக்ஸ்: டேட்டாபேஸில் பிடிஎஃப் லிங்க் இல்லை என்றாலும், இருக்கும் டேட்டாவை வச்சு 
+    // நாமே பிடிஎஃப் பிரிவியூ பக்கத்திற்கு டேட்டாவை கடத்துகிறோம்!
+    navigate("/pdf-preview", {
+      state: {
+        formData: {
+          name: order.customerName,
+          phone: order.phone,
+          date: order.eventDate,
+          guests: order.guests,
+          district: order.district,
+          city: order.city,
+          address: order.address,
+          eventType: order.eventType,
+          session: order.session,
+          preference: order.preference,
+          bookingType: order.bookingType,
+          packageName: order.packageName,
+          packageItems: order.packageItems || [],
+          packagePrice: order.packageCost / (order.guests || 1), // சிங்கிள் பிளேட் ரேட் கணக்கு
+        },
+        grandTotal: order.grandTotal,
+        serviceCharge: order.serviceCharge,
+        deliveryCharge: order.deliveryCharge,
+        staffCount: order.staffCount,
+        staffRequired: order.staffRequired,
+        paymentId: order.razorpayPaymentId || "N/A",
+        tokenAdvanceAmount: order.advancePaid,
+        isFromFilesPage: true // 💡 இந்த பேஜில் இருந்து போறோம்னு ஒரு பிளாக் அனுப்புறோம்
+      }
+    });
   };
 
-  if (loading) return <Loader />;
+  /* ========================= DELETE HANDLER ========================== */
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: "Delete File Log?",
+      text: "This billing record will be permanently deleted from database workspace archive.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, Delete",
+      cancelButtonText: "Cancel",
+      reverseButtons: true,
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      setDeletingId(id);
+      const response = await axios.delete(`${LOCAL_API_BASE}/${id}`);
+      if (response.data.success) {
+        setOrders((prev) => prev.filter((order) => order._id !== id));
+        Swal.fire({
+          icon: "success",
+          title: "File Purged Successfully",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      }
+    } catch (error) {
+      Swal.fire({ icon: "error", title: "Oops...", text: "Failed to clear selected invoice record." });
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  /* ========================= VIEW QUICK DETAILS ========================== */
+  const viewQuickDetails = (order) => {
+    Swal.fire({
+      title: `<strong class="text-[#962a27]">${order.customerName.toUpperCase()} - Details</strong>`,
+      html: `
+        <div style="text-align: left; font-size: 14px; line-height: 1.6;" class="p-2 text-gray-700">
+          <p><b>📍 Venue Location:</b> ${order.address || "N/A"}, ${order.city || ""}</p>
+          <p><b>👥 Total Guests:</b> ${order.guests || 0} Persons</p>
+          <p><b>🍱 Menu Package:</b> ${order.packageName || "Standard Configuration"}</p>
+          <hr style="margin: 10px 0; border-top: 1px dashed #ccc;"/>
+          <p style="color: #962a27; font-size: 15px;"><b>💵 Total Amount: ₹${order.grandTotal || 0}</b></p>
+          <p style="color: green"><b>💳 Paid Advance: ₹${order.advancePaid || 0}</b></p>
+          <p style="color: #444"><b>⏳ Pending Due: ₹${order.balanceAmount || 0}</b></p>
+        </div>
+      `,
+      confirmButtonText: "Close",
+      confirmButtonColor: "#962a27",
+    });
+  };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, searchBy, sortOrder]);
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] p-5 md:p-10">
+    <div className="min-h-screen bg-[#f5f5f5] p-4 md:p-10">
+      
       {/* HEADER SECTION */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 mb-8">
         <div>
-          <h1 className="text-3xl md:text-5xl font-bold text-[#962a27]">Order Files</h1>
-          <p className="text-gray-500 mt-2">Manage and export completed order documents</p>
+          <h1 className="text-3xl md:text-5xl font-bold text-[#962a27]">Lakshmi Billing Files Storage</h1>
+          <p className="text-gray-500 mt-2 text-sm md:text-base">
+            Total Digital Invoices Logged (All Orders) : <span className="font-bold text-[#962a27]">{filteredOrders.length}</span>
+          </p>
         </div>
-        <div className="bg-white px-6 py-3 rounded-2xl border border-gray-200 shadow-sm">
-          <span className="text-gray-500">Total Files: </span>
-          <span className="font-bold text-[#962a27] text-xl">{orders.length}</span>
-        </div>
+
+        {/* 🔥 NEW CONTROLS: ZIP BULK EXPORTER BUTTON */}
+        <button
+          onClick={handleDownloadAllAsZip}
+          disabled={isZipLoading || filteredOrders.length === 0}
+          className="bg-gradient-to-r from-amber-700 to-[#962a27] text-white px-5 py-3.5 rounded-xl font-bold text-sm shadow-md hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-40 flex items-center justify-center gap-2 self-start lg:self-center"
+        >
+          {isZipLoading ? (
+            <Loader2 size={18} className="animate-spin" />
+          ) : (
+            <FolderArchive size={18} />
+          )}
+          {isZipLoading ? "Bundling Invoices..." : "Download All as ZIP (.zip)"}
+        </button>
       </div>
 
-      {/* TABLE SECTION */}
-      {orders.length === 0 ? (
-        <div className="bg-white rounded-3xl border border-gray-200 py-20 text-center shadow-sm">
-          <div className="text-6xl mb-4">📂</div>
-          <h2 className="text-2xl font-bold text-[#962a27]">No Records Found</h2>
-          <p className="text-gray-400">Completed orders will appear here for download.</p>
+      {/* SYSTEM SEARCH AND FILTERS BUTTON BAR */}
+      <div className="mb-6 flex flex-col lg:flex-row gap-3">
+        <select
+          value={searchBy}
+          onChange={(e) => {
+            setSearchBy(e.target.value);
+            setSearchTerm("");
+          }}
+          className="border border-gray-300 rounded-xl px-4 py-3 bg-white font-medium text-gray-700 w-full lg:w-auto focus:outline-none focus:border-[#962a27]"
+        >
+          <option value="customerName">Customer Name</option>
+          <option value="phone">Phone Number</option>
+          <option value="eventType">Event Type</option>
+          <option value="city">City / Location</option>
+        </select>
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder={`Search invoices by ${searchBy === "customerName" ? "Customer Name" : searchBy}`}
+          className="border border-gray-300 rounded-xl px-4 py-3 flex-1 w-full focus:outline-none focus:border-[#962a27] bg-white shadow-xs"
+        />
+        <select
+          value={sortOrder}
+          onChange={(e) => setSortOrder(e.target.value)}
+          className="border border-gray-300 rounded-xl px-4 py-3 bg-white font-medium text-gray-700 w-full lg:w-auto focus:outline-none focus:border-[#962a27]"
+        >
+          <option value="desc">Date DESC (Latest Invoices)</option>
+          <option value="asc">Date ASC (Oldest Invoices)</option>
+        </select>
+      </div>
+
+      {/* RENDER MASTER INVOICES LIST */}
+      {filteredOrders.length === 0 ? (
+        <div className="bg-white rounded-3xl border border-gray-200 py-20 flex flex-col items-center justify-center text-center px-4">
+          <div className="w-20 h-20 rounded-full bg-[#fff7f7] flex items-center justify-center text-4xl">📄</div>
+          <h2 className="mt-6 text-2xl font-bold text-[#962a27]">No Invoice Files Logged</h2>
+          <p className="mt-2 text-gray-500">All matching upcoming and completed order bills will render here.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-[#962a27] text-white">
-                  <th className="p-5 text-left whitespace-nowrap">S.No</th>
-                  <th className="p-5 text-left whitespace-nowrap">Booking ID</th>
-                  <th className="p-5 text-left whitespace-nowrap">Customer</th>
-                  <th className="p-5 text-left whitespace-nowrap">Event</th>
-                  <th className="p-5 text-left whitespace-nowrap">Date</th>
-                  <th className="p-5 text-center whitespace-nowrap">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentOrders.map((order, index) => (
-                  <tr key={order._id} className="border-b hover:bg-gray-50 transition-colors">
-                    <td className="p-5 font-semibold text-gray-600">{startIndex + index + 1}</td>
-                    <td className="p-5 font-bold text-[#962a27]">{order.bookingId}</td>
-                    <td className="p-5">
-                      <div className="font-medium text-gray-800">{order.name}</div>
-                      <div className="text-xs text-gray-400">{order.phone}</div>
-                    </td>
-                    <td className="p-5 text-gray-700">{order.event}</td>
-                    <td className="p-5 text-gray-600 font-medium">{order.date}</td>
-                    <td className="p-5">
-                      <div className="flex items-center justify-center gap-3">
-                        {/* Preview Button */}
-                        <button
-                          onClick={() => handlePreview(order)}
-                          disabled={previewLoading === order._id}
-                          className="flex items-center gap-2 bg-[#962a27] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#7a2220] transition-all disabled:opacity-50"
-                        >
-                          {previewLoading === order._id ? (
-                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          ) : (
-                            <><Eye size={16} /> Preview</>
-                          )}
-                        </button>
-
-                        {/* Download Button */}
-                        <button
-                          onClick={() => downloadCSV(order)}
-                          disabled={downloadLoading === order._id}
-                          className="flex items-center gap-2 border border-[#962a27] text-[#962a27] px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#fff7f7] transition-all disabled:opacity-50"
-                        >
-                          {downloadLoading === order._id ? (
-                            <div className="w-4 h-4 border-2 border-[#962a27]/30 border-t-[#962a27] rounded-full animate-spin" />
-                          ) : (
-                            <><Download size={16} /> CSV</>
-                          )}
-                        </button>
-                      </div>
-                    </td>
+        <>
+          {/* DESKTOP MATRIX TABLE VIEW */}
+          <div className="hidden md:block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-[#962a27] text-white">
+                  <tr>
+                    <th className="p-5 text-left">S.No</th>
+                    <th className="p-5 text-left">File Token</th>
+                    <th className="p-5 text-left">Customer Name</th>
+                    <th className="p-5 text-left">Phone</th>
+                    <th className="p-5 text-left">Event Setup</th>
+                    <th className="p-5 text-left">Target Date</th>
+                    <th className="p-5 text-left">Total Value</th>
+                    <th className="p-5 text-center">Cloud Bill</th> 
+                    <th className="p-5 text-center">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {currentOrders.map((order, index) => (
+                    <tr key={order._id} className="border-b hover:bg-[#fafafa] transition-all">
+                      <td className="p-5 font-semibold">{firstIndex + index + 1}</td>
+                      <td className="p-5 font-bold text-gray-600">#BILL-{order._id ? order._id.slice(-6).toUpperCase() : "XXXXXX"}</td>
+                      <td className="p-5 font-semibold text-gray-800">{order.customerName}</td>
+                      <td className="p-5 text-gray-600">{order.phone}</td>
+                      <td className="p-5 font-medium text-gray-800">{order.eventType}</td>
+                      <td className="p-5 text-gray-700 font-medium">{order.eventDate}</td>
+                      <td className="p-5 font-bold text-[#962a27]">₹ {order.grandTotal?.toLocaleString()}</td>
+                      
+                     {/* டேபிளுக்குள் இருக்கும் Cloud Bill பட்டன் திருத்தம் */}
+<td className="p-5 text-center">
+  <button
+    onClick={() => handleViewPersonInvoice(order)}
+    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-100 text-amber-950 border border-amber-200 hover:bg-amber-200 shadow-sm cursor-pointer transition-all"
+  >
+    <FileText size={14} className="text-amber-700" />
+    Bill PDF
+  </button>
+</td>
+
+                      <td className="p-5">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => viewQuickDetails(order)}
+                            className="bg-gray-800 hover:bg-gray-900 text-white px-3 py-2 rounded-lg flex items-center gap-1 text-sm transition-all"
+                          >
+                            <Eye size={16} /> Details
+                          </button>
+                          <button
+                            onClick={() => handleDelete(order._id)}
+                            disabled={deletingId === order._id}
+                            className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg flex items-center gap-1 disabled:opacity-70 text-sm transition-all"
+                          >
+                            {deletingId === order._id ? (
+                              <><Loader2 size={16} className="animate-spin" /> ...</>
+                            ) : (
+                              <><Trash2 size={16} /> Delete</>
+                            )}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          {/* PAGINATION */}
-          {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-4 py-8 bg-[#fafafa] border-t">
+          {/* MOBILE MATRIX LAYOUT CARDS VIEW */}
+          <div className="grid grid-cols-1 gap-4 md:hidden">
+            {currentOrders.map((order, index) => (
+              <div key={order._id} className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col gap-3">
+                <div className="flex justify-between items-center border-b pb-2">
+                  <span className="text-xs font-bold text-gray-400">S.No: {firstIndex + index + 1}</span>
+                  <span className="font-bold text-sm text-gray-600">#BL-{order._id ? order._id.slice(-6).toUpperCase() : "XXXXXX"}</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-800 font-semibold text-base">
+                  <User size={16} className="text-[#962a27]" /> {order.customerName}
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                  <div className="flex items-center gap-1"><Phone size={14} /> {order.phone}</div>
+                  <div className="flex items-center gap-1 font-medium text-gray-800"><Calendar size={14} /> {order.eventDate}</div>
+                </div>
+                
+                <div className="bg-[#fff7f7] p-3 rounded-xl flex justify-between items-center">
+                  <div>
+                    <span className="text-xs text-gray-400 block">Setup</span>
+                    <span className="font-semibold text-sm text-gray-800">{order.eventType}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs text-gray-400 block">Grand Total</span>
+                    <span className="font-bold text-[#962a27] text-sm">₹ {order.grandTotal?.toLocaleString()}</span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2 mt-2">
+                  <button
+                    onClick={() => viewQuickDetails(order)}
+                    className="bg-gray-800 hover:bg-gray-900 text-white flex-1 py-2.5 rounded-xl flex items-center justify-center gap-1 font-medium text-sm transition-all"
+                  >
+                    <Eye size={16} /> Details
+                  </button>
+
+                  <button
+                    onClick={() => handleViewPersonInvoice(order)}
+                    className={`p-2.5 rounded-xl flex items-center justify-center border transition-all ${
+                      order.invoicePdfDriveLink 
+                        ? "bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100" 
+                        : "bg-gray-50 text-gray-300 border-gray-200 cursor-not-allowed"
+                    }`}
+                    disabled={!order.invoicePdfDriveLink}
+                  >
+                    <FileText size={16} />
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(order._id)}
+                    disabled={deletingId === order._id}
+                    className="bg-red-600 hover:bg-red-700 text-white p-2.5 rounded-xl flex items-center justify-center disabled:opacity-70 transition-all"
+                  >
+                    {deletingId === order._id ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Trash2 size={16} />
+                    )}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* PAGINATION SUITE */}
+          {filteredOrders.length > ordersPerPage && (
+            <div className="mt-8 flex items-center justify-center gap-2 flex-wrap">
               <button
-                onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="px-6 py-2 rounded-xl border border-[#962a27] text-[#962a27] font-bold disabled:opacity-30"
+                className="px-4 py-2 rounded-xl border border-[#962a27] text-[#962a27] font-semibold text-sm disabled:opacity-40"
               >
                 Prev
               </button>
-              <div className="flex gap-2">
-                {[...Array(totalPages)].map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setCurrentPage(i + 1)}
-                    className={`w-10 h-10 rounded-lg font-bold transition-all ${
-                      currentPage === i + 1 ? "bg-[#962a27] text-white shadow-md" : "bg-white text-gray-400 border border-gray-200"
-                    }`}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
-              </div>
+              {[...Array(totalPages)].map((_, index) => (
+                <button
+                  onKey={index}
+                  onClick={() => setCurrentPage(index + 1)}
+                  className={`w-10 h-10 rounded-xl text-sm font-semibold ${
+                    currentPage === index + 1 ? "bg-[#962a27] text-white" : "bg-white border border-gray-200"
+                  }`}
+                >
+                  {index + 1}
+                </button>
+              ))}
               <button
-                onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="px-6 py-2 rounded-xl bg-[#962a27] text-white font-bold disabled:opacity-30"
+                className="px-4 py-2 rounded-xl bg-[#962a27] text-white font-semibold text-sm disabled:opacity-40"
               >
                 Next
               </button>
             </div>
           )}
-        </div>
+        </>
       )}
 
-      {/* PREVIEW MODAL */}
-      {selectedOrder && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-5">
-          <div className="bg-white w-full max-w-2xl rounded-[2rem] p-8 shadow-2xl relative animate-in fade-in zoom-in duration-200">
-            <button 
-                onClick={() => setSelectedOrder(null)}
-                className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors"
-            >
-              ✕
-            </button>
-            
-            <div className="flex items-center gap-4 mb-8">
-                <div className="p-4 bg-[#fff7f7] rounded-2xl text-[#962a27]">
-                    <FileText size={32} />
-                </div>
-                <div>
-                    <h2 className="text-2xl font-bold text-[#962a27]">Order Details</h2>
-                    <p className="text-gray-400 text-sm">ID: {selectedOrder.bookingId}</p>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-1">
-                <p className="text-xs uppercase tracking-wider text-gray-400 font-bold">Customer</p>
-                <p className="font-semibold text-gray-800">{selectedOrder.name}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs uppercase tracking-wider text-gray-400 font-bold">Phone</p>
-                <p className="font-semibold text-gray-800">{selectedOrder.phone}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs uppercase tracking-wider text-gray-400 font-bold">Event & Date</p>
-                <p className="font-semibold text-gray-800">{selectedOrder.event} - {selectedOrder.date}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs uppercase tracking-wider text-gray-400 font-bold">Total Amount</p>
-                <p className="text-xl font-black text-[#962a27]">₹{selectedOrder.grandTotal?.toLocaleString()}</p>
-              </div>
-              <div className="md:col-span-2 space-y-3 pt-4 border-t">
-                <p className="text-xs uppercase tracking-wider text-gray-400 font-bold">Items Selected</p>
-                <div className="flex flex-wrap gap-2">
-                    {Object.keys(selectedOrder.selectedItems || {}).filter(k => selectedOrder.selectedItems[k]).map(item => (
-                        <span key={item} className="px-3 py-1 bg-gray-100 text-gray-600 rounded-lg text-sm font-medium">
-                            {item}
-                        </span>
-                    ))}
-                </div>
-              </div>
-            </div>
-            
-            <button 
-                onClick={() => setSelectedOrder(null)}
-                className="w-full mt-8 py-4 bg-gray-800 text-white rounded-2xl font-bold hover:bg-black transition-colors"
-            >
-                Close Preview
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* DASHBOARD BUTTON */}
-      <div className="mt-12 flex justify-center">
+      {/* DASHBOARD ACTIONS FOOTER */}
+      <div className="mt-10 flex justify-center px-4">
         <button
-          onClick={() => navigate("/admin-dashboard")}
-          className="group flex items-center gap-3 bg-[#962a27] text-white px-10 py-4 rounded-2xl font-bold hover:scale-105 transition-all shadow-lg shadow-red-900/20"
+          onClick={() => navigate(-1)}
+          className="bg-[#962a27] text-white w-full sm:w-auto px-8 py-4 rounded-2xl font-semibold hover:scale-105 transition-all shadow-md text-center"
         >
-          <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
           Back To Dashboard
         </button>
       </div>
@@ -272,4 +477,3 @@ const Files = () => {
 };
 
 export default Files;
-

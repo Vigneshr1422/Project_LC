@@ -17,6 +17,7 @@ import Image70th from "../Images/70th.webp";
 import Corprate from "../Images/Corprate.webp";
 import Professional from "../Images/Professional.webp"
 import GrihaPravesh from "../Images/GrihaPravesh.webp";
+import Loader from "../components/Loader";
 
 
 import House from "../Images/House.webp";

@@ -1,100 +1,48 @@
 .loader {
   position: fixed;
   inset: 0;
-
-  /* background: rgba(20, 17, 15, 0.72); */
-
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  /* Fixed: Unga page theme color ku matching background full block design */
+  background: #f8fafc; 
 
   display: flex;
   justify-content: center;
   align-items: center;
 
   z-index: 9999;
-
-  animation: fadeOut 0.8s ease forwards;
-  animation-delay: 1.9s;
-}
-
-@keyframes fadeOut {
-  to {
-    opacity: 0;
-    visibility: hidden;
-  }
+  
+  /* ❌ Removed automatic fadeOut animation (React will unmount this cleanly) */
 }
 
 .loader svg {
   width: 220px;
+  height: 220px;
 }
 
 .loader path {
   fill: none;
-
-  stroke: #962a27;
+  stroke: #962a27; /* Premium maroon tone */
   stroke-width: 25;
-
   stroke-linecap: round;
   stroke-linejoin: round;
 
-  stroke-dasharray: 6000;
-  stroke-dashoffset: 6000;
+  stroke-dasharray: 4000;
+  stroke-dashoffset: 4000;
 
-  animation: draw 2s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  /* 🔥 FIXED: 'infinite' loop optimization select panni iruken! 
+     Data vara 20 second aanaalum loader loops pattern-la continuous-ah draw aagite irukum. */
+  animation: draw 2.5s cubic-bezier(0.65, 0, 0.35, 1) infinite alternate;
 
   filter:
-    drop-shadow(0 0 6px rgba(247, 213, 199, 0.65))
-    drop-shadow(0 0 14px rgba(247, 213, 199, 0.28));
+    drop-shadow(0 0 6px rgba(150, 42, 39, 0.3))
+    drop-shadow(0 0 14px rgba(150, 42, 39, 0.15));
 }
 
+/* Loop smoothly back and forth */
 @keyframes draw {
-  to {
+  0% {
+    stroke-dashoffset: 4000;
+  }
+  100% {
     stroke-dashoffset: 0;
   }
 }
-/* .loader {
-  position: fixed;
-  inset: 0;
-  background:  #14110f;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  z-index: 9999;
-
-  animation: fadeOut 0.8s ease forwards;
-  animation-delay: 1.8s;
-}
-@keyframes fadeOut {
-  to {
-    opacity: 0;
-    visibility: hidden;
-  }
-}
-
-.loader svg {
-  width: 220px;
-}
-
-.loader path {
-  fill: none;
-  stroke: #f7d5c7;
-  stroke-width: 4;
-
-  stroke-dasharray: 6000;
-  stroke-dashoffset: 6000;
-
-  animation: draw 2s ease forwards;
-
-  filter:
-    drop-shadow(0 0 8px #f7d5c7)
-    drop-shadow(0 0 20px #f7d5c7)
-    drop-shadow(0 0 35px #f7d5c7);
-}
-
-@keyframes draw {
-  to {
-    stroke-dashoffset: 0;
-  }
-} */

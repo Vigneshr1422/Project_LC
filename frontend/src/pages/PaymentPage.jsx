@@ -1,4 +1,3 @@
-import Loader from "../components/Loader";
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CheckCircle2, ArrowRight, Calendar, CloudDownload } from "lucide-react";
@@ -7,24 +6,11 @@ const PaymentSuccess = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Extracting variables securely passed from PDFPreview layout state redirection
+  // BookingSummary.jsx-la irundhu backend anupuna direct drive link and state-ai extract panroam
   const { paymentId, formData, grandTotal = 0, tokenAdvanceAmount = 0, invoicePdfDriveLink = null } = location.state || {};
   const remainingAmount = grandTotal - tokenAdvanceAmount;
 
-  // Function to handle opening/downloading Base64 PDF directly from client side
-  const handleDownloadInvoice = () => {
-    if (!invoicePdfDriveLink) return;
-    
-    // Direct link structure decoding to open up in a clean dynamic browser viewport
-    const newWindow = window.open();
-    if (newWindow) {
-      newWindow.document.write(
-        `<iframe src="${invoicePdfDriveLink}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`
-      );
-      newWindow.document.title = `Invoice_${formData.name || "Customer"}.pdf`;
-    }
-  };
-
+  // Context map aagala na safe backup fallback blocker
   if (!formData || !paymentId) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -50,10 +36,11 @@ const PaymentSuccess = () => {
           </div>
           <h1 className="text-2xl font-black text-white tracking-tight">Booking Confirmed!</h1>
           
+          {/* Status Display based on Backend Drive Response Link */}
           <p className="text-green-100 text-xs mt-1 font-medium">
             {invoicePdfDriveLink 
-              ? "✅ Invoice Document Synthesized inside Database Workspace!" 
-              : "✅ Booking Synced to Corporate Systems Logs!"}
+              ? "✅ Invoice Saved to Lakshmi Google Drive!" 
+              : "✅ Server Synced Successfully!"}
           </p>
         </div>
 
@@ -61,26 +48,26 @@ const PaymentSuccess = () => {
         <div className="p-6 space-y-6">
           <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 space-y-3.5">
             <div className="flex justify-between items-center text-xs font-bold text-gray-500">
-              <span>Total Catering Value:</span>
+              <span>Total Catering Value (Motha Amount):</span>
               <span className="text-gray-900 font-mono text-sm font-black">₹{grandTotal.toLocaleString("en-IN")}</span>
             </div>
             <div className="flex justify-between items-center text-xs font-bold bg-emerald-50 p-2.5 rounded-xl text-emerald-800 border border-emerald-100">
-              <span className="flex items-center gap-1">💸 Paid Advance:</span>
+              <span className="flex items-center gap-1">💸 Paid Advance (Ipa Pay Pannathu):</span>
               <span className="font-mono text-sm font-black text-emerald-600">₹{tokenAdvanceAmount.toLocaleString("en-IN")}</span>
             </div>
             <div className="flex justify-between items-center text-xs font-bold bg-amber-50/70 p-2.5 rounded-xl text-amber-900 border border-amber-100/60 pt-2">
-              <span className="flex items-center gap-1">⏳ Remaining Balance:</span>
+              <span className="flex items-center gap-1">⏳ Remaining Balance (Meethi Avalo):</span>
               <span className="font-mono text-sm font-black text-[#962A27]">₹{remainingAmount.toLocaleString("en-IN")}</span>
             </div>
           </div>
 
           <div className="space-y-3 text-xs font-bold text-gray-600 border-t pt-4">
-            {/* <div className="flex justify-between items-start py-1">
+            <div className="flex justify-between items-start py-1">
               <span className="text-gray-400">Razorpay Payment ID:</span>
               <span className="text-gray-900 font-mono select-all bg-gray-100 px-2 py-0.5 rounded text-[11px] font-black tracking-tight text-right break-all max-w-[200px]">
                 {paymentId}
               </span>
-            </div> */}
+            </div>
             <div className="flex justify-between items-center py-1">
               <span className="text-gray-400">Customer Name:</span>
               <span className="text-gray-900 capitalize truncate max-w-[180px]">{formData.name}</span>
@@ -91,20 +78,22 @@ const PaymentSuccess = () => {
             </div>
           </div>
 
-          {/* BASE64 DIRECT VIEW AND PRINT GATEWAY CONTROLLER */}
+          {/* DYNAMIC GOOGLE DRIVE LINK DOWNLOAD BUTTON */}
           {invoicePdfDriveLink ? (
             <div className="pt-2">
-              <button 
-                onClick={handleDownloadInvoice}
-                className="w-full bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white font-black py-3.5 rounded-xl shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-xs uppercase tracking-widest text-center font-extrabold"
+              <a 
+                href={invoicePdfDriveLink} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-full bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white font-black py-3.5 rounded-xl shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-xs uppercase tracking-widest text-center"
               >
                 <CloudDownload size={14} className="text-amber-400" />
-                View & Print Verified Invoice Bill
-              </button>
+                View & Print Invoice Bill (Google Drive)
+              </a>
             </div>
           ) : (
-            <div className="text-center py-2 text-xs font-bold bg-amber-50 rounded-xl text-amber-700 border border-amber-100">
-              ⚠️ Storage cloud link asset sync processing or missing inside collection array.
+            <div className="text-center py-2 text-xs text-amber-600 font-bold bg-amber-50 rounded-xl border border-amber-100">
+              ⚠️ Invoice link is processing in backend logs.
             </div>
           )}
 
