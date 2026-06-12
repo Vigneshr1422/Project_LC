@@ -17,11 +17,11 @@ const CalendarOrders = () => {
     const fetchLiveBookings = async () => {
       try {
         setLoading(true);
-        const response = await fetch("http://localhost:5000/api/booking1/get-all-bookings");
+        // 🎯 Connected back to production server route
+        const response = await fetch("https://project-lc.onrender.com/api/booking1/get-all-bookings");
         const data = await response.json();
         
         if (data.success && data.bookings) {
-          // லேட்டஸ்ட் ஆர்டர்ஸ் முதல்ல வர்ற மாதிரி டேட் வைஸ் சார்ட் பண்றோம்
           const sortedBookings = data.bookings.sort((a, b) => new Date(b.date) - new Date(a.date));
           setAllOrders(sortedBookings);
         } else {
@@ -37,7 +37,7 @@ const CalendarOrders = () => {
     fetchLiveBookings();
   }, []);
 
-  // 2. CALCULATE TOP 5 UPCOMING ORDERS (Chronological order from today onwards)
+  // 2. CALCULATE TOP 5 UPCOMING ORDERS
   const upcomingTop5 = [...allOrders]
     .filter(order => order.date && new Date(order.date) >= new Date().setHours(0,0,0,0))
     .sort((a, b) => new Date(a.date) - new Date(b.date))
@@ -66,7 +66,13 @@ const CalendarOrders = () => {
   const currentTableOrders = allOrders.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(allOrders.length / itemsPerPage) || 1;
 
-  // ⏳ API டேட்டா லோட் ஆகும்போது லோடரை ரன் பண்றோம்
+  // 🛠️ HELPERS: Function to display only the last 3 characters of any ID safely
+  const formatShortId = (fullId) => {
+    if (!fullId) return "N/A";
+    const strId = String(fullId);
+    return `...${strId.slice(-3)}`; // 👈 Cuts and appends last 3 digits
+  };
+
   if (loading) {
     return <Loader />;
   }
@@ -128,7 +134,6 @@ const CalendarOrders = () => {
               {gridCells.map((day, idx) => {
                 if (!day) return <div key={idx} className="bg-[#962a27]/5 rounded-xl sm:rounded-2xl aspect-square md:aspect-auto md:min-h-[75px]" />;
                 
-                // மேட்ச் பண்றதுக்காக டேட் ஃபார்மேட்டை `YYYY-MM-DD` ஆக்குகிறோம்
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const matchOrders = allOrders.filter(o => o.date && o.date.startsWith(dateStr));
                 const hasOrders = matchOrders.length > 0;
@@ -173,7 +178,7 @@ const CalendarOrders = () => {
           </div>
 
           {/* =========================================================
-              🔥 RIGHT PANEL: TOP 5 LIVE UPCOMING ORDERS FROM API
+              🔥 RIGHT PANEL: TOP 5 LIVE UPCOMING ORDERS
               ========================================================= */}
           <div className="lg:col-span-5 bg-white border border-red-900/10 rounded-[2rem] p-6 shadow-sm text-left h-full flex flex-col">
             <div className="flex items-center gap-3 border-b border-red-50 pb-4 mb-4">
@@ -192,8 +197,9 @@ const CalendarOrders = () => {
                   <div key={order._id || idx} className="p-3.5 bg-[#962a27]/5 border border-[#962a27]/10 hover:border-[#962a27]/40 rounded-2xl transition-all flex justify-between items-center gap-3">
                     <div className="min-w-0 space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-black bg-[#962a27] text-white px-2 py-0.5 rounded uppercase tracking-wide">
-                          {order.id || `LC-${idx + 100}`}
+                        {/* 🎯 Modified: Shows only last 3 digits in upcoming view */}
+                        <span className="text-[10px] font-black bg-[#962a27] text-white px-2 py-0.5 rounded uppercase tracking-wider font-mono">
+                          {formatShortId(order.id || order._id)}
                         </span>
                         <h4 className="text-sm font-black text-slate-900 truncate capitalize">{order.name}</h4>
                       </div>
@@ -220,7 +226,7 @@ const CalendarOrders = () => {
         </div>
 
         {/* =========================================================
-            📊 BOTTOM LEVEL: MASTER DATABASE ARCHITECTURE (PAGINATED LIVE DATABASE)
+            📊 BOTTOM LEVEL: MASTER DATABASE ARCHITECTURE
             ========================================================= */}
         <div className="bg-white border border-red-900/10 rounded-[2rem] overflow-hidden mt-8 shadow-sm text-left">
           <div className="p-6 border-b border-slate-200/60 bg-[#962a27]/5">
@@ -244,8 +250,9 @@ const CalendarOrders = () => {
                 {currentTableOrders.length > 0 ? (
                   currentTableOrders.map((order, idx) => (
                     <tr key={order._id || idx} className="hover:bg-[#962a27]/5 even:bg-[#fdf8f8]/30 transition-colors">
-                      <td className="px-6 py-4 text-center font-mono font-black text-[#962a27]">
-                        {order.id || `LC-${idx + 100}`}
+                      {/* 🎯 Modified: Shows only last 3 digits in master table log columns */}
+                      <td className="px-6 py-4 text-center font-mono font-black text-[#962a27] tracking-wider">
+                        {formatShortId(order.id || order._id)}
                       </td>
                       <td className="px-6 py-4 font-bold text-slate-900 capitalize">{order.name}</td>
                       <td className="px-6 py-4 text-center font-mono">{order.date || "N/A"}</td>
