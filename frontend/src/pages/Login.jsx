@@ -75,7 +75,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] flex items-start justify-center px-6 pt-24">
-      <div className="w-full max-w-md bg-white border border-gray-200 rounded-[30px] p-8 shadow-[0_10px_40px_rgba(0,0,0,0.08)]">
+      <div className="w-full max-w-md bg-white border border-rose-200 rounded-[30px] p-8 shadow-[0_10px_40px_rgba(0,0,0,0.08)]">
         
         {/* HEADING BRAND BLOCK */}
         <div className="text-center mb-8">

@@ -3,7 +3,7 @@ import Loader from "../components/Loader";
 import Swal from "sweetalert2";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Trash2, Loader2, Eye, Calendar, User, Phone, DollarSign, MapPin } from "lucide-react";
+import { Trash2, Loader2, Eye, FileText } from "lucide-react";
 
 const CompletedOrders = () => {
   const navigate = useNavigate();
@@ -145,7 +145,7 @@ const CompletedOrders = () => {
   return (
     <div className="min-h-screen bg-[#f5f5f5] p-4 md:p-10">
       {/* HEADER SECTION */}
-      <div className="flex flex-col gap-5 mb-8">
+      <div className="flex flex-col gap-5 mb-8 text-left">
         <div>
           <h1 className="text-3xl md:text-5xl font-bold text-[#962a27]">Past Completed Orders</h1>
           <p className="text-gray-500 mt-2 text-sm md:text-base">
@@ -160,7 +160,7 @@ const CompletedOrders = () => {
                 setSearchBy(e.target.value);
                 setSearchTerm("");
               }}
-              className="border border-gray-300 rounded-xl px-4 py-3 bg-white font-medium text-gray-700 w-full lg:w-auto"
+              className="border border-gray-300 rounded-xl px-4 py-3 bg-white font-medium text-gray-700 w-full lg:w-auto focus:outline-none focus:border-[#962a27]"
             >
               <option value="customerName">Customer Name</option>
               <option value="phone">Phone Number</option>
@@ -173,13 +173,13 @@ const CompletedOrders = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder={`Search past by ${searchBy === "customerName" ? "Name" : searchBy === "eventType" ? "Event" : searchBy}`}
-              className="border border-gray-300 rounded-xl px-4 py-3 flex-1 w-full"
+              className="border border-gray-300 rounded-xl px-4 py-3 flex-1 w-full focus:outline-none focus:border-[#962a27] bg-white shadow-xs"
             />
 
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value)}
-              className="border border-gray-300 rounded-xl px-4 py-3 bg-white font-medium text-gray-700 w-full lg:w-auto"
+              className="border border-gray-300 rounded-xl px-4 py-3 bg-white font-medium text-gray-700 w-full lg:w-auto focus:outline-none focus:border-[#962a27]"
             >
               <option value="desc">Date DESC (Latest First)</option>
               <option value="asc">Date ASC (Oldest First)</option>
@@ -197,52 +197,52 @@ const CompletedOrders = () => {
         </div>
       ) : (
         <>
-          {/* 1. DESKTOP VIEW - TABLE VIEW */}
-          <div className="hidden md:block bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full">
+          {/* 🎯 MASTER TABLE VIEW (WORKS ON BOTH MOBILE & DESKTOP) */}
+          <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden shadow-sm">
+            <div className="overflow-x-auto"> {/* 🔥 Enables smooth horizontal swipe table inside mobile resolution */}
+              <table className="w-full min-w-[900px] md:min-w-full">
                 <thead className="bg-[#962a27] text-white">
                   <tr>
-                    <th className="p-5 text-left">S.No</th>
-                    <th className="p-5 text-left">Booking ID</th>
-                    <th className="p-5 text-left">Customer</th>
-                    <th className="p-5 text-left">Phone</th>
-                    <th className="p-5 text-left">Catering Event</th>
-                    <th className="p-5 text-left">Execution Date</th>
-                    <th className="p-5 text-left">Total Revenue</th>
-                    <th className="p-5 text-center">Actions</th>
+                    <th className="p-4 text-left text-sm md:text-base">S.No</th>
+                    <th className="p-4 text-left text-sm md:text-base">Booking ID</th>
+                    <th className="p-4 text-left text-sm md:text-base">Customer</th>
+                    <th className="p-4 text-left text-sm md:text-base">Phone</th>
+                    <th className="p-4 text-left text-sm md:text-base">Catering Event</th>
+                    <th className="p-4 text-left text-sm md:text-base">Execution Date</th>
+                    <th className="p-4 text-left text-sm md:text-base">Total Revenue</th>
+                    <th className="p-4 text-center text-sm md:text-base">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {currentOrders.map((order, index) => (
-                    <tr key={order._id} className="border-b hover:bg-[#fafafa] transition-all">
-                      <td className="p-5 font-semibold">{firstIndex + index + 1}</td>
-                      <td className="p-5 font-bold text-gray-600">#LC-{order._id ? order._id.slice(-6).toUpperCase() : "XXXXXX"}</td>
-                      <td className="p-5 font-semibold text-gray-800">{order.customerName}</td>
-                      <td className="p-5 text-gray-600">{order.phone}</td>
-                      <td className="p-5">
+                    <tr key={order._id} className="border-b hover:bg-[#fafafa] transition-all text-xs md:text-sm">
+                      <td className="p-4 font-semibold">{firstIndex + index + 1}</td>
+                      <td className="p-4 font-bold text-gray-600">#LC-{order._id ? order._id.slice(-6).toUpperCase() : "XXXXXX"}</td>
+                      <td className="p-4 font-semibold text-gray-800">{order.customerName}</td>
+                      <td className="p-4 text-gray-600">{order.phone}</td>
+                      <td className="p-4">
                         <span className="font-medium text-gray-800">{order.eventType}</span>
-                        {order.session && <span className="block text-xs text-gray-400">({order.session})</span>}
+                        {order.session && <span className="block text-[10px] text-gray-400">({order.session})</span>}
                       </td>
-                      <td className="p-5 text-gray-700 font-medium">{order.eventDate}</td>
-                      <td className="p-5 font-bold text-[#962a27]">₹ {order.grandTotal?.toLocaleString()}</td>
-                      <td className="p-5">
+                      <td className="p-4 text-gray-700 font-medium">{order.eventDate}</td>
+                      <td className="p-4 font-bold text-[#962a27]">₹ {order.grandTotal?.toLocaleString()}</td>
+                      <td className="p-4">
                         <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => viewFullDetails(order)}
-                            className="bg-gray-800 hover:bg-gray-900 text-white px-3 py-2 rounded-lg flex items-center gap-1 transition-all text-sm"
+                            className="bg-gray-800 hover:bg-gray-900 text-white px-2.5 py-1.5 rounded-lg flex items-center gap-1 text-xs font-medium transition-all cursor-pointer"
                           >
-                            <Eye size={16} /> Details
+                            <Eye size={14} /> Details
                           </button>
                           <button
                             onClick={() => handleDelete(order._id)}
                             disabled={deletingId === order._id}
-                            className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg flex items-center gap-1 disabled:opacity-70 text-sm transition-all"
+                            className="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1.5 rounded-lg flex items-center gap-1 disabled:opacity-70 text-xs font-medium transition-all cursor-pointer"
                           >
                             {deletingId === order._id ? (
-                              <><Loader2 size={16} className="animate-spin" /> ...</>
+                              <><Loader2 size={14} className="animate-spin" /> ...</>
                             ) : (
-                              <><Trash2 size={16} /> Delete</>
+                              <><Trash2 size={14} /> Delete</>
                             )}
                           </button>
                         </div>
@@ -254,66 +254,13 @@ const CompletedOrders = () => {
             </div>
           </div>
 
-          {/* 2. MOBILE VIEW - RESPONSIVE CARDS */}
-          <div className="grid grid-cols-1 gap-4 md:hidden">
-            {currentOrders.map((order, index) => (
-              <div key={order._id} className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex flex-col gap-3">
-                <div className="flex justify-between items-center border-b pb-2">
-                  <span className="text-xs font-bold text-gray-400">S.No: {firstIndex + index + 1}</span>
-                  <span className="font-bold text-sm text-gray-600">#LC-{order._id ? order._id.slice(-6).toUpperCase() : "XXXXXX"}</span>
-                </div>
-                
-                <div className="flex items-center gap-2 text-gray-800 font-semibold text-base">
-                  <User size={16} className="text-[#962a27]" /> {order.customerName}
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-xs md:text-sm text-gray-600">
-                  <div className="flex items-center gap-1"><Phone size={14} /> {order.phone}</div>
-                  <div className="flex items-center gap-1 font-medium text-gray-800"><Calendar size={14} /> {order.eventDate}</div>
-                </div>
-
-                <div className="bg-[#fff7f7] p-3 rounded-xl flex justify-between items-center">
-                  <div>
-                    <span className="text-xs text-gray-400 block">Event Setup</span>
-                    <span className="font-semibold text-sm text-gray-800">{order.eventType}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-xs text-gray-400 block">Revenue</span>
-                    <span className="font-bold text-[#962a27] text-sm">₹ {order.grandTotal?.toLocaleString()}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 mt-2">
-                  <button
-                    onClick={() => viewFullDetails(order)}
-                    className="bg-gray-800 hover:bg-gray-900 text-white flex-1 py-2.5 rounded-xl flex items-center justify-center gap-1 font-medium text-sm transition-all"
-                  >
-                    <Eye size={16} /> View Details
-                  </button>
-                  <button
-                    onClick={() => handleDelete(order._id)}
-                    disabled={deletingId === order._id}
-                    className="bg-red-600 hover:bg-red-700 text-white p-2.5 rounded-xl flex items-center justify-center disabled:opacity-70 transition-all"
-                    title="Delete Record"
-                  >
-                    {deletingId === order._id ? (
-                      <Loader2 size={16} className="animate-spin" />
-                    ) : (
-                      <Trash2 size={16} />
-                    )}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-
           {/* PAGINATION */}
           {filteredOrders.length > ordersPerPage && (
             <div className="mt-8 flex items-center justify-center gap-2 flex-wrap">
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="px-4 py-2 rounded-xl border border-[#962a27] text-[#962a27] font-semibold text-sm disabled:opacity-40"
+                className="px-4 py-2 rounded-xl border border-[#962a27] text-[#962a27] font-semibold text-sm disabled:opacity-40 cursor-pointer"
               >
                 Prev
               </button>
@@ -321,7 +268,7 @@ const CompletedOrders = () => {
                 <button
                   key={index}
                   onClick={() => setCurrentPage(index + 1)}
-                  className={`w-10 h-10 rounded-xl text-sm font-semibold ${
+                  className={`w-10 h-10 rounded-xl text-sm font-semibold cursor-pointer ${
                     currentPage === index + 1 ? "bg-[#962a27] text-white" : "bg-white border border-gray-200"
                   }`}
                 >
@@ -331,7 +278,7 @@ const CompletedOrders = () => {
               <button
                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="px-4 py-2 rounded-xl bg-[#962a27] text-white font-semibold text-sm disabled:opacity-40"
+                className="px-4 py-2 rounded-xl bg-[#962a27] text-white font-semibold text-sm disabled:opacity-40 cursor-pointer"
               >
                 Next
               </button>
@@ -344,7 +291,7 @@ const CompletedOrders = () => {
       <div className="mt-10 flex justify-center px-4">
         <button
           onClick={() => navigate(-1)}
-          className="bg-[#962a27] text-white w-full sm:w-auto px-8 py-4 rounded-2xl font-semibold hover:scale-105 transition-all shadow-md text-center"
+          className="bg-[#962a27] text-white w-full sm:w-auto px-8 py-4 rounded-2xl font-semibold hover:scale-105 transition-all shadow-md text-center cursor-pointer"
         >
           Back To Dashboard
         </button>

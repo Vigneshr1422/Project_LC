@@ -92,7 +92,7 @@ const PaymentSuccess = () => {
           </div>
 
           {/* BASE64 DIRECT VIEW AND PRINT GATEWAY CONTROLLER */}
-          {invoicePdfDriveLink ? (
+          {/* {invoicePdfDriveLink ? (
             <div className="pt-2">
               <button 
                 onClick={handleDownloadInvoice}
@@ -106,7 +106,7 @@ const PaymentSuccess = () => {
             <div className="text-center py-2 text-xs font-bold bg-amber-50 rounded-xl text-amber-700 border border-amber-100">
               ⚠️ Storage cloud link asset sync processing or missing inside collection array.
             </div>
-          )}
+          )} */}
 
           <button onClick={() => navigate("/")} className="w-full bg-[#962A27]/5 hover:bg-[#962A27]/10 text-[#962A27] font-black py-3 rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-1.5 text-xs uppercase tracking-wider" >
             Return to Dashboard <ArrowRight size={14} />

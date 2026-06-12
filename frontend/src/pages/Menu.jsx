@@ -7,12 +7,7 @@ function Menu() {
   const [language, setLanguage] = useState("en");
   const [menuData, setMenuData] = useState(specialMenus); // Master dynamic menu data state
 
-  // ==========================================================================
-  // SYNC DYNAMIC INVENTORY DATA ON LOAD FROM STORAGE ENGINE
-  // ==========================================================================
-// ==========================================================================
-  // SYNC DYNAMIC INVENTORY DATA ON LOAD FROM STORAGE ENGINE - FIXED IMAGE LOGIC
-  // ==========================================================================
+
   useEffect(() => {
     const savedInventory = localStorage.getItem("lc_flat_special_inventory");
     if (savedInventory) {

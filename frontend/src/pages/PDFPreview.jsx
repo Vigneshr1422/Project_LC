@@ -1,10 +1,12 @@
-import React, { useRef } from "react"; 
+import React, { useRef, useState } from "react"; // ✅ Fixed: Added useState here
 import { useLocation, useNavigate } from "react-router-dom";
 import logo from "../Images/Logo.webp";
 import { 
   ArrowRight,
   Printer,
-  Sparkles
+  Sparkles,
+  ArrowLeft,
+  Loader2 // ✅ Fixed: Added Loader2 icon here
 } from "lucide-react";
 import html2pdf from "html2pdf.js";
 
@@ -12,13 +14,16 @@ const PDFPreview = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const invoiceRef = useRef(null);
+  
+  // ✅ Fixed: Moved state inside the component correctly
+  const [isPdfLoading, setIsPdfLoading] = useState(false); 
 
   const { 
     formData, 
     grandTotal = 0, 
     serviceCharge = 0, 
     deliveryCharge = 0, 
-    staffCount = 0, // Extra Persons to serve
+    staffCount = 0, 
     staffRequired = "No",
     paymentId = "N/A",          
     tokenAdvanceAmount = 0,
@@ -28,23 +33,31 @@ const PDFPreview = () => {
   const totalGuests = parseInt(formData?.guests) || 1;
   const extraGuestsCount = parseInt(staffCount) || 0;
 
-  // Exact math logic as per your core requirements
   const rawBaseCost = formData?.packagePrice 
     ? (formData.packagePrice * totalGuests)
     : (grandTotal - serviceCharge - deliveryCharge);
-
+    
   const unitPriceCalculated = formData?.packagePrice || Math.floor(rawBaseCost / totalGuests);
   const packageItems = formData?.packageItems || [];
   const remainingDueAmount = grandTotal - tokenAdvanceAmount;
   
-  const invoiceNumber = formData?.invoiceNo || `SL${Math.floor(1000 + Math.random() * 9000)}`;
+  // =========================================================================
+  // 🎯 🔥 AUTOMATIC BILL NO GENERATION ENGINE (LC + MONTH + UNIQUE INCREMENT)
+  // =========================================================================
+  const currentMonthStr = String(new Date().getMonth() + 1).padStart(2, '0');
+  
+  const uniqueSequence = formData?.invoiceNo 
+    ? formData.invoiceNo 
+    : String(new Date().getTime()).slice(-4);
+
+  const invoiceNumber = formData?.invoiceNo || `LC${currentMonthStr}${uniqueSequence}`;
+  
   const currentDate = new Date().toLocaleDateString("en-IN", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
   });
 
-  // Dynamic Pagination Matrix (Max 10 Items per Page Node)
   const page1Items = packageItems.slice(0, 10);
   const page2Items = packageItems.slice(10, 20);
   const page3Items = packageItems.slice(20);
@@ -52,13 +65,12 @@ const PDFPreview = () => {
   const hasPage2Items = page2Items.length > 0;
   const hasPage3Items = page3Items.length > 0;
 
-  // Determine Financial Core Render Placement Blocks
   const showPaymentOnPage2 = !hasPage3Items; 
   const showPaymentOnPage3 = hasPage3Items;  
 
   const totalPagesCount = hasPage3Items ? 3 : 2;
 
-  const handlePrintVerifiedBill = () => {
+  const handlePrintVerifiedBill = async () => {
     const element = invoiceRef.current;
     const options = {
       margin: 0, 
@@ -74,15 +86,23 @@ const PDFPreview = () => {
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       pagebreak: { mode: ['css', 'avoid-all'] }
     };
-    html2pdf().set(options).from(element).save();
+
+    try {
+      setIsPdfLoading(true); // ⏳ Start rotating loader
+      await html2pdf().set(options).from(element).save();
+    } catch (pdfErr) {
+      console.error("PDF Engine Render Crash: ", pdfErr);
+    } finally {
+      setIsPdfLoading(false); // ✅ Stop loader immediately
+    }
   };
 
   if (!formData) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4">
-        <div className="text-center bg-slate-900 p-8 rounded-xl border border-slate-800 max-w-sm w-full">
-          <p className="text-slate-400 mb-4 font-semibold">No invoice details found.</p>
-          <button onClick={() => navigate("/booking")} className="w-full bg-[#962A27] text-white px-6 py-3 rounded-lg font-bold transition-all">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+        <div className="text-center bg-white p-8 rounded-2xl border border-slate-200 max-w-sm w-full shadow-xl">
+          <p className="text-slate-500 mb-4 font-semibold">No invoice details found.</p>
+          <button onClick={() => navigate("/booking")} className="w-full bg-[#962A27] text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md cursor-pointer">
             Back to Booking
           </button>
         </div>
@@ -90,12 +110,9 @@ const PDFPreview = () => {
     );
   }
 
-  // REUSABLE SUB-RENDER: MASTER LEDGER & ENDORSEMENT SCHEMATICS
   const FinancialLedgerBlock = () => {
     const totalFoodAmount = rawBaseCost; 
     const additionalAmount = (parseInt(deliveryCharge) || 0) + (parseInt(serviceCharge) || 0); 
-    
-    // Extra Person Cost calculation (e.g., 5 * 800 = 4000)
     const extraPersonRate = 800;
     const totalExtraGuestsCost = extraGuestsCount * extraPersonRate;
 
@@ -112,42 +129,26 @@ const PDFPreview = () => {
                     <p className="whitespace-pre-line m-0">{formData.specialInstructions || formData.notes}</p>
                   ) : (
                     <>
-  <p className="m-0">
-    • High-quality ingredients and hygienic cooking practices will be followed for all menu preparations.
-  </p>
-
-  <p className="m-0">
-    • Dedicated service staff will ensure timely food service and a seamless dining experience for guests.
-  </p>
-</>
+                      <p className="m-0">• High-quality ingredients and hygienic cooking practices will be followed for all menu preparations.</p>
+                      <p className="m-0">• Dedicated service staff will ensure timely food service and a seamless dining experience for guests.</p>
+                    </>
                   )}
                 </div>
               </td>
 
               {/* Right Professional Financial Box */}
               <td className="align-top pl-4" style={{ width: "55%" }}>
-                <div className="border border-slate-200 rounded-xl overflow-hidden shadow-sm bg-slate-50/50">
+                <div className="border border-slate-200 rounded-xl overflow-hidden shadow-xs bg-slate-50/50">
                   <div className="bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-2 flex justify-between">
                     <span>Account summary</span>
                     <span>Value (INR)</span>
                   </div>
                   <div className="p-3 space-y-2.5 bg-white text-xs font-semibold">
-                    
-                    {/* 1. Base Food Amount */}
                     <div className="flex justify-between items-center border-b border-slate-100 pb-1.5">
                       <span className="text-slate-500">Food Amount</span>
                       <span className="font-mono font-bold text-slate-900">₹{totalFoodAmount.toLocaleString("en-IN")}.00</span>
                     </div>
 
-                    {/* 2. Primary Headcount Line Indicator */}
-                    {/* <div className="flex justify-between items-center border-b border-slate-100 pb-1.5">
-                      <span className="text-slate-500">Primary Headcount</span>
-                      <span className="font-mono font-bold text-slate-700">
-                        ₹{unitPriceCalculated.toLocaleString("en-IN")} × {totalGuests}
-                      </span>
-                    </div> */}
-
-                    {/* 3. Extra Persons Split Row (Condition: Only shows if extra count > 0) */}
                     {extraGuestsCount > 0 && (
                       <div className="flex justify-between items-center border-b border-slate-100 pb-1.5 bg-amber-50/50 px-1 rounded">
                         <span className="text-amber-900 font-medium">Extra Headcount (₹{extraPersonRate} × {extraGuestsCount})</span>
@@ -155,24 +156,20 @@ const PDFPreview = () => {
                       </div>
                     )}
 
-                    {/* 4. Additional Amount (Logistics) */}
                     <div className="flex justify-between items-center border-b border-slate-100 pb-1.5">
                       <span className="text-slate-500">Additional Amount (Logistics)</span>
                       <span className="font-mono font-bold text-slate-900">₹{additionalAmount.toLocaleString("en-IN")}.00</span>
                     </div>
 
-                    {/* 5. Advance Received */}
                     <div className="flex justify-between items-center border-b border-slate-100 pb-1.5">
                       <span className="text-slate-500">Advance Received</span>
                       <span className="font-mono font-bold text-emerald-600">- ₹{tokenAdvanceAmount.toLocaleString("en-IN")}.00</span>
                     </div>
 
-                    {/* 6. Balance Amount */}
                     <div className="flex justify-between items-center pt-1 font-black">
                       <span className="text-[10px] uppercase text-slate-500 tracking-wider">Balance Amount</span>
                       <span className="font-mono text-base text-[#962A27]">₹{remainingDueAmount.toLocaleString("en-IN")}.00</span>
                     </div>
-
                   </div>
                 </div>
               </td>
@@ -180,7 +177,7 @@ const PDFPreview = () => {
           </tbody>
         </table>
 
-        {/* SIGNATURE SECTION FIELD TIER */}
+        {/* SIGNATURE SECTION */}
         <table className="w-full border-collapse mt-16 text-xs font-bold text-slate-700 mb-4">
           <tbody>
             <tr>
@@ -196,7 +193,7 @@ const PDFPreview = () => {
           </tbody>
         </table>
 
-        {/* BOTTOM FOOTER BRAND SUBSTRIP */}
+        {/* BOTTOM FOOTER BRAND STRIP */}
         <div className="text-center border-t border-slate-100 pt-3 w-full mt-4">
           <p className="text-[9px] text-slate-300 font-black uppercase tracking-widest m-0 space-x-3">
             <span>TASTE</span> • <span>TRADITION</span> • <span>ABSOLUTE QUALITY</span>
@@ -207,36 +204,47 @@ const PDFPreview = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 py-6 sm:py-10 px-4 antialiased text-slate-800 font-sans select-none overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-tr from-slate-50 via-slate-100 to-slate-200 py-6 sm:py-10 px-4 antialiased text-slate-800 font-sans select-none overflow-x-hidden relative">
       
-      {/* CONTROLS BAR */}
-      <div className="max-w-4xl mx-auto mb-6 bg-slate-950/80 backdrop-blur-md rounded-2xl p-4 border border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-white shadow-2xl">
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="p-2.5 bg-[#962A27]/10 text-amber-500 rounded-xl border border-amber-500/20 shrink-0">
-            <Sparkles size={20} />
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-500/5 rounded-full blur-3xl pointer-events-none" />
+
+      {/* 👑 CONTROLS BAR */}
+      <div className="max-w-4xl mx-auto mb-8 bg-white/75 border border-white/80 backdrop-blur-md rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-4 text-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+        <div className="flex items-center gap-3 w-full sm:w-auto text-left">
+          <div className="p-2.5 bg-red-50 text-[#962A27] rounded-xl border border-red-100 shrink-0">
+            <Sparkles size={18} className="animate-pulse" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-slate-200">Typography Fix Engine Active</h2>
-            <p className="text-[11px] text-slate-400">Dynamic Multi-Page Architecture Ready</p>
+            <h2 className="text-xs font-black uppercase tracking-wider text-slate-900">Document Hub</h2>
+            <p className="text-[11px] text-slate-400 font-medium">Verified Multi-Page Matrix Format</p>
           </div>
         </div>
         
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+        <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
           <button 
             onClick={handlePrintVerifiedBill}
-            className="flex-1 sm:flex-none bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer shadow-lg active:scale-95 transition-all text-center whitespace-nowrap"
+            disabled={isPdfLoading}
+            className="flex-1 sm:flex-none bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer shadow-md shadow-amber-500/10 active:scale-95 transition-all text-center whitespace-nowrap flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Printer size={15} className="inline mr-1" /> Download PDF
+            {isPdfLoading ? (
+              <Loader2 size={14} className="animate-spin text-slate-950" />
+            ) : (
+              <Printer size={14} />
+            )}
+            {isPdfLoading ? "Compiling PDF..." : "Download PDF"}
           </button>
 
           {isFromFilesPage ? (
-            <button onClick={() => navigate(-1)} className="flex-1 sm:flex-none bg-slate-800 text-slate-300 px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer text-center">
-              Back
+            <button 
+              onClick={() => navigate(-1)} 
+              className="flex-1 sm:flex-none bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer text-center transition-all flex items-center justify-center gap-1"
+            >
+              <ArrowLeft size={14} /> Back
             </button>
           ) : (
             <button 
               onClick={() => navigate("/payment-success", { state: { paymentId, formData, grandTotal, tokenAdvanceAmount } })}
-              className="flex-1 sm:flex-none bg-[#962A27] text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer flex items-center justify-center gap-1 text-center whitespace-nowrap"
+              className="flex-1 sm:flex-none bg-[#962A27] hover:bg-[#7a1e1b] text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer flex items-center justify-center gap-1 text-center whitespace-nowrap shadow-md shadow-red-900/10 transition-all"
             >
               Proceed <ArrowRight size={14} />
             </button>
@@ -247,10 +255,10 @@ const PDFPreview = () => {
       {/* ========================================================
           👑 SCROLLABLE RESPONSIVE CONTAINER SHIELD
           ======================================================== */}
-      <div className="max-w-4xl mx-auto overflow-x-auto pb-6 rounded-2xl scrollbar-thin scrollbar-thumb-slate-800">
+      <div className="max-w-4xl mx-auto overflow-x-auto pb-6 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
         <div 
           ref={invoiceRef} 
-          className="bg-white min-w-[210mm] w-[210mm] mx-auto shadow-2xl"
+          className="bg-white min-w-[210mm] w-[210mm] mx-auto"
           style={{ transformOrigin: "top left" }}
         >
           {/* 📄 PAGE 1 */}
@@ -265,7 +273,7 @@ const PDFPreview = () => {
                 </div>
 
                 <div className="flex justify-between items-start border-b border-slate-200 pb-4 mb-4">
-                  <div className="space-y-1">
+                  <div className="space-y-1 text-left">
                     <div className="flex items-center gap-4">
                       {logo && (
                         <div className="w-14 h-14 overflow-hidden rounded-xl bg-slate-50 p-1 border border-slate-200 shrink-0">
@@ -282,8 +290,7 @@ const PDFPreview = () => {
                       </div>
                     </div>
                     <div className="text-xs text-slate-500 font-medium pt-2">
-                      <p>📍                  🗺️H-10, Aishwarya Avenue, Thanavayal, Karaikudi 
-</p>
+                      <p>📍 H-10, Aishwarya Avenue, Thanavayal, Karaikudi</p>
                       <p className="font-mono text-slate-700 font-bold">📞 Mobile: +91 96006 30051</p>
                     </div>
                   </div>
@@ -297,7 +304,7 @@ const PDFPreview = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6 py-4 my-3 bg-slate-50 border border-slate-200/60 rounded-xl px-5">
+                <div className="grid grid-cols-2 gap-6 py-4 my-3 bg-slate-50 border border-slate-200/60 rounded-xl px-5 text-left">
                   <div className="space-y-1">
                     <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center border-b border-slate-200/60 pb-1 w-fit">
                       👤 Billed To (Customer)
@@ -322,7 +329,7 @@ const PDFPreview = () => {
                   </div>
                 </div>
 
-                <div className="bg-amber-500/10 border-2 border-amber-500/20 rounded-xl p-4 my-4 flex justify-between items-center">
+                <div className="bg-amber-500/10 border-2 border-amber-500/20 rounded-xl p-4 my-4 flex justify-between items-center text-left">
                   <div>
                     <span className="text-[10px] font-black uppercase tracking-widest text-amber-800 block">SELECTED PACKAGE TIER</span>
                     <p className="text-sm font-black text-slate-900 uppercase m-0 mt-0.5">Package: {formData.packageName || "Veg Signature Package"}</p>
@@ -334,7 +341,7 @@ const PDFPreview = () => {
                   </div>
                 </div>
 
-                <div className="mt-4">
+                <div className="mt-4 text-left">
                   <h3 className="text-xs font-black tracking-widest text-slate-900 uppercase mb-3 pb-1 border-b border-slate-200">
                     🍴 Menu Architecture (Page 1)
                   </h3>
@@ -369,13 +376,13 @@ const PDFPreview = () => {
           >
             <div className="border-2 border-amber-300 p-6 flex flex-col justify-between h-full w-full">
               <div>
-                <div className="flex justify-between items-center border-b border-slate-200 pb-3 mb-6 w-full">
+                <div className="flex justify-between items-center border-b border-slate-200 pb-3 mb-6 w-full text-left">
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lakshmi Catering Account Ledger</span>
                   <span className="font-mono text-xs font-bold text-slate-400 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded">INV REFERENCE: {invoiceNumber}</span>
                 </div>
 
                 {hasPage2Items && (
-                  <div className="mb-8">
+                  <div className="mb-8 text-left">
                     <h3 className="text-xs font-black tracking-widest text-slate-900 uppercase mb-3 pb-1 border-b border-slate-200">
                       🍴 Menu Architecture (Page 2 Continuation)
                     </h3>
@@ -415,12 +422,12 @@ const PDFPreview = () => {
             >
               <div className="border-2 border-amber-300 p-6 flex flex-col justify-between h-full w-full">
                 <div>
-                  <div className="flex justify-between items-center border-b border-slate-200 pb-3 mb-6 w-full">
+                  <div className="flex justify-between items-center border-b border-slate-200 pb-3 mb-6 w-full text-left">
                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lakshmi Catering Account Ledger</span>
                     <span className="font-mono text-xs font-bold text-slate-400 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded">INV REFERENCE: {invoiceNumber}</span>
                   </div>
 
-                  <div className="mb-8">
+                  <div className="mb-8 text-left">
                     <h3 className="text-xs font-black tracking-widest text-slate-900 uppercase mb-3 pb-1 border-b border-slate-200">
                       🍴 Menu Architecture (Page 3 Final Continuation)
                     </h3>

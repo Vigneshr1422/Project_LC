@@ -27,6 +27,21 @@ const BookingSummary = () => {
   const [staffCount, setStaffCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
+  // 🎯 🔥 NEW STATES: API-Sync and custom 30s countdown pipeline
+  const [isSyncing, setIsSyncing] = useState(false); 
+  const [timeLeft, setTimeLeft] = useState(30); 
+
+  // ⏰ Custom 30s timer triggers ONLY when payment is complete and server sync starts
+  useEffect(() => {
+    if (!isSyncing || timeLeft <= 0) return;
+
+    const timerInterval = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timerInterval);
+  }, [isSyncing, timeLeft]);
+
   // Dynamically load Razorpay SDK onto window context
   useEffect(() => {
     const script = document.createElement("script");
@@ -77,58 +92,59 @@ const BookingSummary = () => {
     setLoading(true);
 
     const options = {
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID, // Test Key ID from .env
-      amount: tokenAdvanceAmount * 100, // Grand Total 50% Advance in subunits (Paise)
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID, 
+      amount: tokenAdvanceAmount * 100, 
       currency: "INR",
       name: "Lakshmi Catering",
       description: "50% Booking Advance Transaction",
-     image: "/favicon.svg",
-      // BookingSummary.jsx உள்ளே இருக்கும் handleRazorpayPayment-ன் சின்க் பிளாக்:
-handler: async function (response) {
-  setLoading(true);
-  try {
-    const serverResponse = await fetch("https://project-lc.onrender.com/api/booking1/save-confirmed-booking", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        formData: formData, 
-        grandTotal: grandTotal, 
-        tokenAdvanceAmount: tokenAdvanceAmount, 
-        paymentId: response.razorpay_payment_id, 
-        serviceCharge: serviceCharge, 
-        deliveryCharge: deliveryCharge, 
-        staffCount: staffCount, 
-        staffRequired: staffRequired, 
-        totalAmount: totalAmount 
-      })
-    });
-    
-    const dbResult = await serverResponse.json();
-    setLoading(false);
-    
-    if (dbResult.success) {
-      // PDF-Preview-விற்குச் சென்று அங்கே நேரடியாக பிரிண்ட்/டவுன்லோட் ஆப்ஷனை மட்டும் வழங்குகிறோம்.
-      navigate("/pdf-preview", { 
-        state: { 
-          paymentId: response.razorpay_payment_id, 
-          formData: formData, 
-          grandTotal: grandTotal, 
-          tokenAdvanceAmount: tokenAdvanceAmount, 
-          serviceCharge: serviceCharge, 
-          deliveryCharge: deliveryCharge, 
-          staffCount: staffCount, 
-          staffRequired: staffRequired 
-        } 
-      });
-    } else {
-      alert(`Database Sync Error: ${dbResult.message}`);
-    }
-  } catch (err) {
-    setLoading(false);
-    console.error("Network sync issue:", err);
-    alert("⚠️ Payment Successful, but local server syncing failed!");
-  }
-},
+      image: "/favicon.svg",
+      handler: async function (response) {
+        // 🎯 Payment complete dynamically switches on our custom syncing countdown block
+        setLoading(false); 
+        setIsSyncing(true); 
+        
+        try {
+          const serverResponse = await fetch("https://project-lc.onrender.com/api/booking1/save-confirmed-booking", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+              formData: formData, 
+              grandTotal: grandTotal, 
+              tokenAdvanceAmount: tokenAdvanceAmount, 
+              paymentId: response.razorpay_payment_id, 
+              serviceCharge: serviceCharge, 
+              deliveryCharge: deliveryCharge, 
+              staffCount: staffCount, 
+              staffRequired: staffRequired, 
+              totalAmount: totalAmount 
+            })
+          });
+          
+          const dbResult = await serverResponse.json();
+          setIsSyncing(false); 
+          
+          if (dbResult.success) {
+            navigate("/pdf-preview", { 
+              state: { 
+                paymentId: response.razorpay_payment_id, 
+                formData: formData, 
+                grandTotal: grandTotal, 
+                tokenAdvanceAmount: tokenAdvanceAmount, 
+                serviceCharge: serviceCharge, 
+                deliveryCharge: deliveryCharge, 
+                staffCount: staffCount, 
+                staffRequired: staffRequired 
+              } 
+            });
+          } else {
+            alert(`Database Sync Error: ${dbResult.message}`);
+          }
+        } catch (err) {
+          setIsSyncing(false);
+          console.error("Network sync issue:", err);
+          alert("⚠️ Payment Successful, but local server syncing failed!");
+        }
+      },
       prefill: {
         name: formData.name || "",
         contact: formData.phone || "",
@@ -146,6 +162,7 @@ handler: async function (response) {
       modal: {
         ondismiss: function () {
           setLoading(false);
+          setIsSyncing(false);
         }
       }
     };
@@ -153,11 +170,13 @@ handler: async function (response) {
     const rzp1 = new window.Razorpay(options);
     rzp1.on("payment.failed", function (response) {
       setLoading(false);
+      setIsSyncing(false);
       alert(`❌ Payment Failed!\nReason: ${response.error.description}`);
     });
     
     rzp1.open();
   };
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] py-4 sm:py-8 px-3 sm:px-4 lg:px-8">
       <div className="max-w-6xl mx-auto">
@@ -165,7 +184,7 @@ handler: async function (response) {
         {/* Top Navigation */}
         <button 
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-gray-500 hover:text-[#962A27] mb-5 sm:mb-6 transition-colors font-semibold text-sm sm:text-base"
+          className="flex items-center gap-2 text-gray-500 hover:text-[#962A27] mb-5 sm:mb-6 transition-colors font-semibold text-sm sm:text-base cursor-pointer"
         >
           <ChevronLeft size={18} /> Back to Packages
         </button>
@@ -268,7 +287,7 @@ handler: async function (response) {
                     setStaffRequired("No");
                     setStaffCount(0);
                   }}
-                  className={`flex-1 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm font-black transition-all ${staffRequired === "No" ? "bg-white text-[#962A27] shadow-sm" : "text-gray-500"}`}
+                  className={`flex-1 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer ${staffRequired === "No" ? "bg-white text-[#962A27] shadow-sm" : "text-gray-500"}`}
                 >
                   Not Needed
                 </button>
@@ -277,7 +296,7 @@ handler: async function (response) {
                     setStaffRequired("Yes");
                     if (staffCount === 0) setStaffCount(1);
                   }}
-                  className={`flex-1 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm font-black transition-all ${staffRequired === "Yes" ? "bg-white text-[#962A27] shadow-sm" : "text-gray-500"}`}
+                  className={`flex-1 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm font-black transition-all cursor-pointer ${staffRequired === "Yes" ? "bg-white text-[#962A27] shadow-sm" : "text-gray-500"}`}
                 >
                   Required
                 </button>
@@ -336,22 +355,33 @@ handler: async function (response) {
                 </div>
               </div>
 
-              {/* INTEGRATED: Proceed to Pay Button directly connecting Razorpay Framework */}
+              {/* 🎯 🔥 COMPLETELY CORRECT IMPLEMENTATION MECHANISM FOR WIDGET SYNC TIMERS */}
               <button
-                disabled={loading}
+                disabled={loading || isSyncing}
                 onClick={handleRazorpayPayment}
-                className="w-full mt-6 bg-amber-400 hover:bg-amber-500 disabled:bg-amber-400/50 disabled:cursor-not-allowed text-gray-900 font-black py-3 sm:py-4 rounded-xl sm:rounded-[1.2rem] shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2 text-xs sm:text-base tracking-wider uppercase font-extrabold"
+                className="w-full mt-6 bg-amber-400 hover:bg-amber-500 disabled:bg-slate-200 disabled:text-slate-400 disabled:border-slate-300 disabled:cursor-not-allowed text-gray-900 font-black py-3 sm:py-4 rounded-xl sm:rounded-[1.2rem] shadow-xl transition-all active:scale-95 flex flex-col items-center justify-center gap-1.5 text-xs sm:text-base tracking-wider uppercase font-extrabold cursor-pointer"
               >
-                {loading ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" />
-                    Connecting Gateway...
-                  </>
+                {isSyncing ? (
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="flex items-center gap-2">
+                      <Loader2 size={16} className="animate-spin text-gray-900" />
+                      <span>Continuing to Gateway...</span>
+                    </div>
+                    {/* ⏳ Live 30s counter below text - visible ONLY during redirection syncing phase */}
+                    <span className="text-[11px] font-mono font-bold text-gray-600 lowercase tracking-normal bg-gray-900/5 px-2 py-0.5 rounded mt-1 normal-case">
+                      Redirecting to PDF Page in 00:{String(timeLeft).padStart(2, '0')} sec
+                    </span>
+                  </div>
+                ) : loading ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 size={16} className="animate-spin text-gray-900" />
+                    <span>Connecting Razorpay...</span>
+                  </div>
                 ) : (
-                  <>
+                  <div className="flex items-center gap-2 w-full justify-center">
                     <span>Proceed to Pay Advance (₹{tokenAdvanceAmount.toLocaleString("en-IN")})</span>
                     <ArrowRight size={16} />
-                  </>
+                  </div>
                 )}
               </button>
             </div>

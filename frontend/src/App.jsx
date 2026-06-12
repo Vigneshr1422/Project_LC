@@ -16,7 +16,8 @@ import Menu from "./pages/Menu";
 import specialMenu from "./data/SpecialMenus";
 import BookingSummary from "./pages/BookingSummary";
 import AdminDashboard from "./pages/AdminDashboard";
-
+import CalendarOrders from "./pages/CalendarOrders";
+// Route Component setup list kulla ithai set பண்ணுங்க:
 import PaymentPage from "./pages/PaymentPage";
 import SpecialMenuItems from "./pages/SpecialMenuItems";
 import UsersManagement from "./pages/StorageManagement";
@@ -126,6 +127,8 @@ function App() {
                 path="/special-menu-items" 
                 element={<SpecialMenuItems />} 
               />
+              <Route path="/calendar-orders" element={<CalendarOrders />} />
+
             </Route>
 
           </Route>
