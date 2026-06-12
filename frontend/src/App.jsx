@@ -13,7 +13,7 @@ import Home from "./pages/Home";
 import Services from "./pages/Services";
 import Contact from "./pages/Contact";
 import Menu from "./pages/Menu";
-import specialMenu from "./data/specialMenus";
+import specialMenu from "./data/SpecialMenus";
 import BookingSummary from "./pages/BookingSummary";
 import AdminDashboard from "./pages/AdminDashboard";
 
