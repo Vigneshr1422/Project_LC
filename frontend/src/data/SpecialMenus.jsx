@@ -17,6 +17,8 @@ import VegClas from "../Images/vegClas.webp";
 import nonv1 from "../Images/nonv1.webp";
 import nonv3 from "../Images/nonv3.webp";
 
+import Nonveg6 from "../Images/Nonveg6.webp";
+import Nonveg8 from "../Images/Nonveg8.webp";
 
 import VegPre from "../Images/VegPre.webp";
 import Veg from "../Images/Veg.webp";
@@ -374,7 +376,7 @@ image: VegPre,
     },
     {
       title: { en: "NV Elite", ta: "என்.வி எலைட்" },
-      image: biryaniImg,
+      image: Nonveg8,
       price: 1000,
       note: "Diamond ++ Menu included with additions",
       items: [
@@ -395,7 +397,7 @@ image: VegPre,
     },
     {
       title: { en: "NV Grand Royale", ta: "என்.வி கிராண்ட் ராயல்" },
-      image: biryaniImg,
+      image: Nonveg6,
       price: 1200,
       note: "Diamond & Ruby package combined ( Added Prawn 65)",
       items: [

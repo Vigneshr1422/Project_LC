@@ -38,7 +38,7 @@ const AdminDashboard = () => {
         const EXPIRY_DURATION = 2 * 60 * 60 * 1000; 
 
         if (currentTime - parseInt(loginTime) > EXPIRY_DURATION) {
-          alert("🔒 Session Expired! Safety-kaaga system automatic-ah logout செய்யப்பட்டுள்ளது.");
+          alert("🔒 Session Expired!  automatic-ah logout Excuted");
           handleLogout();
         }
       }
