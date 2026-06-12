@@ -3,10 +3,8 @@ import BookingOrders from "../models/bookingOrderRoute.js";
 
 const router = express.Router();
 
-// Memory-leya temporary-ah file blob buffer-ah process panna multer storage setup
-
 /* ========================================================
-    1. SAVE CONFIRMED BOOKING (POST) - Pure DB Sync Without PdfKit
+    1. SAVE CONFIRMED BOOKING (POST)
 ======================================================= */
 router.post("/save-confirmed-booking", async (req, res) => {
   try {
@@ -22,7 +20,6 @@ router.post("/save-confirmed-booking", async (req, res) => {
       totalAmount,
     } = req.body;
 
-    // Step A: Save transactional parameters directly into MongoDB Atlas
     const booking = await BookingOrders.create({
       customerName: formData.name,
       phone: formData.phone,
@@ -51,9 +48,8 @@ router.post("/save-confirmed-booking", async (req, res) => {
       bookingStatus: "Pending",
     });
 
-    console.log("✅ Step 1: MongoDB Booking Record Sync Complete! Waiting for Frontend HTML PDF Blob Stream...");
+    console.log("✅ Step 1: MongoDB Booking Record Sync Complete!");
 
-    // Dispatch clear responsive data back to client application flow
     return res.status(201).json({
       success: true,
       booking,
@@ -65,7 +61,37 @@ router.post("/save-confirmed-booking", async (req, res) => {
   }
 });
 
+/* ========================================================
+    🔥 2. GET ALL BOOKINGS (GET) - FRONTEND CALENDAR-KU ITHU THAAN MUKKIYAM
+======================================================== */
+router.get("/get-all-bookings", async (req, res) => {
+  try {
+    // Database-la irukura elaa bookings-aiyum eduthu frontend-ku tharom
+    const bookings = await BookingOrders.find({});
+    
+    // Frontend dynamic structural keys mapping wrapper
+    // Frontend-la `.name`, `.date` nu object flat keys vaasikirathaala, inge map panni safe-ah tharom
+    const mappedBookings = bookings.map(b => ({
+      _id: b._id,
+      id: b.id || b._id.toString().substring(18, 24).toUpperCase(), // Backup Custom Order ID template
+      name: b.customerName,
+      date: b.eventDate,
+      guests: b.guests,
+      city: b.city,
+      district: b.district,
+      preference: b.preference,
+      status: b.bookingStatus
+    }));
 
+    res.status(200).json({ 
+      success: true, 
+      count: mappedBookings.length, 
+      bookings: mappedBookings 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Failed to fetch all bookings", error: error.message });
+  }
+});
 
 /* ========================================================
     3. GET UPCOMING ORDERS (GET)
@@ -94,20 +120,7 @@ router.get("/completed", async (req, res) => {
 });
 
 /* ========================================================
-    5. DELETE BOOKING BY ID (DELETE)
-======================================================== */
-router.delete("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    await BookingOrders.findByIdAndDelete(id);
-    res.status(200).json({ success: true, message: "Booking deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Failed to delete booking", error: error.message });
-  }
-});
-
-/* ========================================================
-    6. MENU BULK SYNCHRONIZATION (POST)
+    5. MENU BULK SYNCHRONIZATION (POST)
 ======================================================== */
 router.post("/menu-bulk-sync", async (req, res) => {
   try {
@@ -118,9 +131,11 @@ router.post("/menu-bulk-sync", async (req, res) => {
   }
 });
 
+/* ========================================================
+    6. DELETE ALL BOOKINGS (DELETE) - Specific Route mela irukalam
+======================================================== */
 router.delete("/delete-all", async (req, res) => {
   try {
-    // BookingOrders கலெக்ஷனில் உள்ள அனைத்து டாக்குமெண்டுகளையும் காலி செய்யும்
     await BookingOrders.deleteMany({});
     res.status(200).json({ success: true, message: "Purged completely" });
   } catch (error) {
@@ -129,7 +144,7 @@ router.delete("/delete-all", async (req, res) => {
 });
 
 /* ========================================================
-    🔥 6. DELETE BOOKING BY ID (DELETE) - இது கீழே இருக்க வேண்டும்!
+    7. DELETE BOOKING BY ID (DELETE) - Dynamic parameters parameters eppovume bottom-la thaan irukanum!
 ======================================================== */
 router.delete("/:id", async (req, res) => {
   try {
