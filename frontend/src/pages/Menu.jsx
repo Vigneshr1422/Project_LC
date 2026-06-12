@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 // 🔥 SpecialMenu file import as default blueprint schema fallback
-import specialMenus from "../data/specialMenus"; 
+import specialMenus from "../data/SpecialMenus"; 
 import Loader from "../components/Loader";
 
 function Menu() {

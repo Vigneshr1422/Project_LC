@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 
 // Sourced master data configuration structures dynamic fallback sync hook
-import specialMenus from "../data/specialMenus"; 
+import specialMenus from "../data/SpecialMenus"; 
 
 const categoryIcons = {
   Breakfast: <Coffee size={18} />,
