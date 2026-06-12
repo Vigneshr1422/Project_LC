@@ -13,12 +13,15 @@ import Sweets from "../Images/Sweets.webp";
 import chettinad from "../Images/chettinad.webp";
 import Essen from "../Images/Essen.webp";
 import VegSig from "../Images/vegSig.webp";
-import VegPre from "../Images/vegPre.webp";
 import VegClas from "../Images/vegClas.webp";
-import Veg from "../Images/veg.webp";
-import VegPri from "../Images/vegPri.webp";
 import nonv1 from "../Images/nonv1.webp";
 import nonv3 from "../Images/nonv3.webp";
+
+
+import VegPre from "../Images/VegPre.webp";
+import Veg from "../Images/Veg.webp";
+import VegPri from "../Images/VegPri.webp";
+
 
 import Pongal from "../Images/Pongal.webp";
 import Poori from "../Images/Poori.webp";
