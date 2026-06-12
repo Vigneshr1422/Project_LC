@@ -87,7 +87,7 @@ const BookingSummary = () => {
 handler: async function (response) {
   setLoading(true);
   try {
-    const serverResponse = await fetch("http://localhost:5000/api/booking1/save-confirmed-booking", {
+    const serverResponse = await fetch("https://project-lc.onrender.com/api/booking1/save-confirmed-booking", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 

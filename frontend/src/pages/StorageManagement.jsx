@@ -53,7 +53,7 @@ const StorageManagement = () => {
     try {
       setDeleting(true);
       // உங்களுடைய பேக்-எண்ட் டெலீட் ரூட்டிங் எண்ட் பாயிண்ட்
-      const res = await axios.delete("http://localhost:5000/api/booking1/delete-all");
+      const res = await axios.delete("https://project-lc.onrender.com/api/booking1/delete-all");
       
       if (res.data.success) {
         alert("🎯 Mass da! All booking documents cleared out successfully!");

@@ -5,8 +5,7 @@ import dotenv from "dotenv";
 
 import adminRoutes from "./routes/adminRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
-import bookingOrderRoute from "./Routes/bookingorderroute.js";
-
+import bookingOrderRoute from "./routes/bookingorderroute.js";
 dotenv.config();
 
 const app = express();
