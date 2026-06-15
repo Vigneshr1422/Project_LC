@@ -207,7 +207,7 @@ const BookingPage = () => {
 
   const handleContinue = async () => {
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 200));
     setIsSubmitting(false);
     nextStep();
   };

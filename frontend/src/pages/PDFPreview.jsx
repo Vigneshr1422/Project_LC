@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react"; // ✅ Fixed: Added useState here
+import React, { useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import logo from "../Images/Logo.webp";
 import { 
@@ -6,16 +6,118 @@ import {
   Printer,
   Sparkles,
   ArrowLeft,
-  Loader2 // ✅ Fixed: Added Loader2 icon here
+  Loader2 
 } from "lucide-react";
 import html2pdf from "html2pdf.js";
+
+// 🎯 உன்னோட இன்னொரு ஃபைலில் இருக்கும் specialMenus டேட்டாவை இங்கே இம்போர்ட் செய்கிறோம்!
+import specialMenus from "../data/SpecialMenus"; 
+
+// 🎯 Custom மற்றும் Package இரண்டையும் பிரித்துப் பார்த்து, தமிழ் பெயரைத் துல்லியமாக எடுக்கும் ஸ்மார்ட் Helper
+const findItemDetails = (itemInput, formData) => {
+  let inputName = "";
+  let userCount = null;
+
+  if (!itemInput) return { name: "—", price: "—", count: "—", total: "—", isCustom: false };
+
+  if (typeof itemInput === "object") {
+    inputName = itemInput.ta || itemInput.en || itemInput.name || itemInput.itemName || "";
+    userCount = itemInput.count !== undefined ? itemInput.count : (itemInput.quantity !== undefined ? itemInput.quantity : null);
+  } else {
+    inputName = itemInput;
+  }
+
+  if (typeof inputName !== "string") {
+    inputName = String(inputName || "");
+  }
+
+  const searchName = inputName.trim().toLowerCase();
+  let matchedItem = null;
+  let isCustomOrder = false;
+
+  // 1️⃣ முதலில் Breakfast, Lunch, Dinner-ல் தேடுகிறது (Custom Orders)
+  const customCategories = ["Breakfast", "Lunch", "Dinner"];
+  for (const category of customCategories) {
+    if (specialMenus[category] && Array.isArray(specialMenus[category])) {
+      for (const subCat of specialMenus[category]) {
+        if (subCat && Array.isArray(subCat.items)) {
+          for (const item of subCat.items) {
+            const itemEn = item && item.en ? item.en.toLowerCase() : "";
+            const itemTa = item && item.ta ? item.ta.toLowerCase() : "";
+
+            if (itemEn === searchName || itemTa === searchName) {
+              matchedItem = item;
+              isCustomOrder = true;
+              break;
+            }
+          }
+        }
+        if (matchedItem) break;
+      }
+    }
+    if (matchedItem) break;
+  }
+
+  // 2️⃣ VegPackages, NonVegPackages-ல் உள்ளே இருக்கும் ஐட்டங்களில் தேடி தமிழ் பெயரை எடுக்கிறது!
+  if (!matchedItem) {
+    const packageCategories = ["VegPackages", "NonVegPackages"];
+    for (const category of packageCategories) {
+      if (specialMenus[category] && Array.isArray(specialMenus[category])) {
+        for (const pkg of specialMenus[category]) {
+          if (pkg && Array.isArray(pkg.items)) {
+            for (const item of pkg.items) {
+              const itemEn = item && item.en ? item.en.toLowerCase() : "";
+              const itemTa = item && item.ta ? item.ta.toLowerCase() : "";
+
+              if (itemEn === searchName || itemTa === searchName) {
+                matchedItem = item;
+                isCustomOrder = false; 
+                break;
+              }
+            }
+          }
+          if (matchedItem) break;
+        }
+      }
+      if (matchedItem) break;
+    }
+  }
+
+  if (userCount === null && matchedItem && formData) {
+    userCount = formData[matchedItem.en] || formData[matchedItem.ta] || formData[inputName];
+  }
+
+  if (userCount === null || userCount === undefined || userCount === "") {
+    userCount = formData?.guests || 1;
+  }
+
+  const finalCountNum = parseInt(userCount) || 1;
+  const finalDisplayName = matchedItem ? (matchedItem.ta || matchedItem.en) : inputName;
+
+  if (isCustomOrder && matchedItem) {
+    return {
+      name: finalDisplayName,
+      price: `₹${matchedItem.price}.00`,
+      count: finalCountNum,
+      total: `₹${(matchedItem.price * finalCountNum).toLocaleString("en-IN")}.00`,
+      isCustom: true 
+    };
+  }
+
+  return { 
+    name: finalDisplayName, 
+    price: "—", 
+    count: finalCountNum, 
+    total: "—", 
+    isCustom: false 
+  };
+};
 
 const PDFPreview = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const invoiceRef = useRef(null);
   
-  // ✅ Fixed: Moved state inside the component correctly
   const [isPdfLoading, setIsPdfLoading] = useState(false); 
 
   const { 
@@ -38,37 +140,48 @@ const PDFPreview = () => {
     : (grandTotal - serviceCharge - deliveryCharge);
     
   const unitPriceCalculated = formData?.packagePrice || Math.floor(rawBaseCost / totalGuests);
+  
   const packageItems = formData?.packageItems || [];
   const remainingDueAmount = grandTotal - tokenAdvanceAmount;
   
-  // =========================================================================
-  // 🎯 🔥 AUTOMATIC BILL NO GENERATION ENGINE (LC + MONTH + UNIQUE INCREMENT)
-  // =========================================================================
   const currentMonthStr = String(new Date().getMonth() + 1).padStart(2, '0');
-  
-  const uniqueSequence = formData?.invoiceNo 
-    ? formData.invoiceNo 
-    : String(new Date().getTime()).slice(-4);
-
+  const uniqueSequence = formData?.invoiceNo ? formData.invoiceNo : String(new Date().getTime()).slice(-4);
   const invoiceNumber = formData?.invoiceNo || `LC${currentMonthStr}${uniqueSequence}`;
   
+  // பில் ஜெனரேட் ஆகும் இன்றைய தேதி
   const currentDate = new Date().toLocaleDateString("en-IN", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
   });
 
-  const page1Items = packageItems.slice(0, 10);
-  const page2Items = packageItems.slice(10, 20);
-  const page3Items = packageItems.slice(20);
+  // 🎯 யூசர் என்டர் செய்த ஒரிஜினல் விசேஷ தேதியை எடுக்கிறது (Format: DD/MM/YYYY ஆக மாற்றும் பாதுகாப்புடன்)
+  const rawUserDate = formData?.date || formData?.eventDate;
+  const userEventDate = rawUserDate 
+    ? (typeof rawUserDate === "string" && rawUserDate.includes("-") 
+        ? rawUserDate.split("-").reverse().join("/") // YYYY-MM-DD-ஐ DD/MM/YYYY ஆக மாற்றுகிறது
+        : rawUserDate)
+    : "—";
 
-  const hasPage2Items = page2Items.length > 0;
-  const hasPage3Items = page3Items.length > 0;
+  const itemPages = [];
+  let currentItemsPointer = 0;
 
-  const showPaymentOnPage2 = !hasPage3Items; 
-  const showPaymentOnPage3 = hasPage3Items;  
+  const page1Chunk = packageItems.slice(0, 10);
+  itemPages.push(page1Chunk);
+  currentItemsPointer = 10;
 
-  const totalPagesCount = hasPage3Items ? 3 : 2;
+  while (currentItemsPointer < packageItems.length) {
+    const nextChunk = packageItems.slice(currentItemsPointer, currentItemsPointer + 15);
+    itemPages.push(nextChunk);
+    currentItemsPointer += 15;
+  }
+
+  if (itemPages.length === 1) {
+    itemPages.push([]); 
+  }
+
+  const totalPagesCount = itemPages.length;
+  const hasCustomItems = packageItems.some(item => findItemDetails(item, formData).isCustom);
 
   const handlePrintVerifiedBill = async () => {
     const element = invoiceRef.current;
@@ -76,24 +189,18 @@ const PDFPreview = () => {
       margin: 0, 
       filename: `Lakshmi_Catering_${invoiceNumber}.pdf`,
       image: { type: 'jpeg', quality: 1.0 },
-      html2canvas: { 
-        scale: 3, 
-        useCORS: true, 
-        letterRendering: true,
-        logging: false,
-        useOverflow: true
-      },
+      html2canvas: { scale: 3, useCORS: true, letterRendering: true, logging: false, useOverflow: true },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       pagebreak: { mode: ['css', 'avoid-all'] }
     };
 
     try {
-      setIsPdfLoading(true); // ⏳ Start rotating loader
+      setIsPdfLoading(true);
       await html2pdf().set(options).from(element).save();
     } catch (pdfErr) {
       console.error("PDF Engine Render Crash: ", pdfErr);
     } finally {
-      setIsPdfLoading(false); // ✅ Stop loader immediately
+      setIsPdfLoading(false);
     }
   };
 
@@ -118,10 +225,9 @@ const PDFPreview = () => {
 
     return (
       <div className="w-full mt-auto">
-        <table className="w-full border-collapse border-t border-slate-200 pt-6 mt-4">
+        <table className="w-full border-collapse border-t border-slate-200 pt-4">
           <tbody>
             <tr>
-              {/* Left Instructions Box */}
               <td className="align-top pr-6" style={{ width: "45%" }}>
                 <span className="text-[10px] font-black tracking-widest text-slate-400 block mb-2">📝 SPECIAL INSTRUCTIONS</span>
                 <div className="text-[11px] text-slate-500 font-semibold space-y-1 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
@@ -136,7 +242,6 @@ const PDFPreview = () => {
                 </div>
               </td>
 
-              {/* Right Professional Financial Box */}
               <td className="align-top pl-4" style={{ width: "55%" }}>
                 <div className="border border-slate-200 rounded-xl overflow-hidden shadow-xs bg-slate-50/50">
                   <div className="bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-2 flex justify-between">
@@ -177,8 +282,7 @@ const PDFPreview = () => {
           </tbody>
         </table>
 
-        {/* SIGNATURE SECTION */}
-        <table className="w-full border-collapse mt-16 text-xs font-bold text-slate-700 mb-4">
+        <table className="w-full border-collapse mt-8 text-xs font-bold text-slate-700 mb-2">
           <tbody>
             <tr>
               <td className="align-bottom pb-1" style={{ width: "50%" }}>
@@ -186,15 +290,14 @@ const PDFPreview = () => {
                 <p className="text-slate-400 text-[9px] uppercase tracking-widest m-0">Client Endorsement</p>
               </td>
               <td className="text-right align-bottom pb-1" style={{ width: "50%" }}>
-                <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px] mb-12 m-0">Authorized Executive</p>
+                <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px] mb-8 m-0">Authorized Executive</p>
                 <p className="text-black font-black uppercase text-xs border-t border-black pt-1.5 m-0">லெட்சுமி கேட்டரிங்</p>
               </td>
             </tr>
           </tbody>
         </table>
 
-        {/* BOTTOM FOOTER BRAND STRIP */}
-        <div className="text-center border-t border-slate-100 pt-3 w-full mt-4">
+        <div className="text-center border-t border-slate-100 pt-2 w-full mt-2">
           <p className="text-[9px] text-slate-300 font-black uppercase tracking-widest m-0 space-x-3">
             <span>TASTE</span> • <span>TRADITION</span> • <span>ABSOLUTE QUALITY</span>
           </p>
@@ -205,10 +308,9 @@ const PDFPreview = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-tr from-slate-50 via-slate-100 to-slate-200 py-6 sm:py-10 px-4 antialiased text-slate-800 font-sans select-none overflow-x-hidden relative">
-      
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-500/5 rounded-full blur-3xl pointer-events-none" />
 
-      {/* 👑 CONTROLS BAR */}
+      {/* CONTROLS BAR */}
       <div className="max-w-4xl mx-auto mb-8 bg-white/75 border border-white/80 backdrop-blur-md rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-4 text-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
         <div className="flex items-center gap-3 w-full sm:w-auto text-left">
           <div className="p-2.5 bg-red-50 text-[#962A27] rounded-xl border border-red-100 shrink-0">
@@ -216,7 +318,7 @@ const PDFPreview = () => {
           </div>
           <div>
             <h2 className="text-xs font-black uppercase tracking-wider text-slate-900">Document Hub</h2>
-            <p className="text-[11px] text-slate-400 font-medium">Verified Multi-Page Matrix Format</p>
+            <p className="text-[11px] text-slate-400 font-medium">Verified Hybrid Matrix Layout</p>
           </div>
         </div>
         
@@ -226,239 +328,179 @@ const PDFPreview = () => {
             disabled={isPdfLoading}
             className="flex-1 sm:flex-none bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer shadow-md shadow-amber-500/10 active:scale-95 transition-all text-center whitespace-nowrap flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isPdfLoading ? (
-              <Loader2 size={14} className="animate-spin text-slate-950" />
-            ) : (
-              <Printer size={14} />
-            )}
+            {isPdfLoading ? <Loader2 size={14} className="animate-spin text-slate-950" /> : <Printer size={14} />}
             {isPdfLoading ? "Compiling PDF..." : "Download PDF"}
           </button>
 
           {isFromFilesPage ? (
-            <button 
-              onClick={() => navigate(-1)} 
-              className="flex-1 sm:flex-none bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer text-center transition-all flex items-center justify-center gap-1"
-            >
+            <button onClick={() => navigate(-1)} className="flex-1 sm:flex-none bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer text-center transition-all flex items-center justify-center gap-1">
               <ArrowLeft size={14} /> Back
             </button>
           ) : (
-            <button 
-              onClick={() => navigate("/payment-success", { state: { paymentId, formData, grandTotal, tokenAdvanceAmount } })}
-              className="flex-1 sm:flex-none bg-[#962A27] hover:bg-[#7a1e1b] text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer flex items-center justify-center gap-1 text-center whitespace-nowrap shadow-md shadow-red-900/10 transition-all"
-            >
+            <button onClick={() => navigate("/payment-success", { state: { paymentId, formData, grandTotal, tokenAdvanceAmount } })} className="flex-1 sm:flex-none bg-[#962A27] hover:bg-[#7a1e1b] text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider cursor-pointer flex items-center justify-center gap-1 text-center whitespace-nowrap shadow-md shadow-red-900/10 transition-all">
               Proceed <ArrowRight size={14} />
             </button>
           )}
         </div>
       </div>
 
-      {/* ========================================================
-          👑 SCROLLABLE RESPONSIVE CONTAINER SHIELD
-          ======================================================== */}
+      {/* MASTER DATA SHEETS */}
       <div className="max-w-4xl mx-auto overflow-x-auto pb-6 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
-        <div 
-          ref={invoiceRef} 
-          className="bg-white min-w-[210mm] w-[210mm] mx-auto"
-          style={{ transformOrigin: "top left" }}
-        >
-          {/* 📄 PAGE 1 */}
-          <div 
-            className="bg-white p-10 h-[296mm] max-h-[296mm] flex flex-col justify-between border-4 border-[#962A27] m-0" 
-            style={{ boxSizing: "border-box", pageBreakAfter: "always" }}
-          >
-            <div className="border-2 border-amber-300 p-6 flex flex-col justify-between h-full w-full">
-              <div>
-                <div className="text-center w-full mb-2">
-                  <span className="text-[#962A27] font-bold text-xl tracking-widest px-3 py-0.5 bg-amber-50 border border-amber-200 rounded-full">உ</span>
-                </div>
+        <div ref={invoiceRef} className="bg-white min-w-[210mm] w-[210mm] mx-auto" style={{ transformOrigin: "top left" }}>
+          {itemPages.map((currentPageItems, pageIndex) => {
+            const isFirstPage = pageIndex === 0;
+            const isLastPage = pageIndex === totalPagesCount - 1;
 
-                <div className="flex justify-between items-start border-b border-slate-200 pb-4 mb-4">
-                  <div className="space-y-1 text-left">
-                    <div className="flex items-center gap-4">
-                      {logo && (
-                        <div className="w-14 h-14 overflow-hidden rounded-xl bg-slate-50 p-1 border border-slate-200 shrink-0">
-                          <img src={logo} alt="Logo" className="w-full h-full object-contain" />
-                        </div>
-                      )}
-                      <div style={{ wordBreak: "keep-all", whiteSpace: "nowrap" }}>
-                        <h1 className="text-2xl font-black text-[#962A27] m-0 tracking-normal" style={{ fontFamily: "sans-serif" }}>
-                          லெட்சுமி கேட்டரிங்
-                        </h1>
-                        <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest mt-1.5">
-                          Premium Catering & Hospitality Services
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-xs text-slate-500 font-medium pt-2">
-                      <p>📍 H-10, Aishwarya Avenue, Thanavayal, Karaikudi</p>
-                      <p className="font-mono text-slate-700 font-bold">📞 Mobile: +91 96006 30051</p>
-                    </div>
-                  </div>
-
-                  <div className="text-right space-y-1">
-                    <span className="inline-block bg-[#962A27] text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded">COMMERCIAL INVOICE</span>
-                    <p className="text-[10px] uppercase font-bold text-slate-400 m-0 pt-1">Invoice Number</p>
-                    <p className="font-mono text-base font-black text-slate-900 m-0 tracking-tight">{invoiceNumber}</p>
-                    <p className="text-[10px] uppercase font-bold text-slate-400 m-0">Date Issued</p>
-                    <p className="text-xs font-bold text-slate-900 m-0">{currentDate}</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-6 py-4 my-3 bg-slate-50 border border-slate-200/60 rounded-xl px-5 text-left">
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center border-b border-slate-200/60 pb-1 w-fit">
-                      👤 Billed To (Customer)
-                    </p>
-                    <p className="text-base font-black text-slate-900 capitalize m-0">{formData.name}</p>
-                    <p className="text-xs font-bold text-slate-600 font-mono"> Phone: {formData.phone}</p>
-                    <p className="text-[11px] font-bold text-[#962A27] uppercase tracking-wide"> Venue: {formData.address || formData.city}</p>
-                  </div>
-
-                  <div className="space-y-1 border-l border-slate-200 pl-6">
-                    <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center border-b border-slate-200/60 pb-1 w-fit">
-                      📅 Event Specifications
-                    </p>
-                    <div className="grid grid-cols-2 gap-y-1 text-xs pt-1 font-semibold text-slate-700">
-                      <span className="text-slate-400">Event Nature:</span>
-                      <span className="text-slate-900 font-black uppercase text-right">{formData.eventType}</span>
-                      <span className="text-slate-400">Meal Session:</span>
-                      <span className="text-slate-900 font-black uppercase text-right">{formData.session || "Lunch"}</span>
-                      <span className="text-slate-400">Reporting Time:</span>
-                      <span className="text-slate-900 font-mono text-right">{formData.reportingTime || "10:00 AM"}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-amber-500/10 border-2 border-amber-500/20 rounded-xl p-4 my-4 flex justify-between items-center text-left">
+            return (
+              <div key={pageIndex} className="bg-white p-10 h-[296mm] max-h-[296mm] flex flex-col justify-between border-4 border-[#962A27] m-0" style={{ boxSizing: "border-box", pageBreakAfter: "always" }}>
+                <div className="border-2 border-amber-300 p-6 flex flex-col justify-between h-full w-full">
                   <div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-amber-800 block">SELECTED PACKAGE TIER</span>
-                    <p className="text-sm font-black text-slate-900 uppercase m-0 mt-0.5">Package: {formData.packageName || "Veg Signature Package"}</p>
-                    <p className="text-xs font-bold text-slate-600 font-mono m-0 mt-0.5">Rate Per Plate: ₹{unitPriceCalculated.toLocaleString("en-IN")}</p>
+                    {isFirstPage ? (
+                      <>
+                        <div className="text-center w-full mb-2">
+                          <span className="text-[#962A27] font-bold text-xl tracking-widest">உ</span>
+                        </div>
+
+                        <div className="flex justify-between items-start border-b border-slate-200 pb-4 mb-4">
+                          <div className="space-y-1 text-left">
+                            <div className="flex items-center gap-4">
+                              {logo && (
+                                <div className="w-14 h-14 overflow-hidden rounded-xl bg-slate-50 p-1 border border-slate-200 shrink-0">
+                                  <img src={logo} alt="Logo" className="w-full h-full object-contain" />
+                                </div>
+                              )}
+                              <div style={{ wordBreak: "keep-all", whiteSpace: "nowrap" }}>
+                                <h1 className="text-2xl font-black text-[#962A27] m-0 tracking-normal" style={{ fontFamily: "sans-serif" }}>லெட்சுமி கேட்டரிங்</h1>
+                                <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest mt-1.5">Tradition of Taste & Absolute Quality</p>
+                              </div>
+                            </div>
+                            <div className="text-xs text-slate-500 font-medium pt-2">
+                              <p>📍 H-10, Aishwarya Avenue, Thanavayal, Karaikudi</p>
+                              <p className="font-mono text-slate-700 font-bold">📞 Mobile: +91 96006 30051</p>
+                            </div>
+                          </div>
+
+                          <div className="text-right space-y-1">
+                            <span className="inline-block bg-[#962A27] text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded">COMMERCIAL INVOICE</span>
+                            <p className="text-[10px] uppercase font-bold text-slate-400 m-0 pt-1">Invoice Number</p>
+                            <p className="font-mono text-base font-black text-slate-900 m-0 tracking-tight">{invoiceNumber}</p>
+                            <p className="text-[10px] uppercase font-bold text-slate-400 m-0">Date Issued</p>
+                            <p className="text-xs font-bold text-slate-900 m-0">{currentDate}</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6 py-4 my-3 bg-slate-50 border border-slate-200/60 rounded-xl px-5 text-left">
+                          <div className="space-y-1">
+                            <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center border-b border-slate-200/60 pb-1 w-fit">👤 Billed To (Customer)</p>
+                            <p className="text-base font-black text-slate-900 capitalize m-0">{formData.name}</p>
+                            <p className="text-xs font-bold text-slate-600 font-mono"> Phone: {formData.phone}</p>
+                            <p className="text-[11px] font-bold text-[#962A27] uppercase tracking-wide"> Venue: {formData.address || formData.city}</p>
+                          </div>
+
+                          <div className="space-y-1 border-l border-slate-200 pl-6">
+                            <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center border-b border-slate-200/60 pb-1 w-fit">📅 Event Specifications</p>
+                            <div className="grid grid-cols-2 gap-y-1 text-xs pt-1 font-semibold text-slate-700">
+                              <span className="text-slate-400">Event Date:</span>
+                              <span className="text-slate-900 font-bold font-mono text-right text-[#962A27]">{userEventDate}</span>
+                              <span className="text-slate-400">Event Nature:</span>
+                              <span className="text-slate-900 font-black uppercase text-right">{formData.eventType}</span>
+                              <span className="text-slate-400">Meal Session:</span>
+                              <span className="text-slate-900 font-black uppercase text-right">{formData.session || "Lunch"}</span>
+                              <span className="text-slate-400">Reporting Time:</span>
+                              <span className="text-slate-900 font-mono text-right">{formData.reportingTime || "10:00 AM"}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-amber-500/10 border-2 border-amber-500/20 rounded-xl p-4 my-4 flex justify-between items-center text-left">
+                          <div>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-amber-800 block">SELECTED PACKAGE TIER</span>
+                            <p className="text-sm font-black text-slate-900 uppercase m-0 mt-0.5">Package: {formData.packageName || "Veg Signature Package"}</p>
+                            <p className="text-xs font-bold text-slate-600 font-mono m-0 mt-0.5">Rate Per Plate: ₹{unitPriceCalculated.toLocaleString("en-IN")}</p>
+                          </div>
+                          <div className="text-center bg-white px-5 py-2 rounded-lg border border-amber-200 shadow-sm">
+                            <span className="text-[9px] font-black tracking-widest text-slate-400 block uppercase">TOTAL GUESTS</span>
+                            <span className="text-3xl font-black text-black font-mono leading-none">{totalGuests}</span>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex justify-between items-center border-b border-slate-200 pb-3 mb-6 w-full text-left">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lakshmi Catering Account Ledger</span>
+                        <span className="font-mono text-xs font-bold text-slate-400 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded">INV REFERENCE: {invoiceNumber}</span>
+                      </div>
+                    )}
+
+                    {/* டைனமிக் டேபிள் */}
+                    {currentPageItems.length > 0 && (
+                      <div className="mt-4 text-left">
+                        <h3 className="text-xs font-black tracking-widest text-slate-900 uppercase mb-3 pb-1 border-b border-slate-200">
+                          🍴 Menu Architecture ({isFirstPage ? "Page 1" : `Page ${pageIndex + 1}`})
+                        </h3>
+                        <table className="w-full table-fixed border-collapse">
+                          <thead>
+                            {hasCustomItems ? (
+                              <tr className="text-left text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
+                                <th className="pb-1.5 pl-2" style={{ width: "8%" }}>S.No</th>
+                                <th className="pb-1.5" style={{ width: "42%" }}>Item Name</th>
+                                <th className="pb-1.5 text-right" style={{ width: "15%" }}>Item Price</th>
+                                <th className="pb-1.5 text-center" style={{ width: "15%" }}>Count</th>
+                                <th className="pb-1.5 text-right pr-2" style={{ width: "20%" }}>Total Amount</th>
+                              </tr>
+                            ) : (
+                              <tr className="text-left text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
+                                <th className="pb-1.5 pl-2" style={{ width: "10%" }}>S.No</th>
+                                <th className="pb-1.5" style={{ width: "70%" }}>Item Name</th>
+                                <th className="pb-1.5 text-center pr-2" style={{ width: "20%" }}>Count</th>
+                              </tr>
+                            )}
+                          </thead>
+                          <tbody>
+                            {currentPageItems.map((item, index) => {
+                              let globalIndex = isFirstPage ? index + 1 : 10 + ((pageIndex - 1) * 15) + index + 1;
+                              const details = findItemDetails(item, formData);
+
+                              return (
+                                <tr key={index} className="border-b border-slate-100 hover:bg-slate-50/50">
+                                  {hasCustomItems ? (
+                                    <>
+                                      <td className="py-2.5 pl-2 font-mono text-xs text-slate-400">{String(globalIndex).padStart(2, '0')}</td>
+                                      <td className="py-2.5 text-[13px] font-bold text-slate-800 capitalize truncate">{details.name}</td>
+                                      <td className="py-2.5 text-[12px] font-bold text-slate-600 font-mono text-right">{details.price}</td>
+                                      <td className="py-2.5 text-[12px] font-black text-slate-900 font-mono text-center bg-slate-50/50 rounded">{details.count}</td>
+                                      <td className="py-2.5 text-[13px] font-black text-slate-900 font-mono text-right pr-2">{details.total}</td>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <td className="py-2.5 pl-2 font-mono text-xs text-slate-400">{String(globalIndex).padStart(2, '0')}</td>
+                                      <td className="py-2.5 text-[14px] font-bold text-slate-800 capitalize truncate">{details.name}</td>
+                                      <td className="py-2.5 text-[13px] font-black text-slate-900 font-mono text-center bg-slate-50/50 rounded pr-2">{details.count}</td>
+                                    </>
+                                  )}
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+
+                    {!isFirstPage && currentPageItems.length === 0 && (
+                      <div className="py-6 text-center text-slate-300 font-medium text-xs border border-dashed border-slate-200 rounded-xl mt-4">
+                        Primary menu listing aggregated on Page 1. Financial breakdown attached below.
+                      </div>
+                    )}
                   </div>
-                  <div className="text-center bg-white px-5 py-2 rounded-lg border border-amber-200 shadow-sm">
-                    <span className="text-[9px] font-black tracking-widest text-slate-400 block uppercase">TOTAL GUESTS</span>
-                    <span className="text-3xl font-black text-black font-mono leading-none">{totalGuests}</span>
+
+                  {isLastPage && <FinancialLedgerBlock />}
+
+                  <div className="text-center text-[10px] text-slate-400 font-bold uppercase tracking-widest pt-3 border-t border-slate-100 mt-6">
+                    Page {pageIndex + 1} / {totalPagesCount} • {isLastPage ? "Accounts Ledger Summary Enclosed" : `Menu Overflow Redirected to Page ${pageIndex + 2}`}
                   </div>
                 </div>
-
-                <div className="mt-4 text-left">
-                  <h3 className="text-xs font-black tracking-widest text-slate-900 uppercase mb-3 pb-1 border-b border-slate-200">
-                    🍴 Menu Architecture (Page 1)
-                  </h3>
-                  <table className="w-full table-fixed border-collapse">
-                    <thead>
-                      <tr className="text-left text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
-                        <th className="pb-1.5 pl-2" style={{ width: "12%" }}>S.No</th>
-                        <th className="pb-1.5" style={{ width: "88%" }}>Menu Item Name</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {page1Items.map((item, index) => (
-                        <tr key={index} className="border-b border-slate-100 hover:bg-slate-50/50">
-                          <td className="py-2.5 pl-2 font-mono text-xs text-slate-400">{String(index + 1).padStart(2, '0')}</td>
-                          <td className="py-2.5 text-[14px] font-bold text-slate-800 capitalize truncate">{item}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
               </div>
-              <div className="text-center text-[10px] text-slate-400 font-bold uppercase tracking-widest pt-3 border-t border-slate-100 mt-6">
-                Page 1 / {totalPagesCount} • Invoice Structure Segments Continued
-              </div>
-            </div>
-          </div>
-
-          {/* 📄 PAGE 2 */}
-          <div 
-            className="bg-white p-10 h-[296mm] max-h-[296mm] flex flex-col justify-between border-4 border-[#962A27] m-0"
-            style={{ boxSizing: "border-box", pageBreakAfter: hasPage3Items ? "always" : "auto" }}
-          >
-            <div className="border-2 border-amber-300 p-6 flex flex-col justify-between h-full w-full">
-              <div>
-                <div className="flex justify-between items-center border-b border-slate-200 pb-3 mb-6 w-full text-left">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lakshmi Catering Account Ledger</span>
-                  <span className="font-mono text-xs font-bold text-slate-400 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded">INV REFERENCE: {invoiceNumber}</span>
-                </div>
-
-                {hasPage2Items && (
-                  <div className="mb-8 text-left">
-                    <h3 className="text-xs font-black tracking-widest text-slate-900 uppercase mb-3 pb-1 border-b border-slate-200">
-                      🍴 Menu Architecture (Page 2 Continuation)
-                    </h3>
-                    <table className="w-full table-fixed border-collapse">
-                      <thead>
-                        <tr className="text-left text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
-                          <th className="pb-1.5 pl-2" style={{ width: "12%" }}>S.No</th>
-                          <th className="pb-1.5" style={{ width: "88%" }}>Menu Item Name</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {page2Items.map((item, index) => (
-                          <tr key={index} className="border-b border-slate-100 hover:bg-slate-50/50">
-                            <td className="py-2.5 pl-2 font-mono text-xs text-slate-400">{String(index + 11).padStart(2, '0')}</td>
-                            <td className="py-2.5 text-[14px] font-bold text-slate-800 capitalize truncate">{item}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-
-              {showPaymentOnPage2 && <FinancialLedgerBlock />}
-
-              <div className="text-center text-[10px] text-slate-400 font-bold uppercase tracking-widest pt-3 border-t border-slate-100 mt-6">
-                Page 2 / {totalPagesCount} • {hasPage3Items ? "Menu Overflow Redirected to Page 3" : "Accounts Ledger Summary Enclosed"}
-              </div>
-            </div>
-          </div>
-
-          {/* 📄 PAGE 3 */}
-          {hasPage3Items && (
-            <div 
-              className="bg-white p-10 h-[296mm] max-h-[296mm] flex flex-col justify-between border-4 border-[#962A27] m-0"
-              style={{ boxSizing: "border-box" }}
-            >
-              <div className="border-2 border-amber-300 p-6 flex flex-col justify-between h-full w-full">
-                <div>
-                  <div className="flex justify-between items-center border-b border-slate-200 pb-3 mb-6 w-full text-left">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lakshmi Catering Account Ledger</span>
-                    <span className="font-mono text-xs font-bold text-slate-400 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded">INV REFERENCE: {invoiceNumber}</span>
-                  </div>
-
-                  <div className="mb-8 text-left">
-                    <h3 className="text-xs font-black tracking-widest text-slate-900 uppercase mb-3 pb-1 border-b border-slate-200">
-                      🍴 Menu Architecture (Page 3 Final Continuation)
-                    </h3>
-                    <table className="w-full table-fixed border-collapse">
-                      <thead>
-                        <tr className="text-left text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100">
-                          <th className="pb-1.5 pl-2" style={{ width: "12%" }}>S.No</th>
-                          <th className="pb-1.5" style={{ width: "88%" }}>Menu Item Name</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {page3Items.map((item, index) => (
-                          <tr key={index} className="border-b border-slate-100 hover:bg-slate-50/50">
-                            <td className="py-2.5 pl-2 font-mono text-xs text-slate-400">{String(index + 21).padStart(2, '0')}</td>
-                            <td className="py-2.5 text-[14px] font-bold text-slate-800 capitalize truncate">{item}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                {showPaymentOnPage3 && <FinancialLedgerBlock />}
-
-                <div className="text-center text-[10px] text-slate-400 font-bold uppercase tracking-widest pt-3 border-t border-slate-100 mt-6">
-                  Page 3 / 3 • Final Accounts Ledger Summary Enclosed
-                </div>
-              </div>
-            </div>
-          )}
-
+            );
+          })}
         </div>
       </div>
     </div>

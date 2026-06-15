@@ -28,7 +28,8 @@
     "react-to-print": "^3.3.0",
     "react-toastify": "^11.1.0",
     "sweetalert2": "^11.26.25",
-    "swiper": "^12.1.4"
+    "swiper": "^12.1.4",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
