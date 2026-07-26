@@ -29,7 +29,7 @@ const AdminOrderReviews = () => {
   const itemsPerPage = 15;
 
   useEffect(() => {
-    fetch("https://project-lc.onrender.com/api/booking1/get-all-bookings")
+    fetch("http://localhost:5000/api/booking1/get-all-bookings")
       .then((res) => {
         if (!res.ok) throw new Error(`Server status: ${res.status}`);
         return res.json();

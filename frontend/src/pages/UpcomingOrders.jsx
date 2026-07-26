@@ -22,7 +22,7 @@ const UpcomingOrders = () => {
   const ordersPerPage = 10;
 
   // 🔥 FIXED: Unga server.js-la "/api/booking1" nu register pannirukathala, ingayum atha mathiyachu!
-  const LOCAL_API_BASE = "https://project-lc.onrender.com/api/booking1";
+  const LOCAL_API_BASE = "http://localhost:5000/api/booking1";
 
   /* =========================
       FETCH ORDERS
@@ -30,7 +30,7 @@ const UpcomingOrders = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      // Perfect Sync with https://project-lc.onrender.com/api/booking1/upcoming
+      // Perfect Sync with http://localhost:5000/api/booking1/upcoming
       const response = await axios.get(`${LOCAL_API_BASE}/upcoming`);
       
       const fetchedData = response.data.orders || response.data || [];
@@ -91,7 +91,7 @@ const UpcomingOrders = () => {
 
     try {
       setDeletingId(id);
-      // Perfect Sync with https://project-lc.onrender.com/api/booking1/:id
+      // Perfect Sync with http://localhost:5000/api/booking1/:id
       const response = await axios.delete(`${LOCAL_API_BASE}/${id}`);
 
       if (response.data.success) {

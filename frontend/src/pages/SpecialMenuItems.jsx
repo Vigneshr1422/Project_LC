@@ -179,7 +179,7 @@ const SpecialMenuItems = () => {
 
       // REST Engine DB Pipeline Hook integration routing
       try {
-        await axios.post(`https://project-lc.onrender.com/api/booking1/menu-bulk-sync`, {
+        await axios.post(`http://localhost:5000/api/booking1/menu-bulk-sync`, {
           updatedInventory: finalUpdatedList
         });
       } catch (err) {
@@ -249,7 +249,7 @@ const SpecialMenuItems = () => {
       setFlatMenuData(synchronizedList);
 
       try {
-        await axios.post(`https://project-lc.onrender.com/api/booking1/menu-bulk-sync`, {
+        await axios.post(`http://localhost:5000/api/booking1/menu-bulk-sync`, {
           updatedInventory: synchronizedList
         });
       } catch (err) {
@@ -282,7 +282,7 @@ const SpecialMenuItems = () => {
           setFlatMenuData(synchronizedList);
 
           try {
-            await axios.post(`https://project-lc.onrender.com/api/booking1/menu-bulk-sync`, {
+            await axios.post(`http://localhost:5000/api/booking1/menu-bulk-sync`, {
               updatedInventory: synchronizedList
             });
           } catch (err) {

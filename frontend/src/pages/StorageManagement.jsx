@@ -32,7 +32,7 @@ const StorageManagement = () => {
   const fetchStorage = async () => {
     try {
       setError(false);
-      const res = await axios.get("https://project-lc.onrender.com/api/bookings/storage");
+      const res = await axios.get("http://localhost:5000/api/bookings/storage");
       setStorage(res.data);
     } catch (error) {
       console.log("Error fetching cluster diagnostics: ", error);
@@ -52,7 +52,7 @@ const StorageManagement = () => {
     
     try {
       setDeleting(true);
-      const res = await axios.delete("https://project-lc.onrender.com/api/booking1/delete-all");
+      const res = await axios.delete("http://localhost:5000/api/booking1/delete-all");
       
       if (res.data.success) {
         setIsModalOpen(false);

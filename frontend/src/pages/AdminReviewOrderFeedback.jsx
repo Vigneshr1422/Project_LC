@@ -31,7 +31,7 @@ const AdminReviewOrderFeedback = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const res = await fetch(`https://project-lc.onrender.com/api/reviews/order/${orderId}`);
+        const res = await fetch(`http://localhost:5000/api/reviews/order/${orderId}`);
         if (!res.ok) {
           setReviewsList([]);
           setLoading(false);
