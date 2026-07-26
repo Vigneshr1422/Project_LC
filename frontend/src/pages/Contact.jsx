@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import Loader from "../components/Loader";
-
 import {
   FaFacebookF,
   FaInstagram,
@@ -11,1277 +9,303 @@ import {
   FaPhoneAlt,
   FaEnvelope,
   FaMapMarkerAlt,
-  FaChevronRight,
 } from "react-icons/fa";
 
+
 function Contact() {
-const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+    setLoading(false);
+  };
 
-  setLoading(true);
-
-  // API / Email sending
-  await new Promise((resolve) => setTimeout(resolve, 2500));
-
-  setLoading(false);
-};
   return (
-
-    <section className="bg-[#fffaf7] overflow-hidden">
-
-      {/* ================================================= */}
-      {/* HERO SECTION */}
-      {/* ================================================= */}
-
-      <div
-        className="
-        relative
-        h-[380px]
-        md:h-[450px]
-        flex items-center justify-center
-        text-center
-        px-5
-        "
-      >
-
-        {/* BACKGROUND IMAGE */}
+    <section className="bg-[#fffaf7] text-[#2b1b17] min-h-screen overflow-hidden">
+      
+      {/* HERO BANNER SECTION */}
+      <div className="relative h-[320px] sm:h-[380px] md:h-[420px] flex items-center justify-center text-center px-6">
         <img
           src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop"
-
           alt="contact-banner"
-
-          className="
-          absolute inset-0
-          w-full h-full
-          object-cover
-          "
+          className="absolute inset-0 w-full h-full object-cover"
         />
-
-        {/* DARK OVERLAY */}
-        <div
-          className="
-          absolute inset-0
-          bg-black/65
-          "
-        />
-
-        {/* CONTENT */}
+        <div className="absolute inset-0 bg-black/60" />
+        
         <motion.div
-
-          initial={{
-            opacity: 0,
-            y: 50,
-          }}
-
-          whileInView={{
-            opacity: 1,
-            y: 0,
-          }}
-
-          transition={{
-            duration: 0.8,
-          }}
-
-          viewport={{ once: true }}
-
-          className="relative z-10 max-w-4xl"
-
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="relative z-10 max-w-3xl"
         >
-
-          {/* TOP SMALL BUTTON */}
-          <div
-            className="
-            inline-block
-            px-6 py-2
-            rounded-full
-            bg-[#962a27]
-            text-white
-            tracking-[3px]
-            text-xs md:text-sm
-            font-semibold
-            uppercase
-            mb-5
-            "
-          >
-
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#962a27]/90 text-white font-semibold text-xs uppercase tracking-widest mb-4 border border-white/20">
+            <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
             Connect With Us
-
           </div>
-
-          {/* TITLE */}
-          <h1
-            className="
-            text-white
-            text-5xl md:text-7xl
-            font-bold
-            "
-          >
-
-            Get in Touch
-
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight mb-4">
+            Get In Touch
           </h1>
-
-          {/* SUBTEXT */}
-          <p
-            className="
-            mt-6
-            text-[#f5e6de]
-            text-lg md:text-2xl
-            leading-9
-            "
-          >
-
-            Whether it's a wedding, birthday,
-            corporate event, or family celebration,
-            we're here to serve you with premium
-            catering experience.
-
+          <p className="text-gray-200 text-sm sm:text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
+            Whether it's a wedding, birthday, corporate event, or family function, we are here to provide an authentic & memorable catering experience.
           </p>
-
         </motion.div>
-
       </div>
 
-      {/* ================================================= */}
-      {/* CONTACT SECTION */}
-      {/* ================================================= */}
-
-      <div
-        className="
-        max-w-7xl
-        mx-auto
-        px-5 md:px-10
-        relative
-        z-20
-        -mt-24
-        pb-24
-        "
-      >
-
+      {/* MAIN CONTACT PANEL */}
+      <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-20 -mt-12 sm:-mt-16 pb-20">
         <motion.div
-
-          initial={{
-            opacity: 0,
-            y: 80,
-          }}
-
-          whileInView={{
-            opacity: 1,
-            y: 0,
-          }}
-
-          transition={{
-            duration: 0.8,
-          }}
-
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-
-          className="
-          grid
-          grid-cols-1
-          lg:grid-cols-[0.9fr_1.3fr]
-          rounded-[35px]
-          overflow-hidden
-          shadow-[0_20px_80px_rgba(0,0,0,0.12)]
-          bg-white
-          "
+          className="grid grid-cols-1 lg:grid-cols-[0.85fr_1.15fr] rounded-[2rem] overflow-hidden shadow-xl border border-gray-100 bg-white"
         >
-
-          {/* =============================================== */}
-          {/* LEFT SIDE */}
-          {/* =============================================== */}
-
-          <div
-            className="
-            relative
-            bg-gradient-to-br
-            from-[#962a27]
-            via-[#7e1f1c]
-            to-[#4a120f]
-            p-10 md:p-14
-            text-white
-            overflow-hidden
-            "
-          >
-
-            {/* GLOW EFFECT */}
-            <div
-              className="
-              absolute
-              -top-32
-              -right-24
-              w-72 h-72
-              rounded-full
-              bg-white/10
-              blur-3xl
-              "
-            />
-
-            {/* TITLE */}
-            <h2
-              className="
-              text-4xl
-              font-bold
-              mb-14
-              relative z-10
-              "
-            >
-
-              Contact Information
-
-            </h2>
-
-          <div className="space-y-10 relative z-10">
-
-  {/* LOCATION */}
-  <motion.div
-
-    whileHover={{
-      x: 6,
-    }}
-
-    className="flex gap-4"
-
-  >
-
-    <div
-      className="
-      min-w-[55px]
-      h-[55px]
-      rounded-full
-      bg-white/10
-      backdrop-blur-md
-      flex items-center justify-center
-      text-xl
-      "
-    >
-
-      <FaMapMarkerAlt />
-
-    </div>
-
-    <div>
-
-      <h3 className="text-xl font-semibold mb-1">
-        Location
-      </h3>
-
-      <p className="text-[#f8d9d1] leading-7 text-[15px]">
-
-        H-10, Aishwarya Avenue,
-        Thanavayal,
-        <br />
-
-        Karaikudi - 630001
-
-      </p>
-
-    </div>
-
-  </motion.div>
-
-  {/* PHONE */}
-  <motion.div
-
-    whileHover={{
-      x: 6,
-    }}
-
-    className="flex gap-4"
-
-  >
-
-    <div
-      className="
-      min-w-[55px]
-      h-[55px]
-      rounded-full
-      bg-white/10
-      backdrop-blur-md
-      flex items-center justify-center
-      text-xl
-      "
-    >
-
-      <FaPhoneAlt />
-
-    </div>
-
-    <div>
-
-      <h3 className="text-xl font-semibold mb-1">
-        Call Us
-      </h3>
-
-      <div className="space-y-1 text-[#f8d9d1] text-[15px]">
-
-        <a
-          href="tel:+919600630051"
-          className="block hover:text-white duration-300"
-        >
-          +91 96006 30051
-        </a>
-
-        <a
-          href="tel:+919123578042"
-          className="block hover:text-white duration-300"
-        >
-          +91 91235 78042
-        </a>
-
-      </div>
-
-    </div>
-
-  </motion.div>
-
-  {/* EMAIL */}
-  <motion.div
-
-    whileHover={{
-      x: 6,
-    }}
-
-    className="flex gap-4"
-
-  >
-
-    <div
-      className="
-      min-w-[55px]
-      h-[55px]
-      rounded-full
-      bg-white/10
-      backdrop-blur-md
-      flex items-center justify-center
-      text-xl
-      "
-    >
-
-      <FaEnvelope />
-
-    </div>
-
-    <div>
-
-      <h3 className="text-xl font-semibold mb-1">
-        Write to Us
-      </h3>
-
-      <a
-        href="mailto:lakshmicatering@gmail.com"
-
-        className="
-        text-[#f8d9d1]
-        hover:text-white
-        duration-300
-        break-all
-        text-[15px]
-        "
-      >
-
-        lakshmicatering@gmail.com
-
-      </a>
-
-    </div>
-
-  </motion.div>
-
-  {/* WHATSAPP BUTTON */}
-{/* =========================================== */}
-{/* BOTTOM SECTION */}
-{/* =========================================== */}
-
-<div
-  className="
-  mt-auto
-  pt-10
-  border-t border-white/10
-
-  flex flex-col
-  items-center
-  justify-end
-  "
->
-
-  {/* WHATSAPP BUTTON */}
-  <motion.a
-
-    href="https://wa.me/919600630051"
-
-    target="_blank"
-    rel="noreferrer"
-
-    whileHover={{
-      scale: 1.03,
-    }}
-
-    whileTap={{
-      scale: 0.96,
-    }}
-
-    className="
-    w-full
-    max-w-[320px]
-
-    flex items-center justify-center
-    gap-3
-
-    bg-[#25D366]
-    hover:bg-[#1ebe5d]
-
-    py-4
-    rounded-2xl
-
-    text-lg
-    font-semibold
-
-    duration-300
-    shadow-lg
-    "
-  >
-
-    <FaWhatsapp className="text-2xl" />
-
-    Chat on WhatsApp
-
-  </motion.a>
-
-  {/* SOCIAL MEDIA ICONS */}
-  <div
-    className="
-    flex items-center
-    justify-center
-    gap-4
-
-    mt-7
-    pb-2
-    "
-  >
-
-    {/* FACEBOOK */}
-    <a
-
-      href="https://facebook.com"
-
-      target="_blank"
-      rel="noreferrer"
-
-      className="
-      w-11 h-11
-      rounded-full
-
-      bg-white/10
-      backdrop-blur-md
-
-      flex items-center justify-center
-
-      hover:bg-white
-      hover:text-[#962a27]
-
-      duration-300
-      hover:-translate-y-1
-      "
-    >
-
-      <FaFacebookF />
-
-    </a>
-
-    {/* INSTAGRAM */}
-    <a
-
-      href="https://instagram.com"
-
-      target="_blank"
-      rel="noreferrer"
-
-      className="
-      w-11 h-11
-      rounded-full
-
-      bg-white/10
-      backdrop-blur-md
-
-      flex items-center justify-center
-
-      hover:bg-white
-      hover:text-[#962a27]
-
-      duration-300
-      hover:-translate-y-1
-      "
-    >
-
-      <FaInstagram />
-
-    </a>
-
-    {/* YOUTUBE */}
-    <a
-
-      href="https://youtube.com"
-
-      target="_blank"
-      rel="noreferrer"
-
-      className="
-      w-11 h-11
-      rounded-full
-
-      bg-white/10
-      backdrop-blur-md
-
-      flex items-center justify-center
-
-      hover:bg-white
-      hover:text-[#962a27]
-
-      duration-300
-      hover:-translate-y-1
-      "
-    >
-
-      <FaYoutube />
-
-    </a>
-
-    {/* LINKEDIN */}
-    <a
-
-      href="#"
-
-      className="
-      w-11 h-11
-      rounded-full
-
-      bg-white/10
-      backdrop-blur-md
-
-      flex items-center justify-center
-
-      hover:bg-white
-      hover:text-[#962a27]
-
-      duration-300
-      hover:-translate-y-1
-      "
-    >
-
-      <FaLinkedinIn />
-
-    </a>
-
-  </div>
-
-</div>
-
-</div>
-
+          {/* Left Panel: Contact Information */}
+          <div className="bg-[#962a27] p-8 sm:p-10 md:p-12 text-white flex flex-col justify-between relative overflow-hidden">
+            <div className="absolute -top-24 -right-24 w-64 h-64 rounded-full bg-white/5 blur-2xl pointer-events-none" />
+
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold mb-8 pb-4 border-b border-white/15">
+                Contact Information
+              </h2>
+
+              <div className="space-y-6">
+                {/* Location */}
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-xl shrink-0 text-[#fce8d5]">
+                    <FaMapMarkerAlt />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white mb-1">Location</h3>
+                    <p className="text-gray-200 text-sm leading-relaxed">
+                      H-10, Aishwarya Avenue, Thanavayal, <br /> Karaikudi - 630001
+                    </p>
+                  </div>
+                </div>
+
+                {/* Call Us */}
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-xl shrink-0 text-[#fce8d5]">
+                    <FaPhoneAlt />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white mb-1">Call Us</h3>
+                    <div className="space-y-1 text-gray-200 text-sm font-medium">
+                      <a href="tel:+919600630051" className="block hover:text-white transition-colors">
+                        +91 96006 30051
+                      </a>
+                      <a href="tel:+919123578042" className="block hover:text-white transition-colors">
+                        +91 91235 78042
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Email */}
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-xl shrink-0 text-[#fce8d5]">
+                    <FaEnvelope />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white mb-1">Email Us</h3>
+                    <a href="mailto:lakshmicatering@gmail.com" className="text-gray-200 hover:text-white text-sm font-medium transition-colors break-all">
+                      lakshmicatering@gmail.com
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Social Panel */}
+            <div className="mt-10 pt-8 border-t border-white/15 flex flex-col items-center sm:items-start gap-4">
+              <a
+                href="https://wa.me/919600630051"
+                target="_blank"
+                rel="noreferrer"
+                className="w-full flex items-center justify-center gap-3 bg-[#25D366] hover:bg-[#20bd5a] py-3.5 rounded-xl text-white font-bold text-sm shadow-md transition-all"
+              >
+                <FaWhatsapp className="text-lg" />
+                Chat on WhatsApp
+              </a>
+
+              <div className="flex items-center justify-center gap-3 w-full pt-2">
+                {[
+                  { icon: <FaFacebookF />, link: "https://facebook.com" },
+                  { icon: <FaInstagram />, link: "https://instagram.com" },
+                  { icon: <FaYoutube />, link: "https://youtube.com" },
+                  { icon: <FaLinkedinIn />, link: "#" },
+                ].map((item, idx) => (
+                  <a
+                    key={idx}
+                    href={item.link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-[#962a27] transition-all text-sm"
+                  >
+                    {item.icon}
+                  </a>
+                ))}
+              </div>
+            </div>
           </div>
 
-          {/* =============================================== */}
-          {/* RIGHT SIDE */}
-          {/* =============================================== */}
+          {/* Right Panel: Form */}
+          <div className="p-8 sm:p-10 md:p-12 bg-white flex flex-col justify-center">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#2b1b17] mb-2">
+              Send Us A Message
+            </h2>
+            <p className="text-gray-600 text-sm leading-relaxed mb-8">
+              Fill out the form below and we will get back to you promptly to discuss your catering requirements.
+            </p>
 
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  placeholder="First Name"
+                  required
+                  className="w-full h-12 rounded-xl border border-gray-200 px-4 text-sm outline-none focus:border-[#962a27] focus:ring-1 focus:ring-[#962a27] bg-[#fffaf7] transition-all"
+                />
+                <input
+                  type="text"
+                  placeholder="Last Name"
+                  required
+                  className="w-full h-12 rounded-xl border border-gray-200 px-4 text-sm outline-none focus:border-[#962a27] focus:ring-1 focus:ring-[#962a27] bg-[#fffaf7] transition-all"
+                />
+              </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <input
+                  type="tel"
+                  placeholder="Mobile Number"
+                  required
+                  className="w-full h-12 rounded-xl border border-gray-200 px-4 text-sm outline-none focus:border-[#962a27] focus:ring-1 focus:ring-[#962a27] bg-[#fffaf7] transition-all"
+                />
+                <input
+                  type="email"
+                  placeholder="Email Address"
+                  required
+                  className="w-full h-12 rounded-xl border border-gray-200 px-4 text-sm outline-none focus:border-[#962a27] focus:ring-1 focus:ring-[#962a27] bg-[#fffaf7] transition-all"
+                />
+              </div>
 
-    <div
-      className="
-      bg-white
-      p-8 md:p-14
-      "
-    >
-
-      {/* TITLE */}
-      <motion.h2
-        initial={{
-          opacity: 0,
-          y: 40,
-        }}
-        whileInView={{
-          opacity: 1,
-          y: 0,
-        }}
-        transition={{
-          duration: 0.7,
-        }}
-        viewport={{ once: true }}
-        className="
-        text-4xl md:text-5xl
-        font-bold
-        text-[#2b110f]
-        "
-      >
-
-        Send us a Message
-
-      </motion.h2>
-
-      {/* SUBTEXT */}
-      <p
-        className="
-        mt-6
-        text-[#7b6a66]
-        text-lg
-        leading-9
-        max-w-2xl
-        "
-      >
-
-        Questions about catering, weddings,
-        birthday parties, or corporate events?
-        We'd love to hear from you.
-
-      </p>
-
-      {/* FORM */}
-      <form
-        onSubmit={handleSubmit}
-        className="mt-12 space-y-7"
-      >
-
-        {/* ROW 1 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-          <input
-            type="text"
-            placeholder="First Name"
-            className="
-            h-16
-            rounded-2xl
-            border border-[#e8d5cb]
-            px-6
-            outline-none
-            focus:border-[#962a27]
-            duration-300
-            bg-[#fffaf7]
-            "
-          />
-
-          <input
-            type="text"
-            placeholder="Last Name"
-            className="
-            h-16
-            rounded-2xl
-            border border-[#e8d5cb]
-            px-6
-            outline-none
-            focus:border-[#962a27]
-            duration-300
-            bg-[#fffaf7]
-            "
-          />
-
-        </div>
-
-        {/* ROW 2 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-          <input
-            type="tel"
-            placeholder="Mobile Number"
-            className="
-            h-16
-            rounded-2xl
-            border border-[#e8d5cb]
-            px-6
-            outline-none
-            focus:border-[#962a27]
-            duration-300
-            bg-[#fffaf7]
-            "
-          />
-
-          <input
-            type="email"
-            placeholder="Email ID"
-            className="
-            h-16
-            rounded-2xl
-            border border-[#e8d5cb]
-            px-6
-            outline-none
-            focus:border-[#962a27]
-            duration-300
-            bg-[#fffaf7]
-            "
-          />
-
-        </div>
-
-        {/* MESSAGE */}
-        <textarea
-          rows="6"
-          placeholder="Type Message"
-          className="
-          w-full
-          rounded-2xl
-          border border-[#e8d5cb]
-          px-6 py-5
-          outline-none
-          focus:border-[#962a27]
-          duration-300
-          bg-[#fffaf7]
-          resize-none
-          "
-        />
-
-        {/* BUTTON */}
-        <motion.button
-
-          whileHover={{
-            scale: loading ? 1 : 1.03,
-          }}
-
-          whileTap={{
-            scale: loading ? 1 : 0.96,
-          }}
-
-          disabled={loading}
-
-          type="submit"
-
-          className="
-          w-full md:w-auto
-          px-12
-          h-16
-          rounded-2xl
-          bg-[#962a27]
-          hover:bg-[#7d1f1c]
-          disabled:bg-[#b46a68]
-          text-white
-          font-semibold
-          text-lg
-          duration-300
-          shadow-lg
-          flex
-          items-center
-          justify-center
-          gap-3
-          "
-        >
-
-          {loading ? (
-            <>
-
-              {/* LOADING SPINNER */}
-              <motion.div
-
-                animate={{
-                  rotate: 360,
-                }}
-
-                transition={{
-                  repeat: Infinity,
-                  duration: 1,
-                  ease: "linear",
-                }}
-
-                className="
-                w-6
-                h-6
-                border-[3px]
-                border-white/30
-                border-t-white
-                rounded-full
-                "
+              <textarea
+                rows="4"
+                placeholder="Type your message or query here..."
+                required
+                className="w-full rounded-xl border border-gray-200 p-4 text-sm outline-none focus:border-[#962a27] focus:ring-1 focus:ring-[#962a27] bg-[#fffaf7] resize-none transition-all"
               />
 
-              Sending...
-
-            </>
-          ) : (
-
-            "Send Message"
-
-          )}
-
-        </motion.button>
-
-      </form>
-
-    </div>
-  
-
+              <button
+                disabled={loading}
+                type="submit"
+                className="w-full sm:w-auto px-8 h-12 rounded-xl bg-[#962a27] hover:bg-[#7a2220] disabled:bg-[#b86b69] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {loading ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  "Send Message"
+                )}
+              </button>
+            </form>
+          </div>
         </motion.div>
-
       </div>
 
-{/* ====================================================== */}
-{/* LOCATION & MAP SECTION */}
-{/* ====================================================== */}
-
-<section className="bg-white pb-24 px-5 md:px-10">
-
+    {/* MAP SECTION */}
+{/* MAP SECTION */}
+<section className="pb-20 px-6 md:px-12">
   <div className="max-w-7xl mx-auto">
-
-    {/* TOP TITLE */}
-    <motion.div
-
-      initial={{
-        opacity: 0,
-        y: 40,
-      }}
-
-      whileInView={{
-        opacity: 1,
-        y: 0,
-      }}
-
-      transition={{
-        duration: 0.7,
-      }}
-
-      viewport={{ once: true }}
-
-      className="text-center mb-16"
-
-    >
-
-      <div
-        className="
-        inline-block
-        px-6 py-2
-        rounded-full
-        bg-[#962a27]
-        text-white
-        tracking-[3px]
-        text-xs md:text-sm
-        font-semibold
-        uppercase
-        mb-5
-        "
-      >
-
+    
+    {/* Header */}
+    <div className="text-center mb-10">
+      <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#962a27]/10 text-[#962a27] font-semibold text-xs uppercase tracking-widest mb-3 border border-[#962a27]/20">
+        <span className="w-2 h-2 rounded-full bg-[#962a27]" />
         Our Location
-
-      </div>
-
-      <h2
-        className="
-        text-4xl md:text-6xl
-        font-bold
-        text-[#2b110f]
-        "
-      >
-
+      </span>
+      <h2 className="text-3xl sm:text-4xl font-extrabold text-[#2b1b17]">
         Visit Our Catering Hub
-
       </h2>
-
-      <p
-        className="
-        mt-6
-        text-[#7b6a66]
-        text-lg
-        leading-9
-        max-w-3xl
-        mx-auto
-        "
-      >
-
-        Experience our premium catering service
-        directly at our location in Karaikudi.
-        Visit us for event discussions, bookings,
-        and personalized catering plans.
-
+      <p className="text-gray-600 text-sm sm:text-base max-w-xl mx-auto mt-2 leading-relaxed">
+        Visit our main catering hub in Karaikudi for direct event discussions, bookings, and menu planning.
       </p>
+    </div>
 
-    </motion.div>
-
-    {/* MAIN GRID */}
-    <div
-      className="
-      grid
-      grid-cols-1
-      lg:grid-cols-2
-      gap-10
-      items-center
-      "
-    >
-
-      {/* ===================================== */}
-      {/* LEFT IMAGE */}
-      {/* ===================================== */}
-
-      <motion.div
-
-        initial={{
-          opacity: 0,
-          x: -80,
-        }}
-
-        whileInView={{
-          opacity: 1,
-          x: 0,
-        }}
-
-        transition={{
-          duration: 0.8,
-        }}
-
-        viewport={{ once: true }}
-
-        className="
-        relative
-        rounded-[35px]
-        overflow-hidden
-        shadow-[0_20px_70px_rgba(0,0,0,0.12)]
-        group
-        h-[500px]
-        "
-      >
-
-        {/* IMAGE */}
-        <img
-
-          src="https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=2070&auto=format&fit=crop"
-
-          alt="Lakshmi Catering"
-
-          className="
-          w-full
-          h-full
-          object-cover
-          group-hover:scale-110
-          duration-700
-          "
-        />
-
-        {/* OVERLAY */}
-        <div
-          className="
-          absolute inset-0
-          bg-gradient-to-t
-          from-black/80
-          via-black/20
-          to-transparent
-          "
-        />
-
-        {/* CONTENT */}
-        <div
-          className="
-          absolute bottom-0 left-0
-          p-8 md:p-10
-          text-white
-          "
-        >
-
-          <h3 className="text-3xl md:text-4xl font-bold">
-
-            Lakshmi Catering
-
-          </h3>
-
-          <p
-            className="
-            mt-4
-            text-[#f5d9d0]
-            leading-8
-            text-base md:text-lg
-            "
-          >
-
-            Authentic South Indian catering
-            experience crafted with quality,
-            taste, and tradition for every event.
-
-          </p>
-
-        </div>
-
-      </motion.div>
-
-      {/* ===================================== */}
-      {/* RIGHT MAP */}
-      {/* ===================================== */}
-
-      <motion.div
-
-        initial={{
-          opacity: 0,
-          x: 80,
-        }}
-
-        whileInView={{
-          opacity: 1,
-          x: 0,
-        }}
-
-        transition={{
-          duration: 0.8,
-        }}
-
-        viewport={{ once: true }}
-
-        className="
-        relative
-        h-[500px]
-        rounded-[35px]
-        overflow-hidden
-        shadow-[0_20px_70px_rgba(0,0,0,0.12)]
-        border border-[#f3d8c7]
-        "
-      >
-
-        {/* MAP */}
-<div className="relative w-full h-[300px] sm:h-[400px] md:h-[500px] overflow-hidden rounded-3xl shadow-2xl">
-
-  <iframe
-    title="Lakshmi Catering Karaikudi"
-    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3929.0976854856863!2d78.7844734!3d10.008789499999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b005d8f2ca203c3%3A0xc828bdbdf259ec89!2sLakshmi%20Catering%20Karaikudi!5e0!3m2!1sen!2sin!4v1779617861112!5m2!1sen!2sin"
-    loading="lazy"
-    allowFullScreen
-    referrerPolicy="no-referrer-when-downgrade"
-    className="absolute inset-0 w-full h-full border-0"
-  />
-
-</div>
-        {/* LOCATION CARD */}
-        <motion.div
-
-          initial={{
-            opacity: 0,
-            y: 40,
-          }}
-
-          whileInView={{
-            opacity: 1,
-            y: 0,
-          }}
-
-          transition={{
-            delay: 0.3,
-            duration: 0.7,
-          }}
-
-          viewport={{ once: true }}
-
-          whileHover={{
-            y: -5,
-          }}
-
-          className="
-          absolute
-          bottom-6 left-6 right-6
-          bg-white/95
-          backdrop-blur-xl
-          rounded-[25px]
-          p-6
-          shadow-xl
-          "
-        >
-
-          <div className="flex items-start gap-4">
-
-            {/* ICON */}
-            <div
-              className="
-              min-w-[55px]
-              h-[55px]
-              rounded-full
-              bg-[#fff1ea]
-              text-[#962a27]
-              flex items-center justify-center
-              text-xl
-              "
-            >
-
-              <FaMapMarkerAlt />
-
-            </div>
-
-            {/* TEXT */}
-            <div>
-
-              <h4
-                className="
-                text-2xl
-                font-bold
-                text-[#2b110f]
-                "
-              >
-
-                Karaikudi Branch
-
-              </h4>
-
-              <p
-                className="
-                mt-2
-                text-[#7b6a66]
-                leading-7
-                "
-              >
-
-                H-10, Aishwarya Avenue,
-                Thanavayal,
-                Karaikudi - 630001
-
-              </p>
-
-            </div>
-
+    {/* Clean Split Layout */}
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+      
+      {/* LEFT: Clean Info Box (4 Cols) */}
+      <div className="lg:col-span-4 bg-white rounded-3xl p-8 border border-gray-200/80 shadow-sm flex flex-col justify-between">
+        <div>
+          <div className="w-12 h-12 rounded-2xl bg-[#962a27]/10 text-[#962a27] flex items-center justify-center text-xl mb-6">
+            <FaMapMarkerAlt />
           </div>
 
-        </motion.div>
+          <h3 className="text-2xl font-extrabold text-[#2b1b17] mb-2">
+            Karaikudi Branch
+          </h3>
+          
+          <p className="text-gray-600 text-sm leading-relaxed mb-6">
+            H-10, Aishwarya Avenue, Thanavayal, <br />
+            Karaikudi, Tamil Nadu - 630001
+          </p>
 
-      </motion.div>
+          <div className="space-y-3 pt-6 border-t border-gray-100">
+            <div className="flex items-center gap-3 text-sm text-gray-600">
+              <span className="font-bold text-[#2b1b17]">Timing:</span> Mon - Sun (9:00 AM - 9:00 PM)
+            </div>
+            <div className="flex items-center gap-3 text-sm text-gray-600">
+              <span className="font-bold text-[#2b1b17]">Phone:</span> +91 96006 30051
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col gap-3 mt-8">
+          <a
+            href="https://maps.google.com/?q=Lakshmi+Catering+Karaikudi"
+            target="_blank"
+            rel="noreferrer"
+            className="w-full inline-flex items-center justify-center gap-2 bg-[#962a27] text-white py-3.5 px-5 rounded-xl font-bold text-sm shadow-md shadow-[#962a27]/20 hover:bg-[#7a2220] transition-all"
+          >
+            <span>Open in Google Maps</span>
+            <span>→</span>
+          </a>
+
+          <a
+            href="tel:+919600630051"
+            className="w-full inline-flex items-center justify-center gap-2 bg-[#fffaf7] border border-gray-200 hover:border-[#962a27] text-[#2b1b17] py-3.5 px-5 rounded-xl font-bold text-sm transition-all"
+          >
+            <FaPhoneAlt className="text-xs text-[#962a27]" />
+            <span>Call For Directions</span>
+          </a>
+        </div>
+      </div>
+
+      {/* RIGHT: Pure Map Display (8 Cols) */}
+      <div className="lg:col-span-8 h-[400px] lg:h-auto min-h-[380px] rounded-3xl overflow-hidden border border-gray-200/80 shadow-sm bg-gray-50">
+        <iframe
+          title="Lakshmi Catering Karaikudi Location"
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3929.0976854856863!2d78.7844734!3d10.008789499999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b005d8f2ca203c3%3A0xc828bdbdf259ec89!2sLakshmi%20Catering%20Karaikudi!5e0!3m2!1sen!2sin!4v1779617861112!5m2!1sen!2sin"
+          loading="lazy"
+          allowFullScreen
+          referrerPolicy="no-referrer-when-downgrade"
+          className="w-full h-full border-0"
+        />
+      </div>
 
     </div>
 
   </div>
-
 </section>
 
-
-
-{/* ================= WHY CHOOSE US SECTION ================= */}
-
-<section className="w-full bg-[#fffaf5] py-16 md:py-20 px-4 sm:px-6 md:px-16 overflow-hidden">
-  <div className="max-w-7xl mx-auto text-center">
-
-    {/* Heading */}
-    <motion.div
-      initial={{ opacity: 0, y: 80 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8 }}
-      viewport={{ once: false, amount: 0.2 }}
-    >
-      <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#962a27] mb-4">
-        Why Families Trust Us
-      </h2>
-
-      <p className="text-gray-600 max-w-2xl mx-auto mb-12 md:mb-14 text-sm sm:text-base md:text-lg leading-relaxed">
-        Bringing authentic taste, premium service, and unforgettable dining
-        experiences to every celebration.
-      </p>
-    </motion.div>
-
-    {/* Cards */}
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
-
-      {/* Card 1 */}
-      <motion.div
-        initial={{ opacity: 0, y: 100 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7 }}
-        viewport={{ once: false, amount: 0.2 }}
-        whileHover={{ y: -10 }}
-        className="bg-white rounded-2xl md:rounded-3xl shadow-md hover:shadow-2xl p-4 sm:p-6 md:p-8 border border-[#f3e3d3] duration-300"
-      >
-        <div className="text-3xl sm:text-4xl md:text-5xl mb-3 md:mb-5">
-          ⏰
-        </div>
-
-        <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-[#962a27] mb-2 md:mb-3">
-          Flexible Hours
-        </h3>
-
-        <p className="text-gray-600 text-xs sm:text-sm md:text-base leading-relaxed">
-          Available all week for bookings and catering support.
-        </p>
-
-        <div className="mt-3 md:mt-5 text-[11px] sm:text-sm font-medium text-[#b85c38]">
-          Mon - Sun • 9 AM - 10 PM
-        </div>
-      </motion.div>
-
-      {/* Card 2 */}
-      <motion.div
-        initial={{ opacity: 0, y: 100 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: false, amount: 0.2 }}
-        whileHover={{ y: -10 }}
-        className="bg-white rounded-2xl md:rounded-3xl shadow-md hover:shadow-2xl p-4 sm:p-6 md:p-8 border border-[#f3e3d3] duration-300"
-      >
-        <div className="text-3xl sm:text-4xl md:text-5xl mb-3 md:mb-5">
-          🍽️
-        </div>
-
-        <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-[#962a27] mb-2 md:mb-3">
-          Freshly Prepared
-        </h3>
-
-        <p className="text-gray-600 text-xs sm:text-sm md:text-base leading-relaxed">
-          Hygienic cooking with authentic flavors and fresh ingredients.
-        </p>
-
-        <div className="mt-3 md:mt-5 text-[11px] sm:text-sm font-medium text-[#b85c38]">
-          Quality Guaranteed
-        </div>
-      </motion.div>
-
-      {/* Card 3 */}
-      <motion.div
-        initial={{ opacity: 0, y: 100 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.9 }}
-        viewport={{ once: false, amount: 0.2 }}
-        whileHover={{ y: -10 }}
-        className="bg-white rounded-2xl md:rounded-3xl shadow-md hover:shadow-2xl p-4 sm:p-6 md:p-8 border border-[#f3e3d3] duration-300"
-      >
-        <div className="text-3xl sm:text-4xl md:text-5xl mb-3 md:mb-5">
-          ⚡
-        </div>
-
-        <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-[#962a27] mb-2 md:mb-3">
-          Quick Response
-        </h3>
-
-        <p className="text-gray-600 text-xs sm:text-sm md:text-base leading-relaxed">
-          Fast replies for pricing, booking, and menu inquiries.
-        </p>
-
-        <div className="mt-3 md:mt-5 text-[11px] sm:text-sm font-medium text-[#b85c38]">
-          Within Few Hours
-        </div>
-      </motion.div>
-
-      {/* Card 4 */}
-      <motion.div
-        initial={{ opacity: 0, y: 100 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1 }}
-        viewport={{ once: false, amount: 0.2 }}
-        whileHover={{ y: -10 }}
-        className="bg-white rounded-2xl md:rounded-3xl shadow-md hover:shadow-2xl p-4 sm:p-6 md:p-8 border border-[#f3e3d3] duration-300"
-      >
-        <div className="text-3xl sm:text-4xl md:text-5xl mb-3 md:mb-5">
-          🎉
-        </div>
-
-        <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-[#962a27] mb-2 md:mb-3">
-          Every Celebration
-        </h3>
-
-        <p className="text-gray-600 text-xs sm:text-sm md:text-base leading-relaxed">
-          Weddings, birthdays, family functions, and corporate events.
-        </p>
-
-        <div className="mt-3 md:mt-5 text-[11px] sm:text-sm font-medium text-[#b85c38]">
-          Trusted By Families
-        </div>
-      </motion.div>
-
-    </div>
-  </div>
-</section>
     </section>
-
-    
-
-  
-);
-
-  
+  );
 }
 
 export default Contact;

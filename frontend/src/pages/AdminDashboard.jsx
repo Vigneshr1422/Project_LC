@@ -8,59 +8,47 @@ import {
   HardDrive,
   FolderOpen,
   LogOut,
-  AlertTriangle // 👈 Added for Expiry Toast visual styling
+  AlertTriangle,
+  QrCode,
+  MessageSquareQuote,
 } from "lucide-react";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  
-  // Custom Toast State (No extra packages needed)
   const [toast, setToast] = useState({ show: false, message: "" });
 
-  /* =========================
-      LOGOUT ROUTINE
-  ========================== */
   const handleLogout = () => {
     localStorage.removeItem("adminAuth");
     localStorage.removeItem("adminLoginTime");
     navigate("/");
   };
 
-  /* =========================
-      🔥 TIMESTAMP BASED AUTO-LOGOUT
-  ========================== */
   useEffect(() => {
     if (!localStorage.getItem("adminLoginTime")) {
       localStorage.setItem("adminLoginTime", new Date().getTime().toString());
     }
-
     const checkSessionExpiry = () => {
       const loginTime = localStorage.getItem("adminLoginTime");
-      
       if (loginTime) {
         const currentTime = new Date().getTime();
         const EXPIRY_DURATION = 2 * 60 * 60 * 1000; // 2 Hours
-
         if (currentTime - parseInt(loginTime) > EXPIRY_DURATION) {
-          // Trigger sleek toast alert before executing logout routine
-          setToast({ show: true, message: "🔒 Session Expired! Logging out automatically..." });
-          
+          setToast({
+            show: true,
+            message: "🔒 Session Expired! Logging out automatically...",
+          });
           setTimeout(() => {
             handleLogout();
-          }, 3000); // 3 seconds screen layout hold for toast visibility
+          }, 3000);
         }
       }
     };
-
     checkSessionExpiry();
     const interval = setInterval(checkSessionExpiry, 10000);
     return () => clearInterval(interval);
   }, [navigate]);
 
-  /* =========================
-      📦 ARRANGED DASHBOARD BUTTONS 
-      (Logical Flow: Business/Orders ➡️ Management ➡️ Files)
-  ========================== */
+  /* ========================= 📦 ALL 8 DASHBOARD BUTTONS ========================== */
   const dashboardButtons = [
     {
       icon: <Calendar size={34} />,
@@ -78,9 +66,9 @@ const AdminDashboard = () => {
       path: "/completed-orders",
     },
     {
-      icon: <ChefHat size={34} />, 
+      icon: <ChefHat size={34} />,
       title: "Menu Items",
-      path: "/special-menu-items", 
+      path: "/special-menu-items",
     },
     {
       icon: <HardDrive size={34} />,
@@ -92,19 +80,30 @@ const AdminDashboard = () => {
       title: "Cloud Files",
       path: "/files",
     },
+    {
+      icon: <QrCode size={34} />,
+      title: "Order QR & Reviews",
+      path: "/admin/order-reviews",
+    },
+    {
+      icon: <MessageSquareQuote size={34} />,
+      title: "Testimonials",
+      path: "/admin/testimonials",
+    },
   ];
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] px-5 py-8 md:px-10 md:py-10 relative overflow-x-hidden">
-   
       {toast.show && (
-        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-md bg-slate-900/95 backdrop-blur-md text-white border border-slate-800 rounded-2xl px-5 py-4 shadow-2xl flex items-center gap-4 animate-bounce entry-toast-animation transition-all">
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-md bg-slate-900/95 backdrop-blur-md text-white border border-slate-800 rounded-2xl px-5 py-4 shadow-2xl flex items-center gap-4 animate-bounce">
           <div className="p-2 bg-rose-500/20 rounded-xl text-rose-400">
             <AlertTriangle size={20} className="animate-pulse" />
           </div>
           <div className="flex-1">
             <p className="text-sm font-bold text-slate-100">{toast.message}</p>
-            <p className="text-[11px] text-slate-400 mt-0.5">Please re-authenticate your session</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              Please re-authenticate your session
+            </p>
           </div>
         </div>
       )}
@@ -119,20 +118,17 @@ const AdminDashboard = () => {
         </p>
       </div>
 
-      {/* RE-ORDERED BUTTON GRID */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-5xl mx-auto">
+      {/* 8 BUTTONS GRID */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 max-w-6xl mx-auto">
         {dashboardButtons.map((item, index) => (
           <button
             key={index}
             onClick={() => navigate(item.path)}
             className="bg-white border border-gray-200 rounded-[30px] p-5 md:p-8 flex flex-col items-center justify-center text-center hover:border-[#962a27] hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
           >
-            {/* ICON BOX */}
             <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br from-[#fff1f1] to-[#ffe3e2] flex items-center justify-center text-[#962a27] shadow-sm group-hover:scale-105 transition-transform duration-300">
               {item.icon}
             </div>
-
-            {/* TITLE */}
             <h2 className="mt-4 text-sm md:text-lg font-bold text-[#962a27]">
               {item.title}
             </h2>
@@ -146,8 +142,7 @@ const AdminDashboard = () => {
           onClick={handleLogout}
           className="flex items-center gap-3 bg-[#962a27] text-white px-8 py-4 rounded-2xl font-semibold hover:scale-105 hover:bg-[#b23835] transition-all duration-300 cursor-pointer shadow-md"
         >
-          <LogOut size={20} />
-          Logout Account
+          <LogOut size={20} /> Logout Account
         </button>
       </div>
     </div>

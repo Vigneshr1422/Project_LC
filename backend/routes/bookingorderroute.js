@@ -1,54 +1,90 @@
 import express from "express";
 import BookingOrders from "../models/bookingOrderRoute.js";
 
+// 🎯 நம்ம தனி ஆர்க்கிடெக்சர் ஃபைலான whatsappServer-ஐ இம்போர்ட் செய்கிறோம்
+import { sendAutoWhatsAppInvoices } from "./whatsappServer.js"; 
+
 const router = express.Router();
 
 /* ========================================================
-    1. SAVE CONFIRMED BOOKING (POST)
+    1. SAVE CONFIRMED BOOKING (POST) - WITH WHATSAPP AUTOMATION
 ======================================================= */
 router.post("/save-confirmed-booking", async (req, res) => {
   try {
+    // 🎯 பிரண்ட்-எண்ட் அனுப்பும் நேரடி வேல்யூக்களை Destructure செய்கிறோம் (formData இன்றி)
     const {
-      formData,
+      customerName,
+      phone,
+      eventDate,
+      guests,
+      district,
+      city,
+      address,
+      eventType,
+      session,
+      preference,
+      bookingType,
+      packageId,
+      packageName,
+      packageItems,
       grandTotal,
-      tokenAdvanceAmount,
+      tokenAdvanceAmount, // (ஒருவேளை advancePaid-ஆகவும் வரலாம்)
+      advancePaid,        // மாற்றுப் பெயர் பாதுகாப்புக்காக
+      balanceAmount,
       paymentId,
       serviceCharge,
       deliveryCharge,
       staffCount,
       staffRequired,
       totalAmount,
+      invoicePdfDriveLink
     } = req.body;
 
+    console.log("📥 [Backend] Request received for customer:", customerName);
+
+    // 1. MongoDB Database-ல் ஆர்டரைச் சேமிக்கிறோம்
     const booking = await BookingOrders.create({
-      customerName: formData.name,
-      phone: formData.phone,
-      eventDate: formData.date,
-      guests: Number(formData.guests),
-      district: formData.district,
-      city: formData.city,
-      address: formData.address,
-      eventType: formData.eventType,
-      session: formData.session,
-      preference: formData.preference,
-      bookingType: formData.bookingType,
-      packageId: formData.selectedPackageId,
-      packageName: formData.packageName,
-      packageItems: formData.packageItems || [],
-      staffRequired,
-      staffCount,
-      packageCost: totalAmount,
-      deliveryCharge,
-      serviceCharge,
-      grandTotal,
-      advancePaid: tokenAdvanceAmount,
-      balanceAmount: grandTotal - tokenAdvanceAmount,
+      customerName: customerName,
+      phone: phone,
+      eventDate: eventDate,
+      guests: guests ? Number(guests) : 0,
+      district: district,
+      city: city,
+      address: address,
+      eventType: eventType,
+      session: session,
+      preference: preference,
+      bookingType: bookingType,
+      packageId: packageId,
+      packageName: packageName,
+      packageItems: packageItems || [],
+      staffRequired: staffRequired,
+      staffCount: staffCount,
+      packageCost: totalAmount || grandTotal, // உங்க ஸ்கீமா பெயருக்கு ஏற்ப
+      deliveryCharge: deliveryCharge,
+      serviceCharge: serviceCharge,
+      grandTotal: grandTotal,
+      advancePaid: tokenAdvanceAmount || advancePaid || 0,
+      balanceAmount: balanceAmount || (grandTotal - (tokenAdvanceAmount || advancePaid || 0)),
       razorpayPaymentId: paymentId,
       paymentStatus: "Success",
       bookingStatus: "Pending",
+      invoicePdfDriveLink: invoicePdfDriveLink || "" 
     });
 
     console.log("✅ Step 1: MongoDB Booking Record Sync Complete!");
+
+    // ==================================================================
+    // 🔥 2. BACKEND AUTOMATION: BACKGROUND WHATSAPP ENGINE TRIGGER
+    // ==================================================================
+    try {
+      // வாட்ஸ்அப் மெசேஜ் அனுப்ப இப்போ கிரியேட் ஆன 'booking' ஆப்ஜெக்ட்டை அப்படியே பாஸ் பண்றோம்
+      await sendAutoWhatsAppInvoices(booking);
+      console.log("🚀 Step 2: Full-Auto Backend WhatsApp Trigger Fired!");
+    } catch (wsError) {
+      // வாட்ஸ்அப் செஷன் கட் ஆகி இருந்தாலும் மெயின் ஆர்டர் சேவிங் பிளாக் ஆகாமல் தடுக்க செப்பரேட் ட்ரை-கேட்ச்
+      console.log("⚠️ WhatsApp Automation Engine Fired safely with warnings:", wsError.message);
+    }
 
     return res.status(201).json({
       success: true,
@@ -66,14 +102,11 @@ router.post("/save-confirmed-booking", async (req, res) => {
 ======================================================== */
 router.get("/get-all-bookings", async (req, res) => {
   try {
-    // Database-la irukura elaa bookings-aiyum eduthu frontend-ku tharom
     const bookings = await BookingOrders.find({});
     
-    // Frontend dynamic structural keys mapping wrapper
-    // Frontend-la `.name`, `.date` nu object flat keys vaasikirathaala, inge map panni safe-ah tharom
     const mappedBookings = bookings.map(b => ({
       _id: b._id,
-      id: b.id || b._id.toString().substring(18, 24).toUpperCase(), // Backup Custom Order ID template
+      id: b.id || b._id.toString().substring(18, 24).toUpperCase(), 
       name: b.customerName,
       date: b.eventDate,
       guests: b.guests,
@@ -132,7 +165,7 @@ router.post("/menu-bulk-sync", async (req, res) => {
 });
 
 /* ========================================================
-    6. DELETE ALL BOOKINGS (DELETE) - Specific Route mela irukalam
+    6. DELETE ALL BOOKINGS (DELETE)
 ======================================================== */
 router.delete("/delete-all", async (req, res) => {
   try {
@@ -144,7 +177,7 @@ router.delete("/delete-all", async (req, res) => {
 });
 
 /* ========================================================
-    7. DELETE BOOKING BY ID (DELETE) - Dynamic parameters parameters eppovume bottom-la thaan irukanum!
+    7. DELETE BOOKING BY ID (DELETE)
 ======================================================== */
 router.delete("/:id", async (req, res) => {
   try {
@@ -153,6 +186,21 @@ router.delete("/:id", async (req, res) => {
     res.status(200).json({ success: true, message: "Booking deleted successfully" });
   } catch (error) {
     res.status(500).json({ success: false, message: "Failed to delete booking", error: error.message });
+  }
+});
+
+/* ========================================================
+    GET SINGLE BOOKING BY ID (GET)
+======================================================== */
+router.get("/:id", async (req, res) => {
+  try {
+    const booking = await BookingOrders.findById(req.params.id);
+    if (!booking) {
+      return res.status(404).json({ success: false, message: "Booking not found" });
+    }
+    res.status(200).json({ success: true, booking });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error fetching booking", error: error.message });
   }
 });
 

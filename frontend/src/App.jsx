@@ -5,7 +5,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import Loader from "./components/Loader";
 import Login from "./pages/Login";
 import PDFPreview from "./pages/PDFPreview";
-
+import AdminReviewOrderFeedback from "./pages/AdminReviewOrderFeedback";
 import MainLayout from "./layout/MainLayout";
 import BookingPage from "./pages/BookingPage";
 import BookingPreview from "./pages/BookingPreview";
@@ -18,13 +18,15 @@ import BookingSummary from "./pages/BookingSummary";
 import AdminDashboard from "./pages/AdminDashboard";
 import CalendarOrders from "./pages/CalendarOrders";
 // Route Component setup list kulla ithai set பண்ணுங்க:
-import PaymentPage from "./pages/PaymentPage";
 import SpecialMenuItems from "./pages/SpecialMenuItems";
 import UsersManagement from "./pages/StorageManagement";
 import UpcomingOrders from "./pages/UpcomingOrders";
 import CompletedOrders from "./pages/CompletedOrders";
-import Files from "./pages/Files";
 
+import AdminTestimonials from "./pages/AdminTestimonials";
+import Files from "./pages/Files";
+              import AdminOrderReviews from "./pages/AdminOrderReviews";
+import CustomerReviewPage from "./pages/CustomerReviewPage";
 import PaymentSuccess from "./pages/PaymentSuccess";
 
 /* ==========================================================================
@@ -86,8 +88,8 @@ function App() {
             <Route path="/BookingSummary" element={<BookingSummary />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/booking-preview" element={<BookingPreview />} />
-            <Route path="/payment-gateway" element={<PaymentPage />} />
             <Route path="/pdf-preview" element={<PDFPreview />} />
+
 
             {/* 🔓 PUBLIC ADMIN ENTRY ROUTE (Wrapped with Login Check Guard) */}
             <Route 
@@ -128,7 +130,14 @@ function App() {
                 element={<SpecialMenuItems />} 
               />
               <Route path="/calendar-orders" element={<CalendarOrders />} />
+<Route path="/admin/order-feedback/:orderId" element={<AdminReviewOrderFeedback />} />
 
+
+// Inside Routes:
+<Route path="/admin/order-reviews" element={<AdminOrderReviews />} />
+<Route path="/customer-review" element={<CustomerReviewPage />} />
+
+<Route path="/admin/testimonials" element={<AdminTestimonials />} />
             </Route>
 
           </Route>

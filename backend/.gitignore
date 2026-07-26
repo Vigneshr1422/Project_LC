@@ -1,1 +1,9 @@
 backend/google-key.json
+
+.wwebjs_auth/
+.wwebjs_cache/
+
+node_modules
+.env
+dist
+build
