@@ -17,7 +17,7 @@ const CustomerReviewPage = () => {
 
   useEffect(() => {
     if (orderId) {
-      fetch(`http://localhost:5000/api/booking1/${orderId}`)
+      fetch(`https://project-lc.onrender.com/api/booking1/${orderId}`)
         .then((res) => {
           if (!res.ok) throw new Error("Order not found");
           return res.json();
@@ -79,7 +79,7 @@ const CustomerReviewPage = () => {
     }));
 
     try {
-      const res = await fetch("http://localhost:5000/api/reviews/submit", {
+      const res = await fetch("https://project-lc.onrender.com/api/reviews/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

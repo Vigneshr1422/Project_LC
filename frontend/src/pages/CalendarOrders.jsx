@@ -18,7 +18,7 @@ const CalendarOrders = () => {
       try {
         setLoading(true);
         // 🎯 Connected back to production server route
-        const response = await fetch("http://localhost:5000/api/booking1/get-all-bookings");
+        const response = await fetch("https://project-lc.onrender.com/api/booking1/get-all-bookings");
         const data = await response.json();
         
         if (data.success && data.bookings) {

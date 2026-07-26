@@ -34,7 +34,7 @@ const AdminTestimonials = () => {
   const fetchTestimonials = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:5000/api/testimonials/all");
+      const res = await axios.get("https://project-lc.onrender.com/api/testimonials/all");
       setTestimonials(res.data || []);
     } catch (err) {
       console.error("Error fetching testimonials:", err);
@@ -62,7 +62,7 @@ const AdminTestimonials = () => {
     setDeleteModal({ show: false, targetId: null, targetName: "" });
 
     try {
-      const res = await axios.delete(`http://localhost:5000/api/testimonials/delete/${id}`);
+      const res = await axios.delete(`https://project-lc.onrender.com/api/testimonials/delete/${id}`);
       if (res.status === 200) {
         setTestimonials((prev) => prev.filter((item) => item._id !== id));
         showToast("Testimonial removed successfully!");

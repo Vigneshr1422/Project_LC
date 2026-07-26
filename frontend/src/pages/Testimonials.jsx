@@ -59,7 +59,7 @@ const Testimonials = () => {
 
   const fetchLiveReviews = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/testimonials/all");
+      const response = await axios.get("https://project-lc.onrender.com/api/testimonials/all");
       if (response.data && response.data.length > 0) {
         setReviews(response.data);
       } else {
@@ -92,7 +92,7 @@ const Testimonials = () => {
       };
 
       // 🎯 Exact Match for your Backend Testimonial Router (/api/testimonials/save)
-      const response = await axios.post("http://localhost:5000/api/testimonials/save", payload);
+      const response = await axios.post("https://project-lc.onrender.com/api/testimonials/save", payload);
 
       if (response.status === 201) {
         setReviews((prevReviews) => [response.data, ...prevReviews]);

@@ -20,7 +20,7 @@ const Files = () => {
   const [sortOrder, setSortOrder] = useState("desc");
   const ordersPerPage = 10;
   
-  const LOCAL_API_BASE = "http://localhost:5000/api/booking1";
+  const LOCAL_API_BASE = "https://project-lc.onrender.com/api/booking1";
 
   /* ========================= FETCH ALL ORDERS ========================== */
   const fetchAllOrders = async () => {
