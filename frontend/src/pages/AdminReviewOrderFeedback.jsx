@@ -15,7 +15,7 @@ import {
   Filter,
   Sparkles,
   Flame,
-  CheckCircle2,
+  Clock,
   Home,
 } from "lucide-react";
 
@@ -29,9 +29,8 @@ const AdminReviewOrderFeedback = () => {
   const [loading, setLoading] = useState(true);
   const [filterStar, setFilterStar] = useState("ALL"); // ALL, 5, 3-4, LOW
 
-  // ⏱️ REDIRECT COUNTDOWN STATES
-  const [isCompleted, setIsCompleted] = useState(false);
-  const [countdown, setCountdown] = useState(6);
+  // ⏱️ 10-SECOND DIRECT COUNTDOWN STATE
+  const [countdown, setCountdown] = useState(10);
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -63,28 +62,21 @@ const AdminReviewOrderFeedback = () => {
     }
   }, [orderId]);
 
-  // ⏳ 6-SECOND REDIRECT TIMER LOGIC
+  // ⏳ 10-SECOND AUTOMATIC REDIRECT TIMER TO HOME ("/")
   useEffect(() => {
-    let timer;
-    if (isCompleted) {
-      timer = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            navigate("/"); // Redirect to Home Page
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [isCompleted, navigate]);
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          navigate("/"); // Direct Home Page Redirect
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
-  // 🎯 Trigger redirect manually or call this after complete review action
-  const handleFinishReview = () => {
-    setIsCompleted(true);
-  };
+    return () => clearInterval(timer);
+  }, [navigate]);
 
   // 📊 METRICS & MVP CALCULATIONS
   const stats = useMemo(() => {
@@ -182,41 +174,32 @@ const AdminReviewOrderFeedback = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-3 sm:p-6 lg:p-8 font-sans relative">
-      {/* 🚀 6-SECOND REDIRECT OVERLAY MODAL */}
-      {isCompleted && (
-        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center space-y-5 shadow-2xl border border-gray-100 animate-in fade-in zoom-in duration-300">
-            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto shadow-inner">
-              <CheckCircle2 size={36} />
+      <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6 text-left">
+        
+        {/* ⌚ TOP ANIMATED WATCH COUNTDOWN BANNER */}
+        <div className="bg-gradient-to-r from-slate-900 to-[#962A27] text-white p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl shadow-lg flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-amber-300 shrink-0 border border-white/10">
+              <Clock size={22} className="animate-spin" style={{ animationDuration: "10s" }} />
             </div>
-
             <div>
-              <h2 className="text-xl font-black text-gray-900">
-                Review Inspection Done!
-              </h2>
-              <p className="text-xs text-gray-500 mt-1 font-medium">
-                Redirecting to Home page automatically...
+              <p className="text-xs sm:text-sm font-black text-slate-100 flex items-center gap-1.5">
+                Redirecting to Home Page
+              </p>
+              <p className="text-[10px] sm:text-xs text-slate-300 font-medium">
+                Auto navigating in <span className="font-mono font-bold text-amber-300 text-sm">{countdown}s</span>
               </p>
             </div>
-
-            {/* Countdown Badge */}
-            <div className="inline-flex items-center gap-2 bg-rose-50 text-[#962A27] px-4 py-2 rounded-2xl border border-rose-100 font-mono font-black text-sm">
-              <span className="animate-ping w-2 h-2 rounded-full bg-[#962A27]"></span>
-              Redirecting in {countdown}s
-            </div>
-
-            {/* Direct Redirect Button */}
-            <button
-              onClick={() => navigate("/")}
-              className="w-full flex items-center justify-center gap-2 bg-[#962A27] text-white py-3 rounded-xl text-xs font-bold shadow-md hover:bg-[#7a2220] transition-all cursor-pointer"
-            >
-              <Home size={15} /> Go to Home Right Now
-            </button>
           </div>
-        </div>
-      )}
 
-      <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6 text-left">
+          <button
+            onClick={() => navigate("/")}
+            className="flex items-center gap-1.5 bg-white text-[#962A27] px-3.5 py-2 rounded-xl text-xs font-black hover:bg-gray-100 transition-all cursor-pointer shadow-sm shrink-0 active:scale-95"
+          >
+            <Home size={14} /> Go Home Now
+          </button>
+        </div>
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm gap-3">
           <div className="flex items-center gap-3 sm:gap-4">
@@ -237,21 +220,11 @@ const AdminReviewOrderFeedback = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            {stats.sentimentBadge && !loading && reviewsList.length > 0 && (
-              <span className="inline-flex self-start sm:self-auto items-center gap-1.5 bg-rose-50 border border-rose-100 text-[#962A27] px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-black">
-                <Sparkles size={13} /> {stats.sentimentBadge}
-              </span>
-            )}
-
-            {/* Complete Inspection Button */}
-            <button
-              onClick={handleFinishReview}
-              className="bg-[#962A27] hover:bg-[#7a2220] text-white px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
-            >
-              Finish & Go Home
-            </button>
-          </div>
+          {stats.sentimentBadge && !loading && reviewsList.length > 0 && (
+            <span className="inline-flex self-start sm:self-auto items-center gap-1.5 bg-rose-50 border border-rose-100 text-[#962A27] px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-black">
+              <Sparkles size={13} /> {stats.sentimentBadge}
+            </span>
+          )}
         </div>
 
         {/* Order Summary Card with Review Count */}
