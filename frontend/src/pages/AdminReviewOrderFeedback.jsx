@@ -15,23 +15,30 @@ import {
   Filter,
   Sparkles,
   Flame,
+  CheckCircle2,
+  Home,
 } from "lucide-react";
 
 const AdminReviewOrderFeedback = () => {
   const { orderId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-
   const passedOrder = location.state?.order || null;
 
   const [reviewsList, setReviewsList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterStar, setFilterStar] = useState("ALL"); // ALL, 5, 3-4, LOW
 
+  // ⏱️ REDIRECT COUNTDOWN STATES
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [countdown, setCountdown] = useState(6);
+
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const res = await fetch(`https://project-lc.onrender.com/api/reviews/order/${orderId}`);
+        const res = await fetch(
+          `https://project-lc.onrender.com/api/reviews/order/${orderId}`
+        );
         if (!res.ok) {
           setReviewsList([]);
           setLoading(false);
@@ -55,6 +62,29 @@ const AdminReviewOrderFeedback = () => {
       fetchReviews();
     }
   }, [orderId]);
+
+  // ⏳ 6-SECOND REDIRECT TIMER LOGIC
+  useEffect(() => {
+    let timer;
+    if (isCompleted) {
+      timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            navigate("/"); // Redirect to Home Page
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [isCompleted, navigate]);
+
+  // 🎯 Trigger redirect manually or call this after complete review action
+  const handleFinishReview = () => {
+    setIsCompleted(true);
+  };
 
   // 📊 METRICS & MVP CALCULATIONS
   const stats = useMemo(() => {
@@ -95,8 +125,9 @@ const AdminReviewOrderFeedback = () => {
     });
 
     const overallAvg =
-      totalRatingsCount > 0 ? (totalItemScoreSum / totalRatingsCount).toFixed(1) : "0.0";
-
+      totalRatingsCount > 0
+        ? (totalItemScoreSum / totalRatingsCount).toFixed(1)
+        : "0.0";
     const satisfactionRate =
       totalRatingsCount > 0
         ? Math.round((totalItemScoreSum / (totalRatingsCount * 5)) * 100)
@@ -131,10 +162,14 @@ const AdminReviewOrderFeedback = () => {
   // Dynamic Filter Logic
   const filteredReviews = useMemo(() => {
     if (filterStar === "ALL") return reviewsList;
+
     return reviewsList.filter((rev) => {
       const revItemCount = rev.itemReviews ? rev.itemReviews.length : 0;
       const revSum = revItemCount
-        ? rev.itemReviews.reduce((acc, curr) => acc + (Number(curr.rating) || 5), 0)
+        ? rev.itemReviews.reduce(
+            (acc, curr) => acc + (Number(curr.rating) || 5),
+            0
+          )
         : 5;
       const guestAvg = revItemCount ? revSum / revItemCount : 5;
 
@@ -146,7 +181,41 @@ const AdminReviewOrderFeedback = () => {
   }, [reviewsList, filterStar]);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-3 sm:p-6 lg:p-8 font-sans">
+    <div className="min-h-screen bg-[#F8FAFC] p-3 sm:p-6 lg:p-8 font-sans relative">
+      {/* 🚀 6-SECOND REDIRECT OVERLAY MODAL */}
+      {isCompleted && (
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center space-y-5 shadow-2xl border border-gray-100 animate-in fade-in zoom-in duration-300">
+            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto shadow-inner">
+              <CheckCircle2 size={36} />
+            </div>
+
+            <div>
+              <h2 className="text-xl font-black text-gray-900">
+                Review Inspection Done!
+              </h2>
+              <p className="text-xs text-gray-500 mt-1 font-medium">
+                Redirecting to Home page automatically...
+              </p>
+            </div>
+
+            {/* Countdown Badge */}
+            <div className="inline-flex items-center gap-2 bg-rose-50 text-[#962A27] px-4 py-2 rounded-2xl border border-rose-100 font-mono font-black text-sm">
+              <span className="animate-ping w-2 h-2 rounded-full bg-[#962A27]"></span>
+              Redirecting in {countdown}s
+            </div>
+
+            {/* Direct Redirect Button */}
+            <button
+              onClick={() => navigate("/")}
+              className="w-full flex items-center justify-center gap-2 bg-[#962A27] text-white py-3 rounded-xl text-xs font-bold shadow-md hover:bg-[#7a2220] transition-all cursor-pointer"
+            >
+              <Home size={15} /> Go to Home Right Now
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6 text-left">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm gap-3">
@@ -162,16 +231,27 @@ const AdminReviewOrderFeedback = () => {
                 Order ID: #{orderId}
               </span>
               <h1 className="text-xl sm:text-3xl font-black text-gray-900 mt-0.5 flex items-center gap-2">
-                <MessageSquare size={22} className="text-[#962A27] shrink-0" /> Order Feedback
+                <MessageSquare size={22} className="text-[#962A27] shrink-0" />{" "}
+                Order Feedback
               </h1>
             </div>
           </div>
-          {stats.sentimentBadge && !loading && reviewsList.length > 0 && (
-            <span className="inline-flex self-start sm:self-auto items-center gap-1.5 bg-rose-50 border border-rose-100 text-[#962A27] px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-black">
-              <Sparkles size={13} />
-              {stats.sentimentBadge}
-            </span>
-          )}
+
+          <div className="flex items-center gap-2">
+            {stats.sentimentBadge && !loading && reviewsList.length > 0 && (
+              <span className="inline-flex self-start sm:self-auto items-center gap-1.5 bg-rose-50 border border-rose-100 text-[#962A27] px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-black">
+                <Sparkles size={13} /> {stats.sentimentBadge}
+              </span>
+            )}
+
+            {/* Complete Inspection Button */}
+            <button
+              onClick={handleFinishReview}
+              className="bg-[#962A27] hover:bg-[#7a2220] text-white px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
+            >
+              Finish & Go Home
+            </button>
+          </div>
         </div>
 
         {/* Order Summary Card with Review Count */}
@@ -190,9 +270,9 @@ const AdminReviewOrderFeedback = () => {
               </div>
             )}
             <div>
-              {/* Dynamic Review Count Badge */}
               <span className="inline-block text-xs font-bold text-rose-800 bg-rose-50 px-3 py-1 rounded-xl border border-rose-100 uppercase">
-                {reviewsList.length} {reviewsList.length === 1 ? "Review" : "Reviews"}
+                {reviewsList.length}{" "}
+                {reviewsList.length === 1 ? "Review" : "Reviews"}
               </span>
             </div>
           </div>
@@ -212,8 +292,12 @@ const AdminReviewOrderFeedback = () => {
 
               <div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-4xl sm:text-5xl font-black text-gray-900">{stats.overallAvg}</span>
-                  <span className="text-xs sm:text-sm font-bold text-gray-400">/ 5.0</span>
+                  <span className="text-4xl sm:text-5xl font-black text-gray-900">
+                    {stats.overallAvg}
+                  </span>
+                  <span className="text-xs sm:text-sm font-bold text-gray-400">
+                    / 5.0
+                  </span>
                 </div>
                 <div className="flex items-center gap-1 mt-2 text-amber-400">
                   {[1, 2, 3, 4, 5].map((star) => (
@@ -238,8 +322,12 @@ const AdminReviewOrderFeedback = () => {
                   <div className="flex items-center gap-2 truncate">
                     <Flame size={16} className="text-amber-500 shrink-0" />
                     <div className="truncate">
-                      <p className="text-[9px] sm:text-[10px] text-gray-400 font-extrabold uppercase tracking-wider">Top Rated Dish</p>
-                      <p className="text-xs font-black text-gray-800 capitalize truncate">{stats.topDish.name}</p>
+                      <p className="text-[9px] sm:text-[10px] text-gray-400 font-extrabold uppercase tracking-wider">
+                        Top Rated Dish
+                      </p>
+                      <p className="text-xs font-black text-gray-800 capitalize truncate">
+                        {stats.topDish.name}
+                      </p>
                     </div>
                   </div>
                   <span className="text-xs font-black text-amber-600 bg-amber-50 px-2 py-1 rounded-lg sm:rounded-xl border border-amber-100 shrink-0">
@@ -253,7 +341,8 @@ const AdminReviewOrderFeedback = () => {
             <div className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm space-y-3">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[11px] sm:text-xs font-black uppercase text-gray-500 tracking-wider flex items-center gap-1.5">
-                  <BarChart3 size={15} className="text-[#962A27]" /> Rating Breakdown
+                  <BarChart3 size={15} className="text-[#962A27]" /> Rating
+                  Breakdown
                 </span>
                 <span className="text-[10px] sm:text-[11px] text-emerald-600 font-black">
                   {stats.satisfactionRate}% Liked
@@ -268,9 +357,13 @@ const AdminReviewOrderFeedback = () => {
                     : 0;
 
                 return (
-                  <div key={star} className="flex items-center gap-2 sm:gap-3 text-xs font-bold">
+                  <div
+                    key={star}
+                    className="flex items-center gap-2 sm:gap-3 text-xs font-bold"
+                  >
                     <span className="w-7 sm:w-8 font-mono text-gray-600 flex items-center gap-0.5 text-[11px] sm:text-xs">
-                      {star} <Star size={10} className="fill-amber-400 text-amber-400" />
+                      {star}{" "}
+                      <Star size={10} className="fill-amber-400 text-amber-400" />
                     </span>
                     <div className="flex-1 bg-gray-100 h-2 sm:h-2.5 rounded-full overflow-hidden">
                       <div
@@ -290,9 +383,12 @@ const AdminReviewOrderFeedback = () => {
             <div className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm space-y-3 flex flex-col justify-between">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[11px] sm:text-xs font-black uppercase text-gray-500 tracking-wider flex items-center gap-1.5">
-                  <TrendingUp size={15} className="text-[#962A27]" /> Item Performance
+                  <TrendingUp size={15} className="text-[#962A27]" /> Item
+                  Performance
                 </span>
-                <span className="text-[10px] sm:text-[11px] text-gray-400 font-bold">Avg Score</span>
+                <span className="text-[10px] sm:text-[11px] text-gray-400 font-bold">
+                  Avg Score
+                </span>
               </div>
 
               <div className="space-y-2.5 sm:space-y-3 max-h-36 sm:max-h-40 overflow-y-auto pr-1">
@@ -300,14 +396,21 @@ const AdminReviewOrderFeedback = () => {
                   <div key={idx} className="space-y-1">
                     <div className="flex items-center justify-between text-xs font-bold">
                       <span className="text-gray-800 capitalize flex items-center gap-1 truncate max-w-[130px] sm:max-w-[150px]">
-                        <Utensils size={12} className="text-[#962A27] shrink-0" /> {item.name}
+                        <Utensils size={12} className="text-[#962A27] shrink-0" />{" "}
+                        {item.name}
                       </span>
-                      <span className="text-[#962A27] font-mono text-[11px] sm:text-xs">{item.avg} ★</span>
+                      <span className="text-[#962A27] font-mono text-[11px] sm:text-xs">
+                        {item.avg} ★
+                      </span>
                     </div>
                     <div className="w-full bg-gray-100 h-1.5 sm:h-2 rounded-full overflow-hidden">
                       <div
                         className={`h-full transition-all duration-500 rounded-full ${
-                          item.avg >= 4.0 ? "bg-emerald-500" : item.avg >= 3.0 ? "bg-amber-400" : "bg-rose-500"
+                          item.avg >= 4.0
+                            ? "bg-emerald-500"
+                            : item.avg >= 3.0
+                            ? "bg-amber-400"
+                            : "bg-rose-500"
                         }`}
                         style={{ width: `${item.percent}%` }}
                       ></div>
@@ -319,7 +422,7 @@ const AdminReviewOrderFeedback = () => {
           </div>
         )}
 
-        {/* 🎯 FILTER TABS (Mobile Scrollable) */}
+        {/* 🎯 FILTER TABS */}
         {!loading && reviewsList.length > 0 && (
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-white p-3 sm:p-3.5 rounded-2xl border border-gray-100 shadow-sm">
             <div className="flex items-center gap-1.5 text-xs font-extrabold text-gray-500 px-1">
@@ -358,9 +461,14 @@ const AdminReviewOrderFeedback = () => {
             {filteredReviews.map((rev, idx) => {
               const revItemCount = rev.itemReviews ? rev.itemReviews.length : 0;
               const revSum = revItemCount
-                ? rev.itemReviews.reduce((acc, curr) => acc + (Number(curr.rating) || 5), 0)
+                ? rev.itemReviews.reduce(
+                    (acc, curr) => acc + (Number(curr.rating) || 5),
+                    0
+                  )
                 : 5;
-              const guestAvg = revItemCount ? (revSum / revItemCount).toFixed(1) : "5.0";
+              const guestAvg = revItemCount
+                ? (revSum / revItemCount).toFixed(1)
+                : "5.0";
               const guestPercent = Math.round((guestAvg / 5) * 100);
 
               return (
@@ -392,7 +500,9 @@ const AdminReviewOrderFeedback = () => {
                         {guestAvg} / 5.0
                       </div>
                       <p className="text-[9px] sm:text-[10px] text-gray-400 font-mono mt-0.5">
-                        {rev.createdAt ? new Date(rev.createdAt).toLocaleDateString() : ""}
+                        {rev.createdAt
+                          ? new Date(rev.createdAt).toLocaleDateString()
+                          : ""}
                       </p>
                     </div>
                   </div>
@@ -406,7 +516,11 @@ const AdminReviewOrderFeedback = () => {
                     <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all duration-300 ${
-                          guestPercent >= 80 ? "bg-emerald-500" : guestPercent >= 60 ? "bg-amber-400" : "bg-rose-500"
+                          guestPercent >= 80
+                            ? "bg-emerald-500"
+                            : guestPercent >= 60
+                            ? "bg-amber-400"
+                            : "bg-rose-500"
                         }`}
                         style={{ width: `${guestPercent}%` }}
                       ></div>
@@ -422,7 +536,11 @@ const AdminReviewOrderFeedback = () => {
                           className="bg-gray-50 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-gray-100 flex items-center justify-between gap-2"
                         >
                           <span className="text-xs font-bold text-gray-700 capitalize flex items-center gap-1.5 truncate">
-                            <Utensils size={12} className="text-[#962A27] shrink-0" /> {item.itemName}
+                            <Utensils
+                              size={12}
+                              className="text-[#962A27] shrink-0"
+                            />{" "}
+                            {item.itemName}
                           </span>
                           <div className="flex items-center gap-0.5 shrink-0">
                             {[...Array(item.rating || 5)].map((_, s) => (

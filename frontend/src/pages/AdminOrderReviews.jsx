@@ -45,7 +45,7 @@ const AdminOrderReviews = () => {
       });
   }, []);
 
-  // 📥 Function to Download SVG QR as PNG Image
+  // 📥 Function to Download High-Resolution PNG QR Image
   const downloadQRCode = (orderId) => {
     const svgElement = document.getElementById(`qr-code-${orderId}`);
     if (!svgElement) return;
@@ -56,15 +56,18 @@ const AdminOrderReviews = () => {
     const img = new Image();
 
     img.onload = () => {
-      canvas.width = 300;
-      canvas.height = 300;
+      // 1000x1000 High Resolution Canvas for crisp scan
+      canvas.width = 1000;
+      canvas.height = 1000;
 
+      // Solid White Background
       ctx.fillStyle = "#FFFFFF";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      ctx.drawImage(img, 0, 0, 300, 300);
+      // Draw QR Image scaled to 1000x1000
+      ctx.drawImage(img, 0, 0, 1000, 1000);
 
-      const pngFile = canvas.toDataURL("image/png");
+      const pngFile = canvas.toDataURL("image/png", 1.0);
       const downloadLink = document.createElement("a");
       downloadLink.href = pngFile;
       downloadLink.download = `QR_Order_${orderId}.png`;
@@ -75,7 +78,8 @@ const AdminOrderReviews = () => {
       setDownloadedQRs((prev) => ({ ...prev, [orderId]: true }));
     };
 
-    img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+    // UTF-8 Encoded SVG source for sharp rendering
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgData);
   };
 
   // 🔍 SEARCH & SORT LOGIC
@@ -100,10 +104,8 @@ const AdminOrderReviews = () => {
     list.sort((a, b) => {
       let valA = a[sortField];
       let valB = b[sortField];
-
       if (typeof valA === "string") valA = valA.toLowerCase();
       if (typeof valB === "string") valB = valB.toLowerCase();
-
       if (valA < valB) return sortOrder === "ASC" ? -1 : 1;
       if (valA > valB) return sortOrder === "ASC" ? 1 : -1;
       return 0;
@@ -123,6 +125,16 @@ const AdminOrderReviews = () => {
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1); // Reset to first page on search
+  };
+
+  // 🌐 Dynamic domain selection (Forces Live Netlify domain in Dev/Localhost)
+  const getReviewUrl = (orderId) => {
+    const baseUrl =
+      window.location.hostname === "localhost"
+        ? "https://lakshmicatering.netlify.app"
+        : window.location.origin;
+
+    return `${baseUrl}/customer-review?orderId=${orderId}`;
   };
 
   return (
@@ -153,7 +165,10 @@ const AdminOrderReviews = () => {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-2xl border border-gray-100 shadow-sm">
             {/* Search Input */}
             <div className="relative w-full sm:w-72">
-              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search
+                size={16}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+              />
               <input
                 type="text"
                 placeholder="Search by name or date..."
@@ -194,7 +209,7 @@ const AdminOrderReviews = () => {
                 onClick={() => setSortOrder(sortOrder === "ASC" ? "DESC" : "ASC")}
                 className="px-3.5 py-2 rounded-xl bg-[#962A27] text-white text-xs font-extrabold transition-all cursor-pointer shadow-sm active:scale-95"
               >
-                {sortOrder === "ASC" ? "▲ ASC" : "▼ DESC"}
+                {sortOrder === "ASC" ? "▲ ASC" : "▼ DSC"}
               </button>
             </div>
           </div>
@@ -211,7 +226,9 @@ const AdminOrderReviews = () => {
           </div>
         ) : paginatedOrders.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-2xl sm:rounded-3xl border border-gray-100">
-            <p className="text-gray-500 font-bold">No matching orders found for "{searchTerm}".</p>
+            <p className="text-gray-500 font-bold">
+              No matching orders found for "{searchTerm}".
+            </p>
           </div>
         ) : (
           <>
@@ -231,7 +248,7 @@ const AdminOrderReviews = () => {
                   <tbody className="divide-y divide-gray-100 text-sm font-semibold text-gray-700">
                     {paginatedOrders.map((order) => {
                       const orderId = order._id || order.id;
-                      const reviewUrl = `${window.location.origin}/customer-review?orderId=${orderId}`;
+                      const reviewUrl = getReviewUrl(orderId);
                       const isDownloaded = downloadedQRs[orderId];
 
                       return (
@@ -261,7 +278,13 @@ const AdminOrderReviews = () => {
                           <td className="p-4 sm:p-5">
                             <div className="flex flex-col items-center justify-center gap-2">
                               <div className="p-2 bg-gray-50 rounded-xl border border-gray-200">
-                                <QRCodeSVG id={`qr-code-${orderId}`} value={reviewUrl} size={64} />
+                                <QRCodeSVG
+                                  id={`qr-code-${orderId}`}
+                                  value={reviewUrl}
+                                  size={96}
+                                  includeMargin={true}
+                                  level={"H"}
+                                />
                               </div>
 
                               {/* Download Button */}
@@ -291,11 +314,14 @@ const AdminOrderReviews = () => {
                           {/* Details Button */}
                           <td className="p-4 sm:p-5 text-center">
                             <button
-                              onClick={() => navigate(`/admin/order-feedback/${orderId}`, { state: { order } })}
+                              onClick={() =>
+                                navigate(`/admin/order-feedback/${orderId}`, {
+                                  state: { order },
+                                })
+                              }
                               className="inline-flex items-center gap-2 bg-[#962A27] hover:bg-[#7a2220] text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
                             >
-                              <Eye size={14} />
-                              Details
+                              <Eye size={14} /> Details
                             </button>
                           </td>
                         </tr>
@@ -310,7 +336,7 @@ const AdminOrderReviews = () => {
             <div className="block sm:hidden space-y-3.5 text-left">
               {paginatedOrders.map((order) => {
                 const orderId = order._id || order.id;
-                const reviewUrl = `${window.location.origin}/customer-review?orderId=${orderId}`;
+                const reviewUrl = getReviewUrl(orderId);
                 const isDownloaded = downloadedQRs[orderId];
 
                 return (
@@ -337,9 +363,14 @@ const AdminOrderReviews = () => {
                     {/* QR Code and Actions */}
                     <div className="flex items-center justify-between bg-gray-50/70 p-3 rounded-xl border border-gray-100 gap-3">
                       <div className="p-1.5 bg-white rounded-lg border border-gray-200 shrink-0">
-                        <QRCodeSVG id={`qr-code-${orderId}`} value={reviewUrl} size={68} />
+                        <QRCodeSVG
+                          id={`qr-code-${orderId}`}
+                          value={reviewUrl}
+                          size={80}
+                          includeMargin={true}
+                          level={"H"}
+                        />
                       </div>
-
                       <div className="flex flex-col gap-2 w-full">
                         <button
                           onClick={() => downloadQRCode(orderId)}
@@ -361,13 +392,15 @@ const AdminOrderReviews = () => {
                             </>
                           )}
                         </button>
-
                         <button
-                          onClick={() => navigate(`/admin/order-feedback/${orderId}`, { state: { order } })}
+                          onClick={() =>
+                            navigate(`/admin/order-feedback/${orderId}`, {
+                              state: { order },
+                            })
+                          }
                           className="w-full inline-flex items-center justify-center gap-1.5 bg-[#962A27] hover:bg-[#7a2220] text-white px-3 py-2 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
                         >
-                          <Eye size={14} />
-                          Details
+                          <Eye size={14} /> Details
                         </button>
                       </div>
                     </div>
@@ -376,13 +409,12 @@ const AdminOrderReviews = () => {
               })}
             </div>
 
-            {/* 📄 PAGINATION CONTROLS (15 ITEMS PER PAGE) */}
+            {/* 📄 PAGINATION CONTROLS */}
             {totalPages > 1 && (
               <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-xs font-bold text-gray-600">
                 <span>
                   Showing {paginatedOrders.length} of {processedOrders.length} Orders
                 </span>
-
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -391,11 +423,9 @@ const AdminOrderReviews = () => {
                   >
                     <ChevronLeft size={16} />
                   </button>
-
                   <span className="px-3 py-1 bg-rose-50 text-[#962A27] rounded-xl border border-rose-100 font-mono">
                     {currentPage} / {totalPages}
                   </span>
-
                   <button
                     onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}

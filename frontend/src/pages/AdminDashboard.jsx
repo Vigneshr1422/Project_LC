@@ -95,19 +95,20 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-[#f5f5f5] px-5 py-8 md:px-10 md:py-10 relative overflow-x-hidden">
       {toast.show && (
-        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-md bg-slate-900/95 backdrop-blur-md text-white border border-slate-800 rounded-2xl px-5 py-4 shadow-2xl flex items-center gap-4 animate-bounce">
-          <div className="p-2 bg-rose-500/20 rounded-xl text-rose-400">
-            <AlertTriangle size={20} className="animate-pulse" />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-bold text-slate-100">{toast.message}</p>
-            <p className="text-[11px] text-slate-400 mt-0.5">
-              Please re-authenticate your session
-            </p>
-          </div>
-        </div>
-      )}
-
+  <div className="fixed bottom-5 sm:bottom-auto sm:top-5 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md bg-slate-900/95 backdrop-blur-md text-white border border-slate-800 rounded-2xl px-4 py-3.5 sm:px-5 sm:py-4 shadow-2xl flex items-center gap-3 sm:gap-4 animate-bounce">
+    <div className="p-2 bg-rose-500/20 rounded-xl text-rose-400 shrink-0">
+      <AlertTriangle size={20} className="animate-pulse" />
+    </div>
+    <div className="flex-1 min-w-0">
+      <p className="text-xs sm:text-sm font-bold text-slate-100 break-words">
+        {toast.message}
+      </p>
+      <p className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">
+        Please re-authenticate your session
+      </p>
+    </div>
+  </div>
+)}
       {/* TOP SUMMARY */}
       <div className="text-center mb-12">
         <h1 className="text-3xl md:text-5xl font-bold text-[#962a27]">
