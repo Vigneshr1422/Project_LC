@@ -219,62 +219,30 @@ router.get(
 );
 
 router.get("/storage", async (req, res) => {
-
   try {
+    const stats = await mongoose.connection.db.stats();
 
-    const stats =
-      await mongoose.connection.db.stats();
+    // storageSize -> actual space taken on disk (includes data, indexes, padding)
+    const usedBytes = stats.storageSize || stats.dataSize || 0;
+    const usedMB = Number((usedBytes / (1024 * 1024)).toFixed(2));
+    const totalMB = 512; // MongoDB Atlas M0 Free Tier Limit
 
-    const usedMB =
-      Number(
-        (
-          stats.dataSize /
-          1024 /
-          1024
-        ).toFixed(2)
-      );
-
-    const totalMB = 512;
+    const remainingMB = Number(Math.max(0, totalMB - usedMB).toFixed(2));
+    const usagePercent = Number(((usedMB / totalMB) * 100).toFixed(2));
 
     res.json({
-
       usedMB,
-
       totalMB,
-
-      remainingMB:
-        Number(
-          (
-            totalMB -
-            usedMB
-          ).toFixed(2)
-        ),
-
-      usagePercent:
-        Number(
-          (
-            (usedMB /
-              totalMB) *
-            100
-          ).toFixed(2)
-        ),
-
-      collections:
-        stats.collections,
-
-      objects:
-        stats.objects,
-
+      remainingMB,
+      usagePercent,
+      collections: stats.collections || 0,
+      objects: stats.objects || 0,
     });
-
   } catch (err) {
-
     res.status(500).json({
       message: err.message,
     });
-
   }
-
 });
 /* =========================
     COMPLETED ORDERS

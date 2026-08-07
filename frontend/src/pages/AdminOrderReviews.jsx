@@ -1,18 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import {
-  ChevronLeft,
-  User,
-  Calendar,
-  Loader2,
-  Eye,
-  Download,
-  CheckCircle2,
-  Search,
-  ArrowUpDown,
-  ChevronRight,
-  X,
-} from "lucide-react";
+import { ChevronLeft, User, Calendar, Loader2, Eye, Download, CheckCircle2, Search, ArrowUpDown, ChevronRight, X, } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const AdminOrderReviews = () => {
@@ -23,8 +11,13 @@ const AdminOrderReviews = () => {
 
   // 🔍 Search, Sort, and Pagination States
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortOrder, setSortOrder] = useState("ASC"); // "ASC" or "DESC"
-  const [sortField, setSortField] = useState("sno"); // "sno", "name", "date"
+  
+  // 🔥 CHANGE 1: Default sortOrder-ah "DESC" nu mathiyaachu (Recent orders first varum)
+  const [sortOrder, setSortOrder] = useState("DESC"); 
+  
+  // 🔥 CHANGE 2: Default sortField-ah "sno" nu vachurkuken. DESC potta max sno (last index / recent) top-la varum.
+  const [sortField, setSortField] = useState("sno"); 
+  
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
 
@@ -56,15 +49,12 @@ const AdminOrderReviews = () => {
     const img = new Image();
 
     img.onload = () => {
-      // 1000x1000 High Resolution Canvas for crisp scan
       canvas.width = 1000;
       canvas.height = 1000;
 
-      // Solid White Background
       ctx.fillStyle = "#FFFFFF";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Draw QR Image scaled to 1000x1000
       ctx.drawImage(img, 0, 0, 1000, 1000);
 
       const pngFile = canvas.toDataURL("image/png", 1.0);
@@ -78,19 +68,16 @@ const AdminOrderReviews = () => {
       setDownloadedQRs((prev) => ({ ...prev, [orderId]: true }));
     };
 
-    // UTF-8 Encoded SVG source for sharp rendering
     img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgData);
   };
 
   // 🔍 SEARCH & SORT LOGIC
   const processedOrders = useMemo(() => {
-    // 1. Add Original Serial Number (S.No)
     let list = orders.map((order, index) => ({
       ...order,
       sno: index + 1,
     }));
 
-    // 2. Filter by Search Term (Customer Name or Date)
     if (searchTerm.trim()) {
       const query = searchTerm.toLowerCase();
       list = list.filter(
@@ -100,12 +87,13 @@ const AdminOrderReviews = () => {
       );
     }
 
-    // 3. Sort (ASC / DESC)
     list.sort((a, b) => {
       let valA = a[sortField];
       let valB = b[sortField];
+
       if (typeof valA === "string") valA = valA.toLowerCase();
       if (typeof valB === "string") valB = valB.toLowerCase();
+
       if (valA < valB) return sortOrder === "ASC" ? -1 : 1;
       if (valA > valB) return sortOrder === "ASC" ? 1 : -1;
       return 0;
@@ -114,32 +102,27 @@ const AdminOrderReviews = () => {
     return list;
   }, [orders, searchTerm, sortOrder, sortField]);
 
-  // 📄 PAGINATION LOGIC (15 items per page)
+  // 📄 PAGINATION LOGIC
   const totalPages = Math.ceil(processedOrders.length / itemsPerPage) || 1;
   const paginatedOrders = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     return processedOrders.slice(startIndex, startIndex + itemsPerPage);
   }, [processedOrders, currentPage, itemsPerPage]);
 
-  // Handle Search Input
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page on search
+    setCurrentPage(1);
   };
 
-  // 🌐 Dynamic domain selection (Forces Live Netlify domain in Dev/Localhost)
   const getReviewUrl = (orderId) => {
-    const baseUrl =
-      window.location.hostname === "localhost"
-        ? "https://lakshmicatering.netlify.app"
-        : window.location.origin;
-
+    const baseUrl = window.location.hostname === "localhost" ? "https://lakshmicatering.netlify.app" : window.location.origin;
     return `${baseUrl}/customer-review?orderId=${orderId}`;
   };
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-3 sm:p-6 lg:p-8 font-sans">
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
+        
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm gap-3 text-left">
           <div className="flex items-center gap-3 sm:gap-4">
@@ -163,12 +146,10 @@ const AdminOrderReviews = () => {
         {/* 🔍 SEARCH AND SORT CONTROLS */}
         {!loading && orders.length > 0 && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-2xl border border-gray-100 shadow-sm">
+            
             {/* Search Input */}
             <div className="relative w-full sm:w-72">
-              <Search
-                size={16}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
-              />
+              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search by name or date..."
@@ -209,7 +190,7 @@ const AdminOrderReviews = () => {
                 onClick={() => setSortOrder(sortOrder === "ASC" ? "DESC" : "ASC")}
                 className="px-3.5 py-2 rounded-xl bg-[#962A27] text-white text-xs font-extrabold transition-all cursor-pointer shadow-sm active:scale-95"
               >
-                {sortOrder === "ASC" ? "▲ ASC" : "▼ DSC"}
+                {sortOrder === "ASC" ? "▲ ASC" : "▼ DESC"}
               </button>
             </div>
           </div>
@@ -253,28 +234,21 @@ const AdminOrderReviews = () => {
 
                       return (
                         <tr key={orderId} className="hover:bg-gray-50/60 transition-colors">
-                          {/* S.No */}
                           <td className="p-4 sm:p-5 font-mono font-black text-[#962A27] text-center">
                             {order.sno}
                           </td>
-
-                          {/* Customer Name */}
                           <td className="p-4 sm:p-5">
                             <div className="flex items-center gap-2 font-bold text-gray-900">
                               <User size={14} className="text-[#962A27]" />
                               {order.name || "Customer"}
                             </div>
                           </td>
-
-                          {/* Date */}
                           <td className="p-4 sm:p-5 text-xs text-gray-500 font-medium">
                             <div className="flex items-center gap-1.5">
                               <Calendar size={13} className="text-gray-400" />
                               {order.date || "N/A"}
                             </div>
                           </td>
-
-                          {/* QR Code */}
                           <td className="p-4 sm:p-5">
                             <div className="flex flex-col items-center justify-center gap-2">
                               <div className="p-2 bg-gray-50 rounded-xl border border-gray-200">
@@ -286,8 +260,6 @@ const AdminOrderReviews = () => {
                                   level={"H"}
                                 />
                               </div>
-
-                              {/* Download Button */}
                               <button
                                 onClick={() => downloadQRCode(orderId)}
                                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
@@ -310,8 +282,6 @@ const AdminOrderReviews = () => {
                               </button>
                             </div>
                           </td>
-
-                          {/* Details Button */}
                           <td className="p-4 sm:p-5 text-center">
                             <button
                               onClick={() =>
@@ -360,7 +330,6 @@ const AdminOrderReviews = () => {
                       </div>
                     </div>
 
-                    {/* QR Code and Actions */}
                     <div className="flex items-center justify-between bg-gray-50/70 p-3 rounded-xl border border-gray-100 gap-3">
                       <div className="p-1.5 bg-white rounded-lg border border-gray-200 shrink-0">
                         <QRCodeSVG

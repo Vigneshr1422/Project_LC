@@ -15,8 +15,7 @@ import {
   Filter,
   Sparkles,
   Flame,
-  Clock,
-  Home,
+  ChevronDown,
 } from "lucide-react";
 
 const AdminReviewOrderFeedback = () => {
@@ -29,8 +28,15 @@ const AdminReviewOrderFeedback = () => {
   const [loading, setLoading] = useState(true);
   const [filterStar, setFilterStar] = useState("ALL"); // ALL, 5, 3-4, LOW
 
-  // ⏱️ 10-SECOND DIRECT COUNTDOWN STATE
-  const [countdown, setCountdown] = useState(10);
+  // 🔥 State to track expanded reviews for toggle functionality (collapsed by default)
+  const [expandedReviews, setExpandedReviews] = useState({});
+
+  const toggleReviewExpand = (index) => {
+    setExpandedReviews((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -62,22 +68,6 @@ const AdminReviewOrderFeedback = () => {
     }
   }, [orderId]);
 
-  // ⏳ 10-SECOND AUTOMATIC REDIRECT TIMER TO HOME ("/")
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          navigate("/"); // Direct Home Page Redirect
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [navigate]);
-
   // 📊 METRICS & MVP CALCULATIONS
   const stats = useMemo(() => {
     if (!reviewsList || reviewsList.length === 0) {
@@ -103,7 +93,6 @@ const AdminReviewOrderFeedback = () => {
           const r = Number(item.rating) || 5;
           totalItemScoreSum += r;
           totalRatingsCount += 1;
-
           const starBucket = Math.min(5, Math.max(1, Math.round(r)));
           dist[starBucket] = (dist[starBucket] || 0) + 1;
 
@@ -154,7 +143,6 @@ const AdminReviewOrderFeedback = () => {
   // Dynamic Filter Logic
   const filteredReviews = useMemo(() => {
     if (filterStar === "ALL") return reviewsList;
-
     return reviewsList.filter((rev) => {
       const revItemCount = rev.itemReviews ? rev.itemReviews.length : 0;
       const revSum = revItemCount
@@ -175,31 +163,6 @@ const AdminReviewOrderFeedback = () => {
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-3 sm:p-6 lg:p-8 font-sans relative">
       <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6 text-left">
-        
-        {/* ⌚ TOP ANIMATED WATCH COUNTDOWN BANNER */}
-        <div className="bg-gradient-to-r from-slate-900 to-[#962A27] text-white p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl shadow-lg flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-amber-300 shrink-0 border border-white/10">
-              <Clock size={22} className="animate-spin" style={{ animationDuration: "10s" }} />
-            </div>
-            <div>
-              <p className="text-xs sm:text-sm font-black text-slate-100 flex items-center gap-1.5">
-                Redirecting to Home Page
-              </p>
-              <p className="text-[10px] sm:text-xs text-slate-300 font-medium">
-                Auto navigating in <span className="font-mono font-bold text-amber-300 text-sm">{countdown}s</span>
-              </p>
-            </div>
-          </div>
-
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-1.5 bg-white text-[#962A27] px-3.5 py-2 rounded-xl text-xs font-black hover:bg-gray-100 transition-all cursor-pointer shadow-sm shrink-0 active:scale-95"
-          >
-            <Home size={14} /> Go Home Now
-          </button>
-        </div>
-
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm gap-3">
           <div className="flex items-center gap-3 sm:gap-4">
@@ -210,16 +173,12 @@ const AdminReviewOrderFeedback = () => {
               <ChevronLeft size={18} />
             </button>
             <div>
-              <span className="text-[10px] sm:text-xs font-mono font-bold text-[#962A27]">
-                Order ID: #{orderId}
-              </span>
               <h1 className="text-xl sm:text-3xl font-black text-gray-900 mt-0.5 flex items-center gap-2">
                 <MessageSquare size={22} className="text-[#962A27] shrink-0" />{" "}
                 Order Feedback
               </h1>
             </div>
           </div>
-
           {stats.sentimentBadge && !loading && reviewsList.length > 0 && (
             <span className="inline-flex self-start sm:self-auto items-center gap-1.5 bg-rose-50 border border-rose-100 text-[#962A27] px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-black">
               <Sparkles size={13} /> {stats.sentimentBadge}
@@ -238,8 +197,7 @@ const AdminReviewOrderFeedback = () => {
             </div>
             {passedOrder.date && (
               <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
-                <Calendar size={14} className="shrink-0" />
-                {passedOrder.date}
+                <Calendar size={14} className="shrink-0" /> {passedOrder.date}
               </div>
             )}
             <div>
@@ -262,14 +220,14 @@ const AdminReviewOrderFeedback = () => {
                 </span>
                 <Award size={20} className="text-[#962A27]" />
               </div>
-
               <div>
                 <div className="flex items-baseline gap-2">
                   <span className="text-4xl sm:text-5xl font-black text-gray-900">
                     {stats.overallAvg}
                   </span>
                   <span className="text-xs sm:text-sm font-bold text-gray-400">
-                    / 5.0
+                    {" "}
+                    / 5.0{" "}
                   </span>
                 </div>
                 <div className="flex items-center gap-1 mt-2 text-amber-400">
@@ -289,7 +247,6 @@ const AdminReviewOrderFeedback = () => {
                   </span>
                 </div>
               </div>
-
               {stats.topDish && (
                 <div className="bg-white/80 backdrop-blur-sm p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-amber-200/60 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 truncate">
@@ -314,26 +271,20 @@ const AdminReviewOrderFeedback = () => {
             <div className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm space-y-3">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[11px] sm:text-xs font-black uppercase text-gray-500 tracking-wider flex items-center gap-1.5">
-                  <BarChart3 size={15} className="text-[#962A27]" /> Rating
-                  Breakdown
+                  <BarChart3 size={15} className="text-[#962A27]" /> Rating Breakdown
                 </span>
                 <span className="text-[10px] sm:text-[11px] text-emerald-600 font-black">
                   {stats.satisfactionRate}% Liked
                 </span>
               </div>
-
               {[5, 4, 3, 2, 1].map((star) => {
                 const count = stats.distribution[star] || 0;
                 const percentage =
                   stats.totalRatingsCount > 0
                     ? Math.round((count / stats.totalRatingsCount) * 100)
                     : 0;
-
                 return (
-                  <div
-                    key={star}
-                    className="flex items-center gap-2 sm:gap-3 text-xs font-bold"
-                  >
+                  <div key={star} className="flex items-center gap-2 sm:gap-3 text-xs font-bold">
                     <span className="w-7 sm:w-8 font-mono text-gray-600 flex items-center gap-0.5 text-[11px] sm:text-xs">
                       {star}{" "}
                       <Star size={10} className="fill-amber-400 text-amber-400" />
@@ -356,14 +307,12 @@ const AdminReviewOrderFeedback = () => {
             <div className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm space-y-3 flex flex-col justify-between">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[11px] sm:text-xs font-black uppercase text-gray-500 tracking-wider flex items-center gap-1.5">
-                  <TrendingUp size={15} className="text-[#962A27]" /> Item
-                  Performance
+                  <TrendingUp size={15} className="text-[#962A27]" /> Item Performance
                 </span>
                 <span className="text-[10px] sm:text-[11px] text-gray-400 font-bold">
                   Avg Score
                 </span>
               </div>
-
               <div className="space-y-2.5 sm:space-y-3 max-h-36 sm:max-h-40 overflow-y-auto pr-1">
                 {stats.itemAverages.map((item, idx) => (
                   <div key={idx} className="space-y-1">
@@ -443,6 +392,7 @@ const AdminReviewOrderFeedback = () => {
                 ? (revSum / revItemCount).toFixed(1)
                 : "5.0";
               const guestPercent = Math.round((guestAvg / 5) * 100);
+              const isExpanded = expandedReviews[idx] || false;
 
               return (
                 <div
@@ -466,10 +416,9 @@ const AdminReviewOrderFeedback = () => {
                         )}
                       </div>
                     </div>
-
                     <div className="text-right shrink-0">
                       <div className="inline-flex items-center gap-1 bg-amber-50 px-2.5 py-1 rounded-lg sm:rounded-xl border border-amber-100 text-amber-700 font-black text-[11px] sm:text-xs">
-                        <Star size={12} className="fill-amber-400 text-amber-400" />
+                        <Star size={12} className="fill-amber-400 text-amber-400" />{" "}
                         {guestAvg} / 5.0
                       </div>
                       <p className="text-[9px] sm:text-[10px] text-gray-400 font-mono mt-0.5">
@@ -500,32 +449,50 @@ const AdminReviewOrderFeedback = () => {
                     </div>
                   </div>
 
-                  {/* Item Ratings Grid */}
+                  {/* 🔥 TOGGLE BUTTON FOR ITEM RATINGS */}
                   {rev.itemReviews && rev.itemReviews.length > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {rev.itemReviews.map((item, i) => (
-                        <div
-                          key={i}
-                          className="bg-gray-50 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-gray-100 flex items-center justify-between gap-2"
-                        >
-                          <span className="text-xs font-bold text-gray-700 capitalize flex items-center gap-1.5 truncate">
-                            <Utensils
-                              size={12}
-                              className="text-[#962A27] shrink-0"
-                            />{" "}
-                            {item.itemName}
-                          </span>
-                          <div className="flex items-center gap-0.5 shrink-0">
-                            {[...Array(item.rating || 5)].map((_, s) => (
-                              <Star
-                                key={s}
-                                size={11}
-                                className="fill-amber-400 text-amber-400"
-                              />
-                            ))}
-                          </div>
+                    <div className="pt-1">
+                      <button
+                        onClick={() => toggleReviewExpand(idx)}
+                        className="w-full flex items-center justify-between px-3.5 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-xs font-bold text-gray-700 transition-all cursor-pointer"
+                      >
+                        <span className="flex items-center gap-1.5">
+                          <Utensils size={13} className="text-[#962A27]" />
+                          Item-wise Ratings ({rev.itemReviews.length})
+                        </span>
+                        <ChevronDown
+                          size={16}
+                          className={`text-gray-500 transition-transform duration-300 ${
+                            isExpanded ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+
+                      {/* Expandable Item Ratings Grid */}
+                      {isExpanded && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2 pt-1 animate-fadeIn">
+                          {rev.itemReviews.map((item, i) => (
+                            <div
+                              key={i}
+                              className="bg-gray-50 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-gray-100 flex items-center justify-between gap-2"
+                            >
+                              <span className="text-xs font-bold text-gray-700 capitalize flex items-center gap-1.5 truncate">
+                                <Utensils size={12} className="text-[#962A27] shrink-0" />{" "}
+                                {item.itemName}
+                              </span>
+                              <div className="flex items-center gap-0.5 shrink-0">
+                                {[...Array(item.rating || 5)].map((_, s) => (
+                                  <Star
+                                    key={s}
+                                    size={11}
+                                    className="fill-amber-400 text-amber-400"
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                      )}
                     </div>
                   )}
 
