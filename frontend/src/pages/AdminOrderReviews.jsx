@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { ChevronLeft, User, Calendar, Eye, Download, CheckCircle2, Search, ArrowUpDown, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, User, Calendar, Eye, Download, CheckCircle2, Search, ArrowUpDown, ChevronRight, X, Sparkles, QrCode } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
 
@@ -15,7 +15,7 @@ const AdminOrderReviews = () => {
   const [sortOrder, setSortOrder] = useState("DESC");
   const [sortField, setSortField] = useState("sno");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 15;
+  const itemsPerPage = 12;
 
   useEffect(() => {
     fetch("https://project-lc.onrender.com/api/booking1/get-all-bookings")
@@ -102,23 +102,31 @@ const AdminOrderReviews = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-3 sm:p-6 lg:p-8 font-sans">
-      <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm gap-3 text-left">
+    <div className="min-h-screen bg-[#fffcfb] p-4 sm:p-8 lg:p-12 font-sans relative overflow-x-hidden">
+      
+      {/* Background Soft Glow Effect */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] sm:w-[600px] h-[250px] bg-[#962A27]/5 rounded-full blur-[90px] pointer-events-none" />
+
+      <div className="max-w-6xl mx-auto space-y-5 sm:space-y-6 relative z-10">
+        
+        {/* TOP HEADER */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white p-5 sm:p-7 rounded-[28px] border-2 border-[#962A27]/20 shadow-sm gap-4 text-left">
           <div className="flex items-center gap-3 sm:gap-4">
             <button
               onClick={() => navigate(-1)}
-              className="p-2 sm:p-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 transition-all border border-gray-200 cursor-pointer shrink-0"
+              className="p-2.5 sm:p-3 rounded-2xl bg-rose-50 hover:bg-rose-100 text-[#962A27] transition-all border border-[#962A27]/30 cursor-pointer shrink-0 shadow-2xs hover:scale-105"
             >
-              <ChevronLeft size={18} />
+              <ChevronLeft size={20} />
             </button>
             <div>
-              <h1 className="text-xl sm:text-3xl font-black text-gray-900">
-                Order QRs & Feedback
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#962A27]/10 text-[#962A27] font-black text-[10px] uppercase tracking-wider mb-1.5 border border-[#962A27]/20">
+                <Sparkles size={12} className="text-amber-600" /> Scanner & Insights
+              </div>
+              <h1 className="text-2xl sm:text-4xl font-black text-[#2b1b17] tracking-tight">
+                Order QRs & <span className="text-[#962A27]">Feedback</span>
               </h1>
-              <p className="text-xs sm:text-sm text-gray-500 font-medium">
-                Download order QR codes & inspect guest review analytics.
+              <p className="text-xs sm:text-sm text-gray-500 font-semibold mt-1">
+                Download high-resolution guest feedback QR codes & monitor performance analytics.
               </p>
             </div>
           </div>
@@ -126,29 +134,30 @@ const AdminOrderReviews = () => {
 
         {/* 🔍 SEARCH AND SORT CONTROLS */}
         {!loading && orders.length > 0 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-2xl border border-gray-100 shadow-sm">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3.5 bg-white p-4 sm:p-5 rounded-[24px] border-2 border-[#962A27]/20 shadow-sm">
+            
             {/* Search Input */}
-            <div className="relative w-full sm:w-72">
-              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+            <div className="relative w-full sm:w-80">
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search by name or date..."
+                placeholder="Search by customer name or date..."
                 value={searchTerm}
                 onChange={handleSearchChange}
-                className="w-full text-xs font-semibold pl-9 pr-8 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-[#962A27] focus:bg-white transition-all"
+                className="w-full text-xs sm:text-sm font-semibold pl-10 pr-9 py-3 rounded-xl bg-rose-50/30 border border-[#962A27]/30 focus:outline-none focus:border-[#962A27] focus:bg-white transition-all shadow-2xs"
               />
               {searchTerm && (
                 <button
                   onClick={() => setSearchTerm("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
                 >
-                  <X size={14} />
+                  <X size={15} />
                 </button>
               )}
             </div>
 
-            {/* Sort Dropdowns & Toggle */}
-            <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+            {/* Sort Controls */}
+            <div className="flex items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-end">
               <div className="flex items-center gap-1.5 text-xs font-bold text-gray-500">
                 <ArrowUpDown size={14} className="text-[#962A27]" />
                 <span>Sort:</span>
@@ -156,7 +165,7 @@ const AdminOrderReviews = () => {
               <select
                 value={sortField}
                 onChange={(e) => setSortField(e.target.value)}
-                className="text-xs font-bold px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 focus:outline-none cursor-pointer"
+                className="text-xs font-bold px-3 py-2.5 rounded-xl bg-rose-50/30 border border-[#962A27]/30 text-gray-700 focus:outline-none focus:border-[#962A27] cursor-pointer shadow-2xs"
               >
                 <option value="sno">S.No</option>
                 <option value="name">Customer Name</option>
@@ -164,7 +173,7 @@ const AdminOrderReviews = () => {
               </select>
               <button
                 onClick={() => setSortOrder(sortOrder === "ASC" ? "DESC" : "ASC")}
-                className="px-3.5 py-2 rounded-xl bg-[#962A27] text-white text-xs font-extrabold transition-all cursor-pointer shadow-sm active:scale-95"
+                className="px-4 py-2.5 rounded-xl bg-[#962A27] hover:bg-[#7a2220] text-white text-xs font-black transition-all cursor-pointer shadow-md active:scale-95 shrink-0"
               >
                 {sortOrder === "ASC" ? "▲ ASC" : "▼ DESC"}
               </button>
@@ -176,87 +185,92 @@ const AdminOrderReviews = () => {
         {loading ? (
           <Loader />
         ) : orders.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-2xl sm:rounded-3xl border border-gray-100">
-            <p className="text-gray-500 font-bold">No orders found.</p>
+          <div className="text-center py-20 bg-white rounded-[28px] border-2 border-[#962A27]/20 shadow-sm">
+            <QrCode size={48} className="mx-auto text-gray-300 mb-3 animate-pulse" />
+            <p className="text-gray-600 font-bold text-base">No orders found.</p>
+            <p className="text-gray-400 text-xs mt-1">Orders will appear here once bookings are confirmed.</p>
           </div>
         ) : paginatedOrders.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-2xl sm:rounded-3xl border border-gray-100">
-            <p className="text-gray-500 font-bold">
+          <div className="text-center py-20 bg-white rounded-[28px] border-2 border-[#962A27]/20 shadow-sm">
+            <p className="text-gray-600 font-bold text-base">
               No matching orders found for "{searchTerm}".
             </p>
           </div>
         ) : (
           <>
             {/* 🖥️ DESKTOP TABLE VIEW */}
-            <div className="hidden sm:block bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden text-left">
+            <div className="hidden sm:block bg-white rounded-[28px] border-2 border-[#962A27]/20 shadow-sm overflow-hidden text-left">
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>
-                    <tr className="bg-gray-50 border-b border-gray-100 text-gray-500 text-xs font-bold uppercase tracking-wider">
-                      <th className="p-4 sm:p-5 w-16 text-center">S.No</th>
-                      <th className="p-4 sm:p-5">Customer</th>
-                      <th className="p-4 sm:p-5">Date</th>
-                      <th className="p-4 sm:p-5 text-center">QR Code</th>
-                      <th className="p-4 sm:p-5 text-center">Actions</th>
+                    <tr className="bg-rose-50/50 border-b-2 border-[#962A27]/20 text-gray-600 text-xs font-black uppercase tracking-wider">
+                      <th className="p-5 w-20 text-center">S.No</th>
+                      <th className="p-5">Customer Profile</th>
+                      <th className="p-5">Catering Date</th>
+                      <th className="p-5 text-center">QR Code Scanner</th>
+                      <th className="p-5 text-center">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100 text-sm font-semibold text-gray-700">
+                  <tbody className="divide-y divide-rose-100/60 text-sm font-semibold text-gray-700">
                     {paginatedOrders.map((order) => {
                       const orderId = order._id || order.id;
                       const reviewUrl = getReviewUrl(orderId);
                       const isDownloaded = downloadedQRs[orderId];
                       return (
-                        <tr key={orderId} className="hover:bg-gray-50/60 transition-colors">
-                          <td className="p-4 sm:p-5 font-mono font-black text-[#962A27] text-center">
-                            {order.sno}
+                        <tr key={orderId} className="hover:bg-rose-50/30 transition-colors">
+                          <td className="p-5 font-mono font-black text-[#962A27] text-center">
+                            #{order.sno}
                           </td>
-                          <td className="p-4 sm:p-5">
-                            <div className="flex items-center gap-2 font-bold text-gray-900">
-                              <User size={14} className="text-[#962A27]" /> {order.name || "Customer"}
+                          <td className="p-5">
+                            <div className="flex items-center gap-2.5 font-bold text-gray-900">
+                              <div className="w-9 h-9 rounded-xl bg-rose-50 text-[#962A27] flex items-center justify-center font-black border border-rose-200 shadow-2xs">
+                                <User size={16} />
+                              </div>
+                              <span className="text-base">{order.name || "Customer"}</span>
                             </div>
                           </td>
-                          <td className="p-4 sm:p-5 text-xs text-gray-500 font-medium">
-                            <div className="flex items-center gap-1.5">
-                              <Calendar size={13} className="text-gray-400" /> {order.date || "N/A"}
+                          <td className="p-5 text-xs text-gray-600 font-bold">
+                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-rose-50/40 border border-[#962A27]/20">
+                              <Calendar size={14} className="text-[#962A27]" /> {order.date || "N/A"}
                             </div>
                           </td>
-                          <td className="p-4 sm:p-5">
-                            <div className="flex flex-col items-center justify-center gap-2">
-                              <div className="p-2 bg-gray-50 rounded-xl border border-gray-200">
-                                <QRCodeSVG id={`qr-code-${orderId}`} value={reviewUrl} size={96} includeMargin={true} level={"H"} />
+                          <td className="p-5">
+                            <div className="flex flex-col items-center justify-center gap-2.5">
+                              <div className="p-2.5 bg-white rounded-2xl border-2 border-[#962A27]/20 shadow-sm">
+                                <QRCodeSVG id={`qr-code-${orderId}`} value={reviewUrl} size={100} includeMargin={true} level={"H"} />
                               </div>
                               <button
                                 onClick={() => downloadQRCode(orderId)}
-                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer shadow-2xs ${
                                   isDownloaded
                                     ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                                    : "bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200"
+                                    : "bg-rose-50 hover:bg-rose-100 text-[#962A27] border border-[#962A27]/30"
                                 }`}
                               >
                                 {isDownloaded ? (
                                   <>
-                                    <CheckCircle2 size={13} className="text-emerald-600" />
-                                    <span>Saved</span>
+                                    <CheckCircle2 size={14} className="text-emerald-600" />
+                                    <span>Saved QR</span>
                                   </>
                                 ) : (
                                   <>
-                                    <Download size={13} />
+                                    <Download size={14} />
                                     <span>Download QR</span>
                                   </>
                                 )}
                               </button>
                             </div>
                           </td>
-                          <td className="p-4 sm:p-5 text-center">
+                          <td className="p-5 text-center">
                             <button
                               onClick={() =>
                                 navigate(`/admin/order-feedback/${orderId}`, {
                                   state: { order },
                                 })
                               }
-                              className="inline-flex items-center gap-2 bg-[#962A27] hover:bg-[#7a2220] text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
+                              className="inline-flex items-center gap-2 bg-[#962A27] hover:bg-[#7a2220] text-white px-5 py-2.5 rounded-xl text-xs font-black transition-all shadow-md cursor-pointer hover:scale-105 active:scale-95"
                             >
-                              <Eye size={14} /> Details
+                              <Eye size={15} /> Details
                             </button>
                           </td>
                         </tr>
@@ -274,41 +288,47 @@ const AdminOrderReviews = () => {
                 const reviewUrl = getReviewUrl(orderId);
                 const isDownloaded = downloadedQRs[orderId];
                 return (
-                  <div key={orderId} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-4">
-                    <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                      <div>
-                        <span className="text-xs font-mono font-black bg-rose-50 text-[#962A27] px-2.5 py-0.5 rounded-lg border border-rose-100">
-                          S.No: #{order.sno}
-                        </span>
-                        <h3 className="text-sm font-extrabold text-gray-900 flex items-center gap-1.5 mt-1.5">
-                          <User size={13} className="text-[#962A27]" /> {order.name || "Customer"}
-                        </h3>
+                  <div key={orderId} className="bg-white p-4.5 rounded-[22px] border-2 border-[#962A27]/20 shadow-sm space-y-3.5">
+                    <div className="flex items-center justify-between border-b border-rose-100 pb-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-xl bg-rose-50 text-[#962A27] flex items-center justify-center font-black border border-rose-200">
+                          <User size={15} />
+                        </div>
+                        <div>
+                          <span className="text-[10px] font-mono font-black text-gray-400">
+                            S.No: #{order.sno}
+                          </span>
+                          <h3 className="text-sm font-black text-gray-900 leading-tight">
+                            {order.name || "Customer"}
+                          </h3>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1 text-[11px] text-gray-500 font-medium">
-                        <Calendar size={12} className="text-gray-400" /> {order.date || "N/A"}
+                      <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-rose-50/40 border border-[#962A27]/20 text-[11px] text-gray-600 font-bold">
+                        <Calendar size={12} className="text-[#962A27]" /> {order.date || "N/A"}
                       </div>
                     </div>
-                    <div className="flex items-center justify-between bg-gray-50/70 p-3 rounded-xl border border-gray-100 gap-3">
-                      <div className="p-1.5 bg-white rounded-lg border border-gray-200 shrink-0">
-                        <QRCodeSVG id={`qr-code-${orderId}`} value={reviewUrl} size={80} includeMargin={true} level={"H"} />
+
+                    <div className="flex items-center justify-between bg-rose-50/30 p-3 rounded-2xl border border-[#962A27]/20 gap-3">
+                      <div className="p-2 bg-white rounded-xl border border-[#962A27]/20 shrink-0 shadow-2xs">
+                        <QRCodeSVG id={`qr-code-${orderId}`} value={reviewUrl} size={78} includeMargin={true} level={"H"} />
                       </div>
                       <div className="flex flex-col gap-2 w-full">
                         <button
                           onClick={() => downloadQRCode(orderId)}
-                          className={`w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                          className={`w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer shadow-2xs ${
                             isDownloaded
                               ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                              : "bg-white hover:bg-gray-100 text-gray-800 border border-gray-200 shadow-sm"
+                              : "bg-white hover:bg-rose-50 text-[#962A27] border border-[#962A27]/30 shadow-sm"
                           }`}
                         >
                           {isDownloaded ? (
                             <>
-                              <CheckCircle2 size={14} className="text-emerald-600" />
+                              <CheckCircle2 size={13} className="text-emerald-600" />
                               <span>Saved QR</span>
                             </>
                           ) : (
                             <>
-                              <Download size={14} />
+                              <Download size={13} />
                               <span>Download QR</span>
                             </>
                           )}
@@ -319,9 +339,9 @@ const AdminOrderReviews = () => {
                               state: { order },
                             })
                           }
-                          className="w-full inline-flex items-center justify-center gap-1.5 bg-[#962A27] hover:bg-[#7a2220] text-white px-3 py-2 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
+                          className="w-full inline-flex items-center justify-center gap-1.5 bg-[#962A27] hover:bg-[#7a2220] text-white px-3 py-2 rounded-xl text-xs font-black transition-all shadow-sm cursor-pointer"
                         >
-                          <Eye size={14} /> Details
+                          <Eye size={13} /> View Details
                         </button>
                       </div>
                     </div>
@@ -332,27 +352,27 @@ const AdminOrderReviews = () => {
 
             {/* 📄 PAGINATION CONTROLS */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-gray-100 shadow-sm text-xs font-bold text-gray-600">
+              <div className="flex flex-col sm:flex-row items-center justify-between bg-white p-4 sm:p-5 rounded-[24px] border-2 border-[#962A27]/20 shadow-sm gap-3 text-xs font-bold text-gray-600">
                 <span>
-                  Showing {paginatedOrders.length} of {processedOrders.length} Orders
+                  Showing <span className="font-black text-[#962A27]">{paginatedOrders.length}</span> of <span className="font-black text-gray-900">{processedOrders.length}</span> Orders
                 </span>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className="p-2 rounded-xl bg-gray-50 border border-gray-200 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all"
+                    className="p-2.5 rounded-xl bg-rose-50/40 border border-[#962A27]/20 hover:bg-rose-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all shadow-2xs"
                   >
-                    <ChevronLeft size={16} />
+                    <ChevronLeft size={16} className="text-[#962A27]" />
                   </button>
-                  <span className="px-3 py-1 bg-rose-50 text-[#962A27] rounded-xl border border-rose-100 font-mono">
+                  <span className="px-3.5 py-1.5 bg-rose-50 text-[#962A27] rounded-xl border border-[#962A27]/30 font-mono font-black text-xs">
                     {currentPage} / {totalPages}
                   </span>
                   <button
                     onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="p-2 rounded-xl bg-gray-50 border border-gray-200 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all"
+                    className="p-2.5 rounded-xl bg-rose-50/40 border border-[#962A27]/20 hover:bg-rose-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all shadow-2xs"
                   >
-                    <ChevronRight size={16} />
+                    <ChevronRight size={16} className="text-[#962A27]" />
                   </button>
                 </div>
               </div>

@@ -91,7 +91,6 @@ const Testimonials = () => {
         comment: comment.trim(),
       };
 
-      // 🎯 Exact Match for your Backend Testimonial Router (/api/testimonials/save)
       const response = await axios.post("https://project-lc.onrender.com/api/testimonials/save", payload);
 
       if (response.status === 201) {
@@ -114,31 +113,34 @@ const Testimonials = () => {
   const movingArray = [...reviews, ...reviews];
 
   return (
-    <section className="relative bg-[#fffaf7] py-14 sm:py-20 overflow-hidden w-full text-[#2b1b17] border-t border-gray-200/60">
+    <section className="relative bg-[#fffcfb] py-14 sm:py-20 overflow-hidden w-full text-[#2b1b17] border-t-2 border-[#962a27]/20">
+      
+      {/* Background Soft Glow Effect */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-[#962a27]/5 rounded-full blur-[80px] sm:blur-[120px] pointer-events-none" />
+      
       <div className="max-w-7xl mx-auto relative z-10 px-4 sm:px-6 md:px-12">
         {/* Header */}
         <div className="text-center mb-10 sm:mb-14 relative">
           <div className="flex items-center justify-center gap-2 mb-3">
-            <Sparkles size={16} className="text-[#d9a86c] animate-pulse" />
-            <span className="text-[10px] sm:text-xs font-semibold tracking-widest text-[#962a27] uppercase bg-[#962a27]/10 px-4 py-1 rounded-full border border-[#962a27]/20">
+            <Sparkles size={16} className="text-amber-600 animate-pulse" />
+            <span className="text-[10px] sm:text-xs font-black tracking-widest text-[#962a27] uppercase bg-rose-50 px-4 py-1 rounded-full border border-[#962a27]/20 shadow-2xs">
               Client Feedback
             </span>
-            <Sparkles size={16} className="text-[#d9a86c] animate-pulse" />
+            <Sparkles size={16} className="text-amber-600 animate-pulse" />
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-[#2b1b17] tracking-tight">
             What Our{" "}
-            <span className="text-[#962a27] underline decoration-[#d9a86c]/60 underline-offset-8">
+            <span className="text-[#962a27] underline decoration-amber-500/60 underline-offset-8">
               Guests Say
             </span>
           </h2>
-          <p className="text-gray-600 text-xs sm:text-base max-w-xl mx-auto mt-3 leading-relaxed">
+          <p className="text-gray-600 text-xs sm:text-base max-w-xl mx-auto mt-3 font-semibold leading-relaxed">
             Real experiences from families and hosts who celebrated their special milestones with Lakshmi Catering.
           </p>
 
           <button
             onClick={() => setShowForm(true)}
-            className="mt-6 inline-flex items-center gap-2 bg-[#962a27] hover:bg-[#7a2220] text-white text-xs font-extrabold uppercase px-6 py-3 rounded-xl shadow-lg shadow-[#962a27]/20 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+            className="mt-6 inline-flex items-center gap-2 bg-[#962a27] hover:bg-[#7a2220] text-white text-xs font-black uppercase px-6 py-3.5 rounded-2xl shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#b23835]/40"
           >
             <PlusCircle size={16} /> Write a Review
           </button>
@@ -152,8 +154,11 @@ const Testimonials = () => {
             {movingArray.map((client, index) => (
               <div
                 key={`${client._id || index}-${index}`}
-                className="w-[280px] sm:w-[360px] flex-shrink-0 inline-flex flex-col justify-between p-5 sm:p-6 bg-white border border-gray-200/80 rounded-2xl sm:rounded-3xl shadow-sm whitespace-normal transition-all duration-300 hover:shadow-xl hover:border-[#962a27]/30 text-left"
+                className="w-[280px] sm:w-[360px] flex-shrink-0 inline-flex flex-col justify-between p-5 sm:p-6 bg-white border-2 border-[#962a27]/20 rounded-[28px] shadow-sm whitespace-normal transition-all duration-300 hover:shadow-xl hover:border-[#962a27] text-left relative overflow-hidden"
               >
+                {/* Accent Top Bar */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#962a27] via-amber-500 to-[#962a27]" />
+
                 <div>
                   <div className="flex items-center justify-between mb-3 sm:mb-4">
                     <div className="flex items-center gap-0.5">
@@ -163,19 +168,19 @@ const Testimonials = () => {
                     </div>
                     <Quote size={24} className="text-[#962a27]/20 transform rotate-180" />
                   </div>
-                  <p className="text-gray-600 text-xs sm:text-sm leading-relaxed font-medium italic mb-4 sm:mb-6 min-h-[60px] sm:min-h-[70px]">
+                  <p className="text-gray-600 text-xs sm:text-sm leading-relaxed font-semibold italic mb-4 sm:mb-6 min-h-[60px] sm:min-h-[70px]">
                     "{client.comment}"
                   </p>
                 </div>
-                <div className="flex items-center gap-3 pt-3 sm:pt-4 border-t border-gray-100 mt-auto">
-                  <div className="w-10 h-10 bg-[#962a27]/10 text-[#962a27] flex items-center justify-center font-bold text-xs rounded-xl uppercase shrink-0 border border-[#962a27]/20">
+                <div className="flex items-center gap-3 pt-3 sm:pt-4 border-t border-rose-100 mt-auto">
+                  <div className="w-10 h-10 bg-rose-50 text-[#962a27] flex items-center justify-center font-black text-xs rounded-xl uppercase shrink-0 border border-[#962a27]/20 shadow-2xs">
                     {client.name ? client.name.slice(0, 2) : "LC"}
                   </div>
                   <div>
-                    <h4 className="text-xs sm:text-sm font-extrabold text-[#2b1b17]">
+                    <h4 className="text-xs sm:text-sm font-black text-[#2b1b17]">
                       {client.name}
                     </h4>
-                    <p className="text-[#962a27] text-[10px] sm:text-[11px] font-bold mt-0.5">
+                    <p className="text-[#962a27] text-[10px] sm:text-[11px] font-extrabold mt-0.5">
                       {client.role || "Valued Customer"}
                     </p>
                   </div>
@@ -188,8 +193,10 @@ const Testimonials = () => {
             {reviews.map((client) => (
               <div
                 key={client._id}
-                className="relative flex flex-col justify-between p-5 sm:p-6 bg-white border border-gray-200/80 rounded-2xl sm:rounded-3xl shadow-sm text-left hover:shadow-md transition-all"
+                className="relative flex flex-col justify-between p-5 sm:p-6 bg-white border-2 border-[#962a27]/20 rounded-[28px] shadow-sm text-left hover:shadow-md hover:border-[#962a27] transition-all overflow-hidden"
               >
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#962a27] via-amber-500 to-[#962a27]" />
+                
                 <div className="absolute top-5 right-5 text-[#962a27]/20">
                   <Quote size={28} className="transform rotate-180" />
                 </div>
@@ -199,19 +206,19 @@ const Testimonials = () => {
                       <Star key={i} size={14} fill="#FFD54A" stroke="#FFD54A" />
                     ))}
                   </div>
-                  <p className="text-gray-600 text-xs sm:text-sm leading-relaxed font-medium italic mb-5 sm:mb-6">
+                  <p className="text-gray-600 text-xs sm:text-sm leading-relaxed font-semibold italic mb-5 sm:mb-6">
                     "{client.comment}"
                   </p>
                 </div>
-                <div className="flex items-center gap-3 pt-3 sm:pt-4 border-t border-gray-100 mt-auto">
-                  <div className="w-10 h-10 bg-[#962a27]/10 text-[#962a27] flex items-center justify-center font-bold text-xs rounded-xl uppercase shrink-0 border border-[#962a27]/20">
+                <div className="flex items-center gap-3 pt-3 sm:pt-4 border-t border-rose-100 mt-auto">
+                  <div className="w-10 h-10 bg-rose-50 text-[#962a27] flex items-center justify-center font-black text-xs rounded-xl uppercase shrink-0 border border-[#962a27]/20 shadow-2xs">
                     {client.name ? client.name.slice(0, 2) : "LC"}
                   </div>
                   <div>
-                    <h4 className="text-xs sm:text-sm font-extrabold text-[#2b1b17]">
+                    <h4 className="text-xs sm:text-sm font-black text-[#2b1b17]">
                       {client.name}
                     </h4>
-                    <p className="text-[#962a27] text-[10px] sm:text-[11px] font-bold mt-0.5">
+                    <p className="text-[#962a27] text-[10px] sm:text-[11px] font-extrabold mt-0.5">
                       {client.role || "Valued Customer"}
                     </p>
                   </div>
@@ -231,42 +238,42 @@ const Testimonials = () => {
               initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
-              className="relative w-full max-w-md bg-white rounded-3xl border border-gray-200 p-6 sm:p-8 shadow-2xl text-left z-10 max-h-[90vh] overflow-y-auto"
+              className="relative w-full max-w-md bg-white rounded-[28px] border-2 border-[#962a27]/20 p-6 sm:p-8 shadow-2xl text-left z-10 max-h-[90vh] overflow-y-auto"
             >
               <button
                 onClick={() => setShowForm(false)}
-                className="absolute top-4 sm:top-5 right-4 sm:right-5 p-1.5 rounded-full text-gray-400 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 transition-all cursor-pointer"
+                className="absolute top-4 sm:top-5 right-4 sm:right-5 p-2 rounded-full text-gray-400 hover:text-gray-700 bg-rose-50 hover:bg-rose-100 transition-all cursor-pointer border border-[#962a27]/20"
               >
                 <X size={16} />
               </button>
               <h3 className="text-xl sm:text-2xl font-black text-[#2b1b17] mb-1 text-center mt-1">
                 Share Your Experience
               </h3>
-              <p className="text-center text-xs text-gray-500 mb-6">
+              <p className="text-center text-xs text-gray-500 font-medium mb-6">
                 Your feedback will directly appear on our website after review!
               </p>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="text-[10px] font-extrabold uppercase tracking-wider text-gray-500 block mb-1">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-gray-600 block mb-1">
                     Your Name
                   </label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[#962a27] bg-[#fffaf7] text-xs sm:text-sm font-medium"
+                    className="w-full px-3.5 py-3 border-2 border-[#962a27]/20 rounded-xl focus:outline-none focus:border-[#962a27] bg-rose-50/20 text-xs sm:text-sm font-semibold text-gray-800 transition-all"
                     placeholder="e.g., Ramesh Kumar"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] font-extrabold uppercase tracking-wider text-gray-500 block mb-1">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-gray-600 block mb-1">
                     Event Type
                   </label>
                   <select
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
-                    className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[#962a27] bg-[#fffaf7] text-xs sm:text-sm font-medium"
+                    className="w-full px-3.5 py-3 border-2 border-[#962a27]/20 rounded-xl focus:outline-none focus:border-[#962a27] bg-rose-50/20 text-xs sm:text-sm font-semibold text-gray-800 transition-all cursor-pointer"
                   >
                     <option value="Marriage Function">Marriage Function</option>
                     <option value="Reception / Engagement">Reception / Engagement</option>
@@ -277,7 +284,7 @@ const Testimonials = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="text-[10px] font-extrabold uppercase tracking-wider text-gray-500 block mb-1">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-gray-600 block mb-1">
                     Rating
                   </label>
                   <div className="flex gap-1.5 py-1">
@@ -294,14 +301,14 @@ const Testimonials = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="text-[10px] font-extrabold uppercase tracking-wider text-gray-500 block mb-1">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-gray-600 block mb-1">
                     Your Feedback
                   </label>
                   <textarea
                     rows="3"
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
-                    className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[#962a27] bg-[#fffaf7] text-xs sm:text-sm font-medium resize-none"
+                    className="w-full px-3.5 py-3 border-2 border-[#962a27]/20 rounded-xl focus:outline-none focus:border-[#962a27] bg-rose-50/20 text-xs sm:text-sm font-semibold text-gray-800 resize-none transition-all"
                     placeholder="Tell us about the food taste, service and experience..."
                     required
                   ></textarea>
@@ -309,7 +316,7 @@ const Testimonials = () => {
                 <button
                   type="submit"
                   disabled={submitLoading}
-                  className="w-full mt-2 bg-[#962a27] hover:bg-[#7a2220] text-white text-xs font-bold uppercase py-3.5 rounded-xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="w-full mt-2 bg-[#962a27] hover:bg-[#7a2220] text-white text-xs font-black uppercase tracking-wide py-3.5 rounded-xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 border border-[#b23835]/40"
                 >
                   {submitLoading && <Loader2 size={16} className="animate-spin" />}
                   {submitLoading ? "Submitting..." : "Submit Review"}
@@ -322,8 +329,8 @@ const Testimonials = () => {
 
       {/* TOAST NOTIFICATION */}
       {toast.show && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[110] w-[90%] sm:w-auto sm:min-w-[320px] max-w-md bg-[#2b1b17] text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center justify-between gap-4 border border-gray-800 animate-slide-up">
-          <p className="font-sans text-xs font-medium tracking-wide">{toast.message}</p>
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[110] w-[90%] sm:w-auto sm:min-w-[320px] max-w-md bg-[#2b1b17] text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center justify-between gap-4 border border-[#962a27]/40 animate-slide-up">
+          <p className="font-sans text-xs font-bold tracking-wide">{toast.message}</p>
           <span
             className={`w-2 h-2 rounded-full shrink-0 ${
               toast.type === "success" ? "bg-emerald-400 shadow-[0_0_8px_#34d399]" : "bg-rose-400 shadow-[0_0_8px_#f87171]"

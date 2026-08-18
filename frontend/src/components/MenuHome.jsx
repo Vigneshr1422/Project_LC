@@ -111,6 +111,24 @@ function MenuHome({ navigate }) {
 
   const previewCards = (menuData[activeTab] || []).slice(0, 4);
 
+  // Standard Indian Restaurant Veg/Non-Veg Symbol (Square outline with solid dot inside)
+  const FoodSymbol = ({ isNonVeg }) => {
+    return (
+      <div 
+        className={`w-3.5 h-3.5 border-[1.5px] rounded-[3px] flex items-center justify-center shrink-0 ${
+          isNonVeg ? "border-red-600 bg-red-50/20" : "border-emerald-600 bg-emerald-50/20"
+        }`}
+        title={isNonVeg ? "Non-Veg" : "Veg"}
+      >
+        <div 
+          className={`w-1.5 h-1.5 rounded-full ${
+            isNonVeg ? "bg-red-600" : "bg-emerald-600"
+          }`} 
+        />
+      </div>
+    );
+  };
+
   return (
     <section className="relative w-full bg-gradient-to-b from-[#fff8f5] via-[#fff3ea] to-[#fff8f5] py-10 sm:py-20 px-4 sm:px-8 md:px-16 overflow-hidden">
       
@@ -184,16 +202,11 @@ function MenuHome({ navigate }) {
                   <button
                     key={tab.key}
                     onClick={() => setActiveTab(tab.key)}
-                    className={`relative py-2.5 px-2 rounded-xl text-xs font-black transition-all duration-300 flex items-center justify-center gap-1.5 ${
+                    className={`relative py-2.5 px-2 rounded-xl text-xs font-black transition-all duration-300 flex items-center justify-center gap-2 ${
                       isSelected ? "text-white bg-[#962a27] shadow-sm" : "text-gray-700 bg-gray-50/80 hover:bg-gray-100"
                     }`}
                   >
-                    {tab.isVeg && (
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                    )}
-                    {tab.isNonVeg && (
-                      <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
-                    )}
+                    <FoodSymbol isNonVeg={tab.isNonVeg} />
                     <span className="truncate">{tab.label[language]}</span>
                   </button>
                 );
@@ -270,27 +283,24 @@ function MenuHome({ navigate }) {
                       {/* First 3 Item Component Checklist Preview */}
                       <div className="space-y-1.5 sm:space-y-2 border-t border-gray-100 pt-3">
                         {menu.items &&
-                          menu.items.slice(0, 3).map((item, i) => (
-                            <div key={i} className="flex items-center justify-between gap-2">
-                              <div className="flex items-center gap-2 min-w-0">
-                                <span
-                                  className={`w-2 h-2 rounded-full shrink-0 ${
-                                    item.type === "non-veg" || activeTab === "NonVegPackages"
-                                      ? "bg-red-500"
-                                      : "bg-emerald-500"
-                                  }`}
-                                />
-                                <p className="text-gray-600 text-xs font-bold truncate">
-                                  {item[language] || item.en || item}
-                                </p>
+                          menu.items.slice(0, 3).map((item, i) => {
+                            const itemIsNonVeg = item.type === "non-veg" || activeTab === "NonVegPackages";
+                            return (
+                              <div key={i} className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <FoodSymbol isNonVeg={itemIsNonVeg} />
+                                  <p className="text-gray-600 text-xs font-bold truncate">
+                                    {item[language] || item.en || item}
+                                  </p>
+                                </div>
+                                {item.price && (
+                                  <span className="text-gray-400 font-mono text-[11px] font-black shrink-0">
+                                    ₹{item.price}
+                                  </span>
+                                )}
                               </div>
-                              {item.price && (
-                                <span className="text-gray-400 font-mono text-[11px] font-black shrink-0">
-                                  ₹{item.price}
-                                </span>
-                              )}
-                            </div>
-                          ))}
+                            );
+                          })}
 
                         {menu.items && menu.items.length > 3 && (
                           <p className="text-[11px] font-bold text-[#962a27] pt-1">

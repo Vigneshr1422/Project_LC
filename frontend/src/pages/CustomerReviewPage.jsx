@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Star, CheckCircle, Loader2, Utensils, Send, User, Phone, Sparkles, Award } from "lucide-react";
 
 const CustomerReviewPage = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const orderId = searchParams.get("orderId");
 
   const [items, setItems] = useState([]);
@@ -14,6 +15,7 @@ const CustomerReviewPage = () => {
   const [loading, setLoading] = useState(true);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [countdown, setCountdown] = useState(10); // ⏱️ 10 seconds timer state
 
   useEffect(() => {
     if (orderId) {
@@ -41,6 +43,21 @@ const CustomerReviewPage = () => {
         });
     }
   }, [orderId]);
+
+  // 🔄 Automatic 10-second countdown and redirect to Home ("/") when submitted
+  useEffect(() => {
+    let timer;
+    if (submitted) {
+      if (countdown > 0) {
+        timer = setTimeout(() => {
+          setCountdown((prev) => prev - 1);
+        }, 1000);
+      } else {
+        navigate("/"); // Redirects to Home.jsx
+      }
+    }
+    return () => clearTimeout(timer);
+  }, [submitted, countdown, navigate]);
 
   // Dynamic Live Calculation of Overall Rating
   const calculatedStats = useMemo(() => {
@@ -88,7 +105,7 @@ const CustomerReviewPage = () => {
           phone: reviewerPhone.trim(),
           itemReviews,
           overallComment: overallComment.trim(),
-          calculatedRating: calculatedStats.avg, // Extra metric for backend if needed
+          calculatedRating: calculatedStats.avg,
         }),
       });
 
@@ -118,6 +135,15 @@ const CustomerReviewPage = () => {
             Your overall score of <span className="text-[#962A27] font-bold">{calculatedStats.avg} ★</span> for{" "}
             <span className="text-[#962A27] font-bold">Lakshmi Catering</span> has been recorded.
           </p>
+          <div className="pt-2 text-xs font-bold text-gray-400">
+            Redirecting to Home in <span className="text-[#962A27] font-mono font-black">{countdown}s</span>...
+          </div>
+          <button
+            onClick={() => navigate("/")}
+            className="w-full mt-2 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer"
+          >
+            Go to Home Now
+          </button>
         </div>
       </div>
     );
@@ -144,8 +170,6 @@ const CustomerReviewPage = () => {
         ) : (
           <form onSubmit={handleSubmit} className="bg-white p-6 sm:p-8 rounded-[2.5rem] border border-gray-100 shadow-md space-y-6">
             
-           
-
             {/* 1. GUEST DETAILS */}
             <div className="space-y-4 pb-4 border-b border-gray-100">
               <span className="text-xs font-black uppercase tracking-wider text-[#962A27] block">
