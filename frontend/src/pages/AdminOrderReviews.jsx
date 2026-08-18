@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { ChevronLeft, User, Calendar, Loader2, Eye, Download, CheckCircle2, Search, ArrowUpDown, ChevronRight, X, } from "lucide-react";
+import { ChevronLeft, User, Calendar, Eye, Download, CheckCircle2, Search, ArrowUpDown, ChevronRight, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Loader from "../components/Loader";
 
 const AdminOrderReviews = () => {
   const navigate = useNavigate();
@@ -11,13 +12,8 @@ const AdminOrderReviews = () => {
 
   // 🔍 Search, Sort, and Pagination States
   const [searchTerm, setSearchTerm] = useState("");
-  
-  // 🔥 CHANGE 1: Default sortOrder-ah "DESC" nu mathiyaachu (Recent orders first varum)
-  const [sortOrder, setSortOrder] = useState("DESC"); 
-  
-  // 🔥 CHANGE 2: Default sortField-ah "sno" nu vachurkuken. DESC potta max sno (last index / recent) top-la varum.
-  const [sortField, setSortField] = useState("sno"); 
-  
+  const [sortOrder, setSortOrder] = useState("DESC");
+  const [sortField, setSortField] = useState("sno");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
 
@@ -42,21 +38,16 @@ const AdminOrderReviews = () => {
   const downloadQRCode = (orderId) => {
     const svgElement = document.getElementById(`qr-code-${orderId}`);
     if (!svgElement) return;
-
     const svgData = new XMLSerializer().serializeToString(svgElement);
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     const img = new Image();
-
     img.onload = () => {
       canvas.width = 1000;
       canvas.height = 1000;
-
       ctx.fillStyle = "#FFFFFF";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-
       ctx.drawImage(img, 0, 0, 1000, 1000);
-
       const pngFile = canvas.toDataURL("image/png", 1.0);
       const downloadLink = document.createElement("a");
       downloadLink.href = pngFile;
@@ -64,10 +55,8 @@ const AdminOrderReviews = () => {
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
-
       setDownloadedQRs((prev) => ({ ...prev, [orderId]: true }));
     };
-
     img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgData);
   };
 
@@ -77,28 +66,21 @@ const AdminOrderReviews = () => {
       ...order,
       sno: index + 1,
     }));
-
     if (searchTerm.trim()) {
       const query = searchTerm.toLowerCase();
       list = list.filter(
-        (item) =>
-          (item.name && item.name.toLowerCase().includes(query)) ||
-          (item.date && item.date.toLowerCase().includes(query))
+        (item) => (item.name && item.name.toLowerCase().includes(query)) || (item.date && item.date.toLowerCase().includes(query))
       );
     }
-
     list.sort((a, b) => {
       let valA = a[sortField];
       let valB = b[sortField];
-
       if (typeof valA === "string") valA = valA.toLowerCase();
       if (typeof valB === "string") valB = valB.toLowerCase();
-
       if (valA < valB) return sortOrder === "ASC" ? -1 : 1;
       if (valA > valB) return sortOrder === "ASC" ? 1 : -1;
       return 0;
     });
-
     return list;
   }, [orders, searchTerm, sortOrder, sortField]);
 
@@ -122,7 +104,6 @@ const AdminOrderReviews = () => {
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-3 sm:p-6 lg:p-8 font-sans">
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
-        
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm gap-3 text-left">
           <div className="flex items-center gap-3 sm:gap-4">
@@ -146,7 +127,6 @@ const AdminOrderReviews = () => {
         {/* 🔍 SEARCH AND SORT CONTROLS */}
         {!loading && orders.length > 0 && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-2xl border border-gray-100 shadow-sm">
-            
             {/* Search Input */}
             <div className="relative w-full sm:w-72">
               <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -173,8 +153,6 @@ const AdminOrderReviews = () => {
                 <ArrowUpDown size={14} className="text-[#962A27]" />
                 <span>Sort:</span>
               </div>
-
-              {/* Sort Field */}
               <select
                 value={sortField}
                 onChange={(e) => setSortField(e.target.value)}
@@ -184,8 +162,6 @@ const AdminOrderReviews = () => {
                 <option value="name">Customer Name</option>
                 <option value="date">Date</option>
               </select>
-
-              {/* ASC / DESC Toggle */}
               <button
                 onClick={() => setSortOrder(sortOrder === "ASC" ? "DESC" : "ASC")}
                 className="px-3.5 py-2 rounded-xl bg-[#962A27] text-white text-xs font-extrabold transition-all cursor-pointer shadow-sm active:scale-95"
@@ -198,9 +174,7 @@ const AdminOrderReviews = () => {
 
         {/* Content Section */}
         {loading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 size={32} className="animate-spin text-[#962A27]" />
-          </div>
+          <Loader />
         ) : orders.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-2xl sm:rounded-3xl border border-gray-100">
             <p className="text-gray-500 font-bold">No orders found.</p>
@@ -231,7 +205,6 @@ const AdminOrderReviews = () => {
                       const orderId = order._id || order.id;
                       const reviewUrl = getReviewUrl(orderId);
                       const isDownloaded = downloadedQRs[orderId];
-
                       return (
                         <tr key={orderId} className="hover:bg-gray-50/60 transition-colors">
                           <td className="p-4 sm:p-5 font-mono font-black text-[#962A27] text-center">
@@ -239,26 +212,18 @@ const AdminOrderReviews = () => {
                           </td>
                           <td className="p-4 sm:p-5">
                             <div className="flex items-center gap-2 font-bold text-gray-900">
-                              <User size={14} className="text-[#962A27]" />
-                              {order.name || "Customer"}
+                              <User size={14} className="text-[#962A27]" /> {order.name || "Customer"}
                             </div>
                           </td>
                           <td className="p-4 sm:p-5 text-xs text-gray-500 font-medium">
                             <div className="flex items-center gap-1.5">
-                              <Calendar size={13} className="text-gray-400" />
-                              {order.date || "N/A"}
+                              <Calendar size={13} className="text-gray-400" /> {order.date || "N/A"}
                             </div>
                           </td>
                           <td className="p-4 sm:p-5">
                             <div className="flex flex-col items-center justify-center gap-2">
                               <div className="p-2 bg-gray-50 rounded-xl border border-gray-200">
-                                <QRCodeSVG
-                                  id={`qr-code-${orderId}`}
-                                  value={reviewUrl}
-                                  size={96}
-                                  includeMargin={true}
-                                  level={"H"}
-                                />
+                                <QRCodeSVG id={`qr-code-${orderId}`} value={reviewUrl} size={96} includeMargin={true} level={"H"} />
                               </div>
                               <button
                                 onClick={() => downloadQRCode(orderId)}
@@ -308,37 +273,24 @@ const AdminOrderReviews = () => {
                 const orderId = order._id || order.id;
                 const reviewUrl = getReviewUrl(orderId);
                 const isDownloaded = downloadedQRs[orderId];
-
                 return (
-                  <div
-                    key={orderId}
-                    className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-4"
-                  >
+                  <div key={orderId} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-4">
                     <div className="flex items-center justify-between border-b border-gray-100 pb-3">
                       <div>
                         <span className="text-xs font-mono font-black bg-rose-50 text-[#962A27] px-2.5 py-0.5 rounded-lg border border-rose-100">
                           S.No: #{order.sno}
                         </span>
                         <h3 className="text-sm font-extrabold text-gray-900 flex items-center gap-1.5 mt-1.5">
-                          <User size={13} className="text-[#962A27]" />
-                          {order.name || "Customer"}
+                          <User size={13} className="text-[#962A27]" /> {order.name || "Customer"}
                         </h3>
                       </div>
                       <div className="flex items-center gap-1 text-[11px] text-gray-500 font-medium">
-                        <Calendar size={12} className="text-gray-400" />
-                        {order.date || "N/A"}
+                        <Calendar size={12} className="text-gray-400" /> {order.date || "N/A"}
                       </div>
                     </div>
-
                     <div className="flex items-center justify-between bg-gray-50/70 p-3 rounded-xl border border-gray-100 gap-3">
                       <div className="p-1.5 bg-white rounded-lg border border-gray-200 shrink-0">
-                        <QRCodeSVG
-                          id={`qr-code-${orderId}`}
-                          value={reviewUrl}
-                          size={80}
-                          includeMargin={true}
-                          level={"H"}
-                        />
+                        <QRCodeSVG id={`qr-code-${orderId}`} value={reviewUrl} size={80} includeMargin={true} level={"H"} />
                       </div>
                       <div className="flex flex-col gap-2 w-full">
                         <button

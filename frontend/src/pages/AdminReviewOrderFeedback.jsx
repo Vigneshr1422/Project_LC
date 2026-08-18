@@ -163,12 +163,12 @@ const AdminReviewOrderFeedback = () => {
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-3 sm:p-6 lg:p-8 font-sans relative">
       <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6 text-left">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm gap-3">
+        {/* Header with clean visible border */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-2 border-slate-200 shadow-sm gap-3">
           <div className="flex items-center gap-3 sm:gap-4">
             <button
               onClick={() => navigate(-1)}
-              className="p-2 sm:p-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 transition-all border border-gray-200 cursor-pointer shrink-0"
+              className="p-2 sm:p-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 transition-all border border-gray-300 cursor-pointer shrink-0"
             >
               <ChevronLeft size={18} />
             </button>
@@ -180,15 +180,15 @@ const AdminReviewOrderFeedback = () => {
             </div>
           </div>
           {stats.sentimentBadge && !loading && reviewsList.length > 0 && (
-            <span className="inline-flex self-start sm:self-auto items-center gap-1.5 bg-rose-50 border border-rose-100 text-[#962A27] px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-black">
+            <span className="inline-flex self-start sm:self-auto items-center gap-1.5 bg-rose-50 border border-rose-200 text-[#962A27] px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-black">
               <Sparkles size={13} /> {stats.sentimentBadge}
             </span>
           )}
         </div>
 
-        {/* Order Summary Card with Review Count */}
+        {/* Order Summary Card with Review Count & Border */}
         {passedOrder && (
-          <div className="bg-white p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="bg-white p-4 sm:p-5 rounded-2xl sm:rounded-3xl border-2 border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <User size={16} className="text-[#962A27] shrink-0" />
               <span className="text-xs sm:text-sm font-bold text-gray-900">
@@ -201,7 +201,7 @@ const AdminReviewOrderFeedback = () => {
               </div>
             )}
             <div>
-              <span className="inline-block text-xs font-bold text-rose-800 bg-rose-50 px-3 py-1 rounded-xl border border-rose-100 uppercase">
+              <span className="inline-block text-xs font-bold text-rose-800 bg-rose-50 px-3 py-1 rounded-xl border border-rose-200 uppercase">
                 {reviewsList.length}{" "}
                 {reviewsList.length === 1 ? "Review" : "Reviews"}
               </span>
@@ -209,11 +209,11 @@ const AdminReviewOrderFeedback = () => {
           </div>
         )}
 
-        {/* 📊 ANALYTICAL HERO DASHBOARD */}
+        {/* 📊 ANALYTICAL HERO DASHBOARD WITH CLEAR CONTAINER BORDERS */}
         {!loading && reviewsList.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             {/* Overall Score Card */}
-            <div className="bg-gradient-to-br from-rose-50 via-white to-amber-50/40 p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-rose-100 shadow-sm flex flex-col justify-between space-y-4">
+            <div className="bg-gradient-to-br from-rose-50 via-white to-amber-50/40 p-5 sm:p-6 rounded-2xl sm:rounded-3xl border-2 border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] sm:text-xs font-black uppercase text-gray-500 tracking-wider">
                   Overall Rating
@@ -248,11 +248,11 @@ const AdminReviewOrderFeedback = () => {
                 </div>
               </div>
               {stats.topDish && (
-                <div className="bg-white/80 backdrop-blur-sm p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-amber-200/60 flex items-center justify-between gap-2">
+                <div className="bg-white/90 backdrop-blur-sm p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-amber-300 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 truncate">
                     <Flame size={16} className="text-amber-500 shrink-0" />
                     <div className="truncate">
-                      <p className="text-[9px] sm:text-[10px] text-gray-400 font-extrabold uppercase tracking-wider">
+                      <p className="text-[9px] sm:text-[10px] text-gray-500 font-extrabold uppercase tracking-wider">
                         Top Rated Dish
                       </p>
                       <p className="text-xs font-black text-gray-800 capitalize truncate">
@@ -260,7 +260,7 @@ const AdminReviewOrderFeedback = () => {
                       </p>
                     </div>
                   </div>
-                  <span className="text-xs font-black text-amber-600 bg-amber-50 px-2 py-1 rounded-lg sm:rounded-xl border border-amber-100 shrink-0">
+                  <span className="text-xs font-black text-amber-600 bg-amber-50 px-2 py-1 rounded-lg sm:rounded-xl border border-amber-200 shrink-0">
                     {stats.topDish.avg} ★
                   </span>
                 </div>
@@ -268,12 +268,12 @@ const AdminReviewOrderFeedback = () => {
             </div>
 
             {/* Rating Breakdown Bars */}
-            <div className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm space-y-3">
+            <div className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border-2 border-slate-200 shadow-sm space-y-3">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[11px] sm:text-xs font-black uppercase text-gray-500 tracking-wider flex items-center gap-1.5">
                   <BarChart3 size={15} className="text-[#962A27]" /> Rating Breakdown
                 </span>
-                <span className="text-[10px] sm:text-[11px] text-emerald-600 font-black">
+                <span className="text-[10px] sm:text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-md font-black">
                   {stats.satisfactionRate}% Liked
                 </span>
               </div>
@@ -289,13 +289,13 @@ const AdminReviewOrderFeedback = () => {
                       {star}{" "}
                       <Star size={10} className="fill-amber-400 text-amber-400" />
                     </span>
-                    <div className="flex-1 bg-gray-100 h-2 sm:h-2.5 rounded-full overflow-hidden">
+                    <div className="flex-1 bg-gray-100 h-2 sm:h-2.5 rounded-full overflow-hidden border border-gray-200">
                       <div
                         className="bg-gradient-to-r from-amber-400 to-[#962A27] h-full transition-all duration-500 rounded-full"
                         style={{ width: `${percentage}%` }}
                       ></div>
                     </div>
-                    <span className="w-7 sm:w-8 text-right text-gray-400 text-[10px] sm:text-[11px]">
+                    <span className="w-7 sm:w-8 text-right text-gray-500 text-[10px] sm:text-[11px]">
                       {percentage}%
                     </span>
                   </div>
@@ -304,7 +304,7 @@ const AdminReviewOrderFeedback = () => {
             </div>
 
             {/* Menu Item Wise Averages */}
-            <div className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm space-y-3 flex flex-col justify-between">
+            <div className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border-2 border-slate-200 shadow-sm space-y-3 flex flex-col justify-between">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-[11px] sm:text-xs font-black uppercase text-gray-500 tracking-wider flex items-center gap-1.5">
                   <TrendingUp size={15} className="text-[#962A27]" /> Item Performance
@@ -325,7 +325,7 @@ const AdminReviewOrderFeedback = () => {
                         {item.avg} ★
                       </span>
                     </div>
-                    <div className="w-full bg-gray-100 h-1.5 sm:h-2 rounded-full overflow-hidden">
+                    <div className="w-full bg-gray-100 h-1.5 sm:h-2 rounded-full overflow-hidden border border-gray-200">
                       <div
                         className={`h-full transition-all duration-500 rounded-full ${
                           item.avg >= 4.0
@@ -344,10 +344,10 @@ const AdminReviewOrderFeedback = () => {
           </div>
         )}
 
-        {/* 🎯 FILTER TABS */}
+        {/* 🎯 FILTER TABS WITH BORDER */}
         {!loading && reviewsList.length > 0 && (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-white p-3 sm:p-3.5 rounded-2xl border border-gray-100 shadow-sm">
-            <div className="flex items-center gap-1.5 text-xs font-extrabold text-gray-500 px-1">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-white p-3 sm:p-3.5 rounded-2xl border-2 border-slate-200 shadow-sm">
+            <div className="flex items-center gap-1.5 text-xs font-extrabold text-gray-600 px-1">
               <Filter size={14} className="text-[#962A27]" /> Filter Reviews:
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 sm:pb-0 w-full sm:w-auto">
@@ -360,10 +360,10 @@ const AdminReviewOrderFeedback = () => {
                 <button
                   key={tab.key}
                   onClick={() => setFilterStar(tab.key)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 border ${
                     filterStar === tab.key
-                      ? "bg-[#962A27] text-white shadow-sm"
-                      : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                      ? "bg-[#962A27] text-white border-[#962A27] shadow-sm"
+                      : "bg-gray-50 text-gray-600 border-gray-300 hover:bg-gray-100"
                   }`}
                 >
                   {tab.label}
@@ -379,7 +379,7 @@ const AdminReviewOrderFeedback = () => {
             <Loader2 size={32} className="animate-spin text-[#962A27]" />
           </div>
         ) : filteredReviews.length > 0 ? (
-          <div className="space-y-3 sm:space-y-4">
+          <div className="space-y-4 sm:space-y-5">
             {filteredReviews.map((rev, idx) => {
               const revItemCount = rev.itemReviews ? rev.itemReviews.length : 0;
               const revSum = revItemCount
@@ -397,12 +397,16 @@ const AdminReviewOrderFeedback = () => {
               return (
                 <div
                   key={idx}
-                  className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm space-y-3 sm:space-y-4 transition-all hover:shadow-md"
+                  // 🔴 Enhanced with a prominent thick custom red border and distinct lookable card styling
+                  className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-2 border-red-500 shadow-md hover:shadow-lg transition-all space-y-3 sm:space-y-4 relative overflow-hidden"
                 >
+                  {/* Decorative badge corner accent */}
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-rose-100 to-transparent pointer-events-none rounded-bl-3xl"></div>
+
                   {/* Guest Header */}
-                  <div className="flex items-start justify-between border-b border-gray-100 pb-3 gap-2">
+                  <div className="flex items-start justify-between border-b border-gray-200 pb-3 gap-2">
                     <div className="flex items-center gap-2.5 sm:gap-3">
-                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-rose-50 text-[#962A27] font-extrabold text-xs sm:text-sm flex items-center justify-center uppercase border border-rose-100 shadow-sm shrink-0">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-rose-50 text-[#962A27] font-extrabold text-xs sm:text-sm flex items-center justify-center uppercase border border-rose-200 shadow-sm shrink-0">
                         {rev.customerName ? rev.customerName.slice(0, 2) : "G"}
                       </div>
                       <div className="min-w-0">
@@ -410,14 +414,14 @@ const AdminReviewOrderFeedback = () => {
                           {rev.customerName || "Anonymous Guest"}
                         </h4>
                         {rev.phone && (
-                          <p className="text-[11px] sm:text-xs text-gray-400 font-medium flex items-center gap-1">
+                          <p className="text-[11px] sm:text-xs text-gray-500 font-medium flex items-center gap-1">
                             <Phone size={10} /> {rev.phone}
                           </p>
                         )}
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <div className="inline-flex items-center gap-1 bg-amber-50 px-2.5 py-1 rounded-lg sm:rounded-xl border border-amber-100 text-amber-700 font-black text-[11px] sm:text-xs">
+                      <div className="inline-flex items-center gap-1 bg-amber-50 px-2.5 py-1 rounded-lg sm:rounded-xl border border-amber-200 text-amber-800 font-black text-[11px] sm:text-xs">
                         <Star size={12} className="fill-amber-400 text-amber-400" />{" "}
                         {guestAvg} / 5.0
                       </div>
@@ -431,11 +435,11 @@ const AdminReviewOrderFeedback = () => {
 
                   {/* Guest Satisfaction Level Bar */}
                   <div className="space-y-1">
-                    <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold text-gray-400">
+                    <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold text-gray-500">
                       <span>Satisfaction Level</span>
                       <span>{guestPercent}%</span>
                     </div>
-                    <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                    <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden border border-gray-200">
                       <div
                         className={`h-full rounded-full transition-all duration-300 ${
                           guestPercent >= 80
@@ -454,7 +458,7 @@ const AdminReviewOrderFeedback = () => {
                     <div className="pt-1">
                       <button
                         onClick={() => toggleReviewExpand(idx)}
-                        className="w-full flex items-center justify-between px-3.5 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-xs font-bold text-gray-700 transition-all cursor-pointer"
+                        className="w-full flex items-center justify-between px-3.5 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-300 rounded-xl text-xs font-bold text-gray-700 transition-all cursor-pointer shadow-sm"
                       >
                         <span className="flex items-center gap-1.5">
                           <Utensils size={13} className="text-[#962A27]" />
@@ -462,7 +466,7 @@ const AdminReviewOrderFeedback = () => {
                         </span>
                         <ChevronDown
                           size={16}
-                          className={`text-gray-500 transition-transform duration-300 ${
+                          className={`text-gray-600 transition-transform duration-300 ${
                             isExpanded ? "rotate-180" : ""
                           }`}
                         />
@@ -474,7 +478,7 @@ const AdminReviewOrderFeedback = () => {
                           {rev.itemReviews.map((item, i) => (
                             <div
                               key={i}
-                              className="bg-gray-50 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-gray-100 flex items-center justify-between gap-2"
+                              className="bg-gray-50 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border border-gray-200 flex items-center justify-between gap-2 shadow-sm"
                             >
                               <span className="text-xs font-bold text-gray-700 capitalize flex items-center gap-1.5 truncate">
                                 <Utensils size={12} className="text-[#962A27] shrink-0" />{" "}
@@ -498,8 +502,8 @@ const AdminReviewOrderFeedback = () => {
 
                   {/* Guest Comment */}
                   {rev.overallComment && (
-                    <div className="bg-rose-50/50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-rose-100/60">
-                      <p className="text-xs text-gray-700 font-medium italic leading-relaxed">
+                    <div className="bg-rose-50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-rose-200">
+                      <p className="text-xs text-gray-800 font-medium italic leading-relaxed">
                         "{rev.overallComment}"
                       </p>
                     </div>
@@ -509,7 +513,7 @@ const AdminReviewOrderFeedback = () => {
             })}
           </div>
         ) : (
-          <div className="text-center py-12 bg-white rounded-2xl sm:rounded-3xl border border-gray-100">
+          <div className="text-center py-12 bg-white rounded-2xl sm:rounded-3xl border-2 border-slate-200 shadow-sm">
             <p className="text-gray-500 font-bold text-xs sm:text-sm">
               No matching reviews found for the selected filter.
             </p>
